@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
     const floatingBtn = document.getElementById("floating-btn");
+    const orientationBtn = document.getElementById("orientation-btn");
     const reloadBtn = document.getElementById("reload-btn");
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
@@ -58,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let pipSpeedText = null;
     let pipLimitText = null;
     let pipTitleText = null;
+    let simulatedLandscape = false;
 
     // --- FUNCIÓN PARA DIBUJAR LOS NÚMEROS EN EL CÍRCULO ---
     function drawGaugeLabels() {
@@ -133,6 +135,55 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pipWindow && !pipWindow.closed) {
             pipWindow.document.body.className = `mode-${mode}`;
         }
+    }
+
+    function runStartupAnimation() {
+        appContainer.classList.add("app-booting");
+        setTimeout(() => {
+            appContainer.classList.remove("app-booting");
+        }, 1700);
+    }
+
+    function applySimulatedLandscape(enabled) {
+        simulatedLandscape = enabled;
+        appContainer.classList.toggle("force-landscape", enabled);
+        if (orientationBtn) {
+            orientationBtn.classList.toggle("active", enabled);
+            orientationBtn.textContent = enabled ? "Vertical" : "Horizontal";
+        }
+    }
+
+    async function toggleOrientationMode() {
+        const isLandscapeNow = screen.orientation && typeof screen.orientation.type === "string"
+            ? screen.orientation.type.startsWith("landscape")
+            : false;
+
+        const wantsLandscape = simulatedLandscape ? false : !isLandscapeNow;
+
+        if (screen.orientation && typeof screen.orientation.lock === "function") {
+            try {
+                if (wantsLandscape && !document.fullscreenElement && document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+
+                await screen.orientation.lock(wantsLandscape ? "landscape" : "portrait");
+
+                if (!wantsLandscape && document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen();
+                }
+
+                applySimulatedLandscape(false);
+                if (orientationBtn) {
+                    orientationBtn.classList.toggle("active", wantsLandscape);
+                    orientationBtn.textContent = wantsLandscape ? "Vertical" : "Horizontal";
+                }
+                return;
+            } catch (error) {
+                console.warn("No se pudo bloquear orientación nativa", error);
+            }
+        }
+
+        applySimulatedLandscape(!simulatedLandscape);
     }
 
     function updateFloatingHud(currentSpeed, isOverLimit) {
@@ -454,6 +505,10 @@ document.addEventListener("DOMContentLoaded", () => {
         floatingBtn.addEventListener("click", toggleFloatingWindow);
     }
 
+    if (orientationBtn) {
+        orientationBtn.addEventListener("click", toggleOrientationMode);
+    }
+
     // Reloj interno de la esquina superior derecha
     function updateClock() {
         const now = new Date();
@@ -467,6 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
     drawGaugeLabels(); // Esto pintará los números 0, 15, 30... al cargar
+    runStartupAnimation();
     limitValue.textContent = speedLimit;
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
     markActiveLabel(0);

@@ -63,6 +63,23 @@ body {
     overflow: hidden;
 }
 
+.app-container.app-booting {
+    animation: app-boot 1.3s ease-out;
+}
+
+@keyframes app-boot {
+    0% {
+        opacity: 0.2;
+        transform: scale(0.985);
+        filter: saturate(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: saturate(1);
+    }
+}
+
 .app-container.mode-street {
     --gauge-motion-duration: 0.25s;
     --speed-pop-up-scale: 1.03;
@@ -118,7 +135,7 @@ body {
 .status-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .time {
@@ -147,7 +164,31 @@ body {
     transition: border-color 0.2s ease, color 0.2s ease;
 }
 
+.orientation-btn {
+    border: 1px solid #2c313d;
+    background: #0d1015;
+    color: #d4d9e5;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    padding: 7px 10px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.orientation-btn.active {
+    border-color: rgba(255, 90, 31, 0.65);
+    box-shadow: 0 0 10px rgba(255, 90, 31, 0.25);
+    color: #fff5ee;
+}
+
 .reload-btn:active {
+    border-color: rgba(255, 90, 31, 0.6);
+    color: #ffffff;
+}
+
+.orientation-btn:active {
     border-color: rgba(255, 90, 31, 0.6);
     color: #ffffff;
 }
@@ -222,6 +263,16 @@ body {
     will-change: stroke-dashoffset;
 }
 
+.app-container.app-booting .gauge-progress {
+    animation: ignition-arc 1.55s cubic-bezier(0.22, 0.9, 0.18, 1);
+}
+
+@keyframes ignition-arc {
+    0% { stroke-dashoffset: 335; }
+    55% { stroke-dashoffset: 65; }
+    100% { stroke-dashoffset: 335; }
+}
+
 .app-container.accelerating .gauge-progress {
     filter: drop-shadow(0 0 8px rgba(255, 42, 42, 0.55));
 }
@@ -263,6 +314,16 @@ body {
     will-change: transform;
 }
 
+.app-container.app-booting .needle {
+    animation: ignition-needle 1.55s cubic-bezier(0.22, 0.9, 0.18, 1);
+}
+
+@keyframes ignition-needle {
+    0% { transform: rotate(-120deg); }
+    55% { transform: rotate(118deg); }
+    100% { transform: rotate(-120deg); }
+}
+
 .app-container.accelerating .needle {
     filter: drop-shadow(0px 0px 8px rgba(255, 42, 42, 0.62));
 }
@@ -300,6 +361,16 @@ body {
     line-height: 0.85;
     letter-spacing: -1.5px;
     transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.app-container.app-booting .current-speed {
+    animation: ignition-numbers 1.1s ease-out;
+}
+
+@keyframes ignition-numbers {
+    0% { opacity: 0.35; transform: scale(0.84); }
+    60% { opacity: 1; transform: scale(1.07); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 .current-speed.speed-up {
@@ -398,6 +469,39 @@ body {
     gap: 12px;
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
     margin-top: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.app-container.app-booting .controls-panel {
+    animation: ignition-panel 0.9s ease-out;
+}
+
+@keyframes ignition-panel {
+    0% {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.speed-warning .controls-panel {
+    border-color: rgba(255, 42, 42, 0.7);
+    box-shadow: 0 0 22px rgba(255, 42, 42, 0.24), 0 -10px 30px rgba(0, 0, 0, 0.35);
+    animation: actions-alert 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes actions-alert {
+    0% {
+        transform: translateY(0);
+        filter: saturate(0.98);
+    }
+    100% {
+        transform: translateY(-1px);
+        filter: saturate(1.08);
+    }
 }
 
 .stats-grid {
@@ -592,6 +696,11 @@ body {
         font-size: 10px;
     }
 
+    .orientation-btn {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
     .action-row {
         grid-template-columns: 1fr;
         gap: 8px;
@@ -643,11 +752,74 @@ body {
     }
 }
 
+.app-container.force-landscape {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-rows: auto 1fr;
+    gap: 8px 12px;
+    align-content: start;
+    padding: calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom));
+}
+
+.app-container.force-landscape .status-bar {
+    grid-column: 1 / 3;
+}
+
+.app-container.force-landscape .gauge-container {
+    margin: 2px 0;
+}
+
+.app-container.force-landscape .gauge {
+    width: min(46vh, 332px);
+}
+
+.app-container.force-landscape .digital-display {
+    top: 56%;
+}
+
+.app-container.force-landscape .controls-panel {
+    margin-top: 0;
+    max-height: 100%;
+    overflow: hidden;
+    gap: 8px;
+    padding: 8px;
+}
+
+.app-container.force-landscape .stats-grid {
+    padding-bottom: 6px;
+}
+
+.app-container.force-landscape .action-row {
+    grid-template-columns: 1fr;
+}
+
+.app-container.force-landscape .floating-btn,
+.app-container.force-landscape .btn-start {
+    padding: 8px;
+    font-size: 13px;
+}
+
+.app-container.force-landscape .status-right {
+    gap: 6px;
+}
+
+.app-container.force-landscape .time {
+    font-size: 20px;
+    padding: 4px 8px;
+}
+
+.app-container.force-landscape .reload-btn,
+.app-container.force-landscape .orientation-btn {
+    padding: 5px 7px;
+    font-size: 10px;
+}
+
 @media (orientation: landscape) and (max-height: 520px) {
     .app-container {
         min-height: 100dvh;
         display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
+        grid-template-columns: 1.15fr 0.85fr;
         grid-template-rows: auto 1fr;
         gap: 8px 12px;
         align-content: start;
@@ -664,11 +836,11 @@ body {
     }
 
     .gauge {
-        width: min(52vh, 360px);
+        width: min(46vh, 332px);
     }
 
     .digital-display {
-        top: 57%;
+        top: 56%;
     }
 
     .controls-panel {
@@ -676,7 +848,7 @@ body {
         max-height: 100%;
         overflow: hidden;
         gap: 8px;
-        padding: 10px;
+        padding: 8px;
     }
 
     .stats-grid {
@@ -689,7 +861,23 @@ body {
 
     .floating-btn,
     .btn-start {
-        padding: 9px 8px;
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .status-right {
+        gap: 6px;
+    }
+
+    .time {
+        font-size: 20px;
+        padding: 4px 8px;
+    }
+
+    .reload-btn,
+    .orientation-btn {
+        padding: 5px 7px;
+        font-size: 10px;
     }
 }
 
