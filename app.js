@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxSpeedScale = document.getElementById("max-speed-scale");
     const miniMapContainer = document.getElementById("mini-map");
     const mapCenterBtn = document.getElementById("map-center-btn");
+    const themeMeta = document.getElementById("meta-theme-color");
+    const navMeta = document.getElementById("meta-nav-color");
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
     const floatingBtn = document.getElementById("floating-btn");
@@ -76,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let latestLatLng = null;
     let followMap = true;
     const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
+    const normalSystemColor = "#050608";
+    const warningSystemColor = "#250808";
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
@@ -303,7 +307,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 color: "#ff2a2a",
                 weight: 2,
                 fillColor: "#ff5a1f",
-                fillOpacity: 0.9
+                fillOpacity: 0.9,
+                className: "map-speed-marker"
             }).addTo(mapInstance);
         } else {
             mapMarker.setLatLng(point);
@@ -324,6 +329,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (followMap) {
             mapInstance.setView(point, 16, { animate: false });
+        }
+    }
+
+    function updateSystemBarColors(isWarning) {
+        const color = isWarning ? warningSystemColor : normalSystemColor;
+        if (themeMeta) {
+            themeMeta.setAttribute("content", color);
+        }
+        if (navMeta) {
+            navMeta.setAttribute("content", color);
         }
     }
 
@@ -597,6 +612,8 @@ document.addEventListener("DOMContentLoaded", () => {
             appContainer.classList.remove("speed-warning");
         }
 
+        updateSystemBarColors(currentSpeed > speedLimit);
+
         updateFloatingHud(currentSpeed, currentSpeed > speedLimit);
 
         // Registrar estadísticas sólo si el viaje está iniciado y vas avanzando
@@ -749,6 +766,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
     markActiveLabel(0);
     setGpsState("ready", "GPS: Listo");
+    updateSystemBarColors(false);
     updateConnectivityState();
     window.addEventListener("online", updateConnectivityState);
     window.addEventListener("offline", updateConnectivityState);

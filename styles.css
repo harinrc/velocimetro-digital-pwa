@@ -2,6 +2,7 @@
    VARIABLES Y CONFIGURACIÓN EN RAÍZ
    ========================================================================== */
 :root {
+    color-scheme: dark;
     --bg-color: #000000;
     --surface-color: #101113;
     --surface-color-2: #17191d;
@@ -583,6 +584,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .map-head {
@@ -615,6 +617,44 @@ body {
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid #262c36;
+}
+
+.speed-warning .map-card {
+    border-color: rgba(255, 42, 42, 0.72);
+    box-shadow: 0 0 18px rgba(255, 42, 42, 0.24);
+    animation: map-alert 0.55s ease-in-out infinite alternate;
+}
+
+.speed-warning .map-center-btn {
+    border-color: rgba(255, 42, 42, 0.62);
+    color: #fff2f2;
+    box-shadow: 0 0 10px rgba(255, 42, 42, 0.3);
+}
+
+.speed-warning .map-speed-marker {
+    animation: marker-pulse 0.45s ease-in-out infinite alternate;
+}
+
+@keyframes map-alert {
+    0% {
+        transform: translateY(0);
+        filter: saturate(1);
+    }
+    100% {
+        transform: translateY(-1px);
+        filter: saturate(1.12);
+    }
+}
+
+@keyframes marker-pulse {
+    0% {
+        opacity: 0.72;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 
 .leaflet-container {
