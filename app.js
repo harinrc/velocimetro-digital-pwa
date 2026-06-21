@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const limitInput = document.getElementById("limit-input");
     const maxSpeedBtn = document.getElementById("max-speed-btn");
     const maxSpeedScale = document.getElementById("max-speed-scale");
+    const miniMapContainer = document.getElementById("mini-map");
+    const mapCenterBtn = document.getElementById("map-center-btn");
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
     const floatingBtn = document.getElementById("floating-btn");
@@ -68,6 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastPositionAt = 0;
     let gpsHealthTimer = null;
     let gpsRetryTimer = null;
+    let mapInstance = null;
+    let mapMarker = null;
+    let mapAccuracyCircle = null;
+    let latestLatLng = null;
+    let followMap = true;
+    const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
@@ -221,6 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function toggleOrientationMode() {
+        if (isPhoneLike) {
+            return;
+        }
+
         const isLandscapeNow = screen.orientation && typeof screen.orientation.type === "string"
             ? screen.orientation.type.startsWith("landscape")
             : false;
@@ -262,6 +274,59 @@ document.addEventListener("DOMContentLoaded", () => {
         pipWindow.document.body.classList.toggle("warning", isOverLimit);
     }
 
+    function ensureMap() {
+        if (mapInstance || !miniMapContainer || typeof L === "undefined") return;
+
+        mapInstance = L.map(miniMapContainer, {
+            zoomControl: false,
+            attributionControl: true,
+            dragging: true,
+            tap: true
+        }).setView([13.7, -89.2], 14);
+
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+            maxZoom: 20,
+            attribution: "&copy; OpenStreetMap &copy; CARTO"
+        }).addTo(mapInstance);
+    }
+
+    function updateMapPosition(lat, lon, accuracy = 0) {
+        ensureMap();
+        if (!mapInstance) return;
+
+        const point = [lat, lon];
+        latestLatLng = point;
+
+        if (!mapMarker) {
+            mapMarker = L.circleMarker(point, {
+                radius: 7,
+                color: "#ff2a2a",
+                weight: 2,
+                fillColor: "#ff5a1f",
+                fillOpacity: 0.9
+            }).addTo(mapInstance);
+        } else {
+            mapMarker.setLatLng(point);
+        }
+
+        if (!mapAccuracyCircle) {
+            mapAccuracyCircle = L.circle(point, {
+                radius: Math.max(8, accuracy || 8),
+                color: "#ff2a2a",
+                weight: 1,
+                fillColor: "#ff2a2a",
+                fillOpacity: 0.12
+            }).addTo(mapInstance);
+        } else {
+            mapAccuracyCircle.setLatLng(point);
+            mapAccuracyCircle.setRadius(Math.max(8, accuracy || 8));
+        }
+
+        if (followMap) {
+            mapInstance.setView(point, 16, { animate: false });
+        }
+    }
+
     function clearGpsTimers() {
         if (gpsHealthTimer) {
             clearInterval(gpsHealthTimer);
@@ -295,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setGpsState("ready", "GPS: Activo");
                 const speedKmh = computeSpeedKmh(position);
                 updateInterface(speedKmh);
+                updateMapPosition(position.coords.latitude, position.coords.longitude, position.coords.accuracy);
             },
             (error) => {
                 console.warn("Señal GPS baja o buscando satélites...", error.message);
@@ -632,6 +698,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (orientationBtn) {
         orientationBtn.addEventListener("click", toggleOrientationMode);
+        if (isPhoneLike) {
+            orientationBtn.style.display = "none";
+        }
+    }
+
+    if (mapCenterBtn) {
+        mapCenterBtn.addEventListener("click", () => {
+            followMap = true;
+            if (mapInstance && latestLatLng) {
+                mapInstance.setView(latestLatLng, 16, { animate: true });
+            }
+        });
+    }
+
+    if (miniMapContainer) {
+        ensureMap();
+        miniMapContainer.addEventListener("pointerdown", () => {
+            followMap = false;
+        });
     }
 
     document.addEventListener("visibilitychange", () => {
@@ -650,6 +735,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateConnectivityState() {
         if (!netStatus) return;
         netStatus.textContent = navigator.onLine ? "Online" : "Offline";
+        const controlsPanel = document.querySelector(".controls-panel");
+        if (controlsPanel) {
+            controlsPanel.classList.toggle("map-offline", !navigator.onLine);
+        }
     }
 
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---

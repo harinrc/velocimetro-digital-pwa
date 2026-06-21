@@ -194,6 +194,12 @@ body {
     color: #ffffff;
 }
 
+@media (pointer: coarse), (max-width: 899px) {
+    .orientation-btn {
+        display: none;
+    }
+}
+
 .gps-status {
     display: flex;
     align-items: center;
@@ -569,6 +575,62 @@ body {
     padding-bottom: 14px;
 }
 
+.map-card {
+    border: 1px solid #252a33;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #0d1015, #0a0c11);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.map-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.map-title {
+    font-size: 12px;
+    color: #d3d9e8;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.map-center-btn {
+    border: 1px solid #303646;
+    border-radius: 8px;
+    background: #111520;
+    color: #e7ecf8;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+.mini-map {
+    height: 128px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #262c36;
+}
+
+.leaflet-container {
+    background: #0a0d12;
+}
+
+.leaflet-control-attribution {
+    font-size: 9px;
+    background: rgba(8, 10, 14, 0.65) !important;
+    color: #9ea5b5 !important;
+}
+
+.controls-panel.map-offline .map-card {
+    border-color: #2f3440;
+}
+
 .stat-item {
     display: flex;
     flex-direction: column;
@@ -821,6 +883,10 @@ body {
         font-size: 11px;
     }
 
+    .mini-map {
+        height: 110px;
+    }
+
     .floating-btn,
     .btn-start {
         padding: 11px 10px;
@@ -856,6 +922,10 @@ body {
     .max-speed-btn {
         padding: 5px 6px;
         font-size: 10px;
+    }
+
+    .mini-map {
+        height: 96px;
     }
 
     .setup-row,
@@ -908,5 +978,9 @@ body {
 
     .current-speed {
         font-size: clamp(82px, 9vw, 118px);
+    }
+
+    .mini-map {
+        height: 170px;
     }
 }
