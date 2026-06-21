@@ -1,0 +1,18 @@
+{
+  "name": "Velocímetro Deportivo PWA",
+  "short_name": "Velocímetro",
+  "description": "Velocímetro digital y analógico offline con alertas de velocidad.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3039/3039433.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
