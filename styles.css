@@ -505,6 +505,89 @@ html {
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.panel-handle {
+    border: 0;
+    background: transparent;
+    padding: 2px 0 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    touch-action: none;
+}
+
+.panel-handle,
+.app-container.panel-collapsed .panel-handle {
+    display: none;
+}
+
+.panel-handle:active {
+    cursor: grabbing;
+}
+
+.panel-handle-bar {
+    width: 54px;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.24), rgba(255, 42, 42, 0.72), rgba(255, 255, 255, 0.24));
+    box-shadow: 0 0 10px rgba(255, 42, 42, 0.2);
+}
+
+.app-container.panel-collapsed .controls-panel {
+    gap: 0;
+}
+
+.app-container.panel-collapsed .panel-handle {
+    padding-bottom: 6px;
+}
+
+.app-container.panel-collapsed .stats-grid,
+.app-container.panel-collapsed .setup-row,
+.app-container.panel-collapsed .mode-row,
+.app-container.panel-collapsed .action-row {
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+}
+
+.app-container.panel-collapsed .map-card {
+    margin-top: 2px;
+}
+
+.app-container.panel-collapsed .gauge-container {
+    margin-bottom: 4px;
+}
+
+.app-container.panel-collapsed .gauge {
+    width: min(92vw, clamp(250px, 80vw, 420px));
+}
+
+.app-container.panel-collapsed .digital-display {
+    top: 55%;
+}
+
+.app-container.panel-collapsed .current-speed {
+    font-size: clamp(60px, 20vw, 106px);
+}
+
+.app-container.panel-collapsed .current-speed.triple-digits {
+    font-size: clamp(48px, 16vw, 88px);
+}
+
+.app-container.panel-collapsed .mini-map {
+    height: clamp(108px, 30vw, 150px);
+}
+
+.app-container.panel-collapsed .controls-panel {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .app-container.app-booting .controls-panel {
     animation: ignition-panel var(--boot-duration) ease-out;
 }
@@ -885,6 +968,10 @@ html {
         padding: calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom));
     }
 
+    .panel-handle {
+        display: flex;
+    }
+
     .digital-display {
         top: 55.5%;
         gap: 7px;
@@ -950,6 +1037,10 @@ html {
     .floating-btn,
     .btn-start {
         padding: 10px 10px;
+    }
+
+    .panel-handle-bar {
+        width: 46px;
     }
 }
 
@@ -1024,6 +1115,10 @@ html {
     .mode-row {
         grid-template-columns: minmax(72px, 1fr) minmax(0, 1fr);
         gap: 8px;
+    }
+
+    .app-container.panel-collapsed .gauge {
+        width: min(94vw, 360px);
     }
 }
 

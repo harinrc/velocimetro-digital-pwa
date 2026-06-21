@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
     const modeButtons = document.querySelectorAll(".mode-btn");
+    const panelHandle = document.getElementById("panel-handle");
     
     // Elementos de Estadísticas secundarios
     const maxSpeedText = document.getElementById("max-speed");
@@ -77,6 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let mapAccuracyCircle = null;
     let latestLatLng = null;
     let followMap = true;
+    let panelCollapsed = localStorage.getItem("speedometer_panel_collapsed") === "1";
+    let panelSwipeStartY = null;
+    let panelSwipePointerId = null;
+    const isCompactPanelMode = window.matchMedia("(max-width: 379px)").matches;
     const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
     const normalSystemColor = "#050608";
     const warningSystemColor = "#250808";
@@ -230,6 +235,72 @@ document.addEventListener("DOMContentLoaded", () => {
             orientationBtn.classList.toggle("active", enabled);
             orientationBtn.textContent = enabled ? "Vertical" : "Horizontal";
         }
+    }
+
+    function applyPanelState(collapsed, persist = true) {
+        if (!isCompactPanelMode) {
+            panelCollapsed = false;
+            appContainer.classList.remove("panel-collapsed");
+            if (panelHandle) {
+                panelHandle.setAttribute("aria-expanded", "true");
+                panelHandle.style.display = "none";
+            }
+            if (persist) {
+                localStorage.setItem("speedometer_panel_collapsed", "0");
+            }
+            return;
+        }
+
+        panelCollapsed = Boolean(collapsed);
+        appContainer.classList.toggle("panel-collapsed", panelCollapsed);
+
+        if (panelHandle) {
+            panelHandle.setAttribute("aria-expanded", String(!panelCollapsed));
+        }
+
+        if (persist) {
+            localStorage.setItem("speedometer_panel_collapsed", panelCollapsed ? "1" : "0");
+        }
+
+        if (mapInstance) {
+            setTimeout(() => {
+                mapInstance.invalidateSize();
+                if (followMap && latestLatLng) {
+                    mapInstance.setView(latestLatLng, 16, { animate: false });
+                }
+            }, 220);
+        }
+    }
+
+    function setPanelFromSwipe(deltaY) {
+        const threshold = 28;
+        if (deltaY > threshold) {
+            applyPanelState(true, true);
+            return;
+        }
+
+        if (deltaY < -threshold) {
+            applyPanelState(false, true);
+            return;
+        }
+
+        applyPanelState(!panelCollapsed, true);
+    }
+
+    function syncPanelMode() {
+        if (window.matchMedia("(max-width: 379px)").matches) {
+            if (panelHandle) {
+                panelHandle.style.display = "flex";
+            }
+            applyPanelState(panelCollapsed, false);
+            return;
+        }
+
+        if (panelHandle) {
+            panelHandle.style.display = "none";
+        }
+
+        applyPanelState(false, false);
     }
 
     async function toggleOrientationMode() {
@@ -738,6 +809,34 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    if (panelHandle) {
+        if (!isCompactPanelMode) {
+            panelHandle.style.display = "none";
+        }
+
+        panelHandle.addEventListener("pointerdown", (event) => {
+            panelSwipeStartY = event.clientY;
+            panelSwipePointerId = event.pointerId;
+            panelHandle.setPointerCapture(event.pointerId);
+        });
+
+        panelHandle.addEventListener("pointerup", (event) => {
+            if (panelSwipePointerId !== event.pointerId || panelSwipeStartY === null) return;
+
+            const deltaY = event.clientY - panelSwipeStartY;
+            panelSwipeStartY = null;
+            panelSwipePointerId = null;
+            setPanelFromSwipe(deltaY);
+        });
+
+        panelHandle.addEventListener("pointercancel", () => {
+            panelSwipeStartY = null;
+            panelSwipePointerId = null;
+        });
+    }
+
+    window.addEventListener("resize", syncPanelMode);
+
     document.addEventListener("visibilitychange", () => {
         if (!isTracking) return;
         if (document.visibilityState === "visible" && watchId === null) {
@@ -766,6 +865,8 @@ document.addEventListener("DOMContentLoaded", () => {
     limitValue.textContent = speedLimit;
     updateInterface(0);
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
+    applyPanelState(isCompactPanelMode ? panelCollapsed : false, false);
+    syncPanelMode();
     markActiveLabel(0);
     setGpsState("ready", "GPS: Listo");
     updateSystemBarColors(false);
