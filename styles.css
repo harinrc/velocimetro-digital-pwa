@@ -1227,6 +1227,44 @@ body {
     }
 }
 
+@media (orientation: landscape) and (max-height: 520px) and (min-width: 781px) {
+    .gauge,
+    .app-container.force-landscape .gauge {
+        width: min(64vh, 500px);
+    }
+
+    .digital-display,
+    .app-container.force-landscape .digital-display {
+        top: 57%;
+        gap: 10px;
+    }
+
+    .speed-box {
+        margin-left: clamp(6px, 2.3vw, 20px);
+    }
+
+    .current-speed {
+        font-size: clamp(60px, 8.4vw, 92px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(50px, 7.1vw, 76px);
+    }
+
+    .unit {
+        font-size: 11px;
+    }
+
+    .limit-indicator {
+        min-width: 60px;
+        padding: 5px 7px;
+    }
+
+    .limit-value {
+        font-size: 20px;
+    }
+}
+
 @media (max-width: 420px) and (orientation: portrait) {
     .digital-display {
         top: 55.5%;
