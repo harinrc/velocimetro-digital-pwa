@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         appContainer.classList.add("app-booting");
         setTimeout(() => {
             appContainer.classList.remove("app-booting");
-        }, 2500);
+        }, 3000);
     }
 
     function applySimulatedLandscape(enabled) {
@@ -365,12 +365,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Calcular la rotación de la aguja basándose en la velocidad actual
         const percentage = (boundedSpeed - minSpeed) / (maxSpeed - minSpeed);
         const targetAngle = startAngle + (percentage * totalAngle);
-        const dashOffset = arcLength - (percentage * arcLength);
+        const visibleArc = percentage * arcLength;
         
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
         speedText.textContent = currentSpeed;
-        if (gaugeProgress) gaugeProgress.style.strokeDashoffset = dashOffset.toFixed(2);
+        if (gaugeProgress) gaugeProgress.style.strokeDasharray = `${visibleArc.toFixed(2)} 500`;
 
         speedText.classList.remove("speed-up", "speed-down");
         appContainer.classList.remove("accelerating", "decelerating");
@@ -524,6 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
     drawGaugeLabels(); // Esto pintará los números 0, 15, 30... al cargar
     runStartupAnimation();
     limitValue.textContent = speedLimit;
+    updateInterface(0);
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
     markActiveLabel(0);
     setGpsState("ready", "GPS: Listo");

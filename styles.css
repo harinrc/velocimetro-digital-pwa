@@ -19,7 +19,7 @@
     --warning-pulse-duration: 1.1s;
     --warning-max-glow: 0.5;
     --motion-ease: cubic-bezier(0.14, 0.78, 0.12, 1);
-    --boot-duration: 2.45s;
+    --boot-duration: 3s;
 }
 
 /* ==========================================================================
@@ -254,14 +254,13 @@ body {
     fill: none;
     stroke: var(--accent-red);
     stroke-width: 5.2;
-    stroke-dasharray: 335 500;
-    stroke-dashoffset: 335;
+    stroke-dasharray: 0 500;
     stroke-linecap: round;
     transform: rotate(135deg);
     transform-origin: 100px 100px;
-    transition: stroke-dashoffset var(--gauge-motion-duration) var(--motion-ease), stroke 0.2s ease;
-    filter: drop-shadow(0 0 4px rgba(255, 42, 42, 0.38));
-    will-change: stroke-dashoffset;
+    transition: stroke-dasharray var(--gauge-motion-duration) var(--motion-ease), stroke 0.2s ease;
+    filter: drop-shadow(0 0 5px rgba(255, 42, 42, 0.44));
+    will-change: stroke-dasharray;
 }
 
 .app-container.app-booting .gauge-progress {
@@ -269,9 +268,9 @@ body {
 }
 
 @keyframes ignition-arc {
-    0% { stroke-dashoffset: 335; }
-    60% { stroke-dashoffset: 65; }
-    100% { stroke-dashoffset: 335; }
+    0% { stroke-dasharray: 0 500; }
+    60% { stroke-dasharray: 335 500; }
+    100% { stroke-dasharray: 0 500; }
 }
 
 .app-container.accelerating .gauge-progress {
@@ -309,7 +308,7 @@ body {
     stroke-width: 3;
     stroke-linecap: round;
     transform-origin: 100px 100px;
-    transform: rotate(-120deg); /* Posición inicial en 0 km/h */
+    transform: rotate(-135deg); /* Posición inicial en 0 km/h sincronizada con el arco */
     transition: transform var(--gauge-motion-duration) var(--motion-ease);
     filter: drop-shadow(0px 0px 5px var(--accent-red-glow));
     will-change: transform;
@@ -489,6 +488,29 @@ body {
     100% {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+.app-container.app-booting .controls-panel,
+.app-container.app-booting .limit-indicator {
+    animation-name: ignition-panel, ignition-color;
+    animation-duration: var(--boot-duration), var(--boot-duration);
+    animation-timing-function: ease-out, ease-in-out;
+    animation-iteration-count: 1, 1;
+}
+
+@keyframes ignition-color {
+    0% {
+        border-color: #1f2229;
+        box-shadow: 0 0 0 rgba(255, 42, 42, 0);
+    }
+    55% {
+        border-color: rgba(255, 42, 42, 0.75);
+        box-shadow: 0 0 24px rgba(255, 42, 42, 0.28);
+    }
+    100% {
+        border-color: #1f2229;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
     }
 }
 
