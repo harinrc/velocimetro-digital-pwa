@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const limitInput = document.getElementById("limit-input");
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
+    const gpsStatus = document.getElementById("gps-status");
+    const netStatus = document.getElementById("net-status");
     
     // Elementos de Estadísticas secundarios
     const maxSpeedText = document.getElementById("max-speed");
@@ -42,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let speedHistory = [];
     let isTracking = false;
     let watchId = null;
+    let lastCoords = null;
+    let smoothedSpeed = 0;
+    let gaugeLabels = [];
 
     // --- FUNCIÓN PARA DIBUJAR LOS NÚMEROS EN EL CÍRCULO ---
     function drawGaugeLabels() {
@@ -67,11 +72,85 @@ document.addEventListener("DOMContentLoaded", () => {
             const textNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
             textNode.setAttribute("x", x.toFixed(2));
             textNode.setAttribute("y", y.toFixed(2));
+            textNode.setAttribute("data-speed", String(speed));
             textNode.textContent = speed;
 
             // Inyectar el número en el grupo del SVG
             labelsContainer.appendChild(textNode);
         }
+
+        gaugeLabels = Array.from(labelsContainer.querySelectorAll("text"));
+    }
+
+    function markActiveLabel(currentSpeed) {
+        if (!gaugeLabels.length) return;
+
+        const nearest = Math.round(currentSpeed / step) * step;
+
+        gaugeLabels.forEach((label) => {
+            const value = parseInt(label.getAttribute("data-speed"), 10);
+            label.classList.toggle("active-label", value === nearest);
+            label.classList.toggle("over-limit-label", currentSpeed > speedLimit && value >= speedLimit);
+        });
+    }
+
+    function setGpsState(mode, text) {
+        if (!gpsStatus) return;
+
+        gpsStatus.classList.remove("searching", "off");
+        if (mode === "searching") gpsStatus.classList.add("searching");
+        if (mode === "off") gpsStatus.classList.add("off");
+        gpsStatus.innerHTML = `<span class="dot"></span> ${text}`;
+    }
+
+    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+        const toRadians = (deg) => (deg * Math.PI) / 180;
+        const earthRadius = 6371000;
+        const dLat = toRadians(lat2 - lat1);
+        const dLon = toRadians(lon2 - lon1);
+
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * c;
+    }
+
+    function computeSpeedKmh(position) {
+        const { latitude, longitude, speed } = position.coords;
+        const timestamp = position.timestamp;
+        let rawKmh = null;
+
+        if (typeof speed === "number" && speed >= 0) {
+            rawKmh = speed * 3.6;
+        } else if (lastCoords) {
+            const elapsedSeconds = (timestamp - lastCoords.timestamp) / 1000;
+            if (elapsedSeconds > 0.4) {
+                const distance = calculateDistanceMeters(
+                    lastCoords.latitude,
+                    lastCoords.longitude,
+                    latitude,
+                    longitude
+                );
+                rawKmh = (distance / elapsedSeconds) * 3.6;
+            }
+        }
+
+        lastCoords = { latitude, longitude, timestamp };
+
+        if (rawKmh === null || Number.isNaN(rawKmh)) {
+            return 0;
+        }
+
+        if (rawKmh < 0.9) {
+            rawKmh = 0;
+        }
+
+        const alpha = rawKmh < 8 ? 0.58 : 0.38;
+        smoothedSpeed = alpha * rawKmh + (1 - alpha) * smoothedSpeed;
+        return Math.max(0, Math.round(smoothedSpeed));
     }
 
     // --- FUNCIÓN PARA ACTUALIZAR LA AGUJA Y EL DISPLAY ---
@@ -86,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
         speedText.textContent = currentSpeed;
+        markActiveLabel(currentSpeed);
 
         // COMPROBACIÓN DEL LÍMITE: Si te pasas, se activa la alerta roja
         if (currentSpeed > speedLimit) {
@@ -118,31 +198,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const geoOptions = {
             enableHighAccuracy: true, // Fuerza al celular a encender el GPS de alta precisión
-            maximumAge: 0,            // Ignora posiciones viejas guardadas en caché
+            maximumAge: 500,          // Permite actualizaciones recientes para respuesta fluida
             timeout: 10000            // Tiempo de espera máximo de respuesta del satélite
         };
+
+        setGpsState("searching", "GPS: Buscando");
 
         // Escucha activa de movimiento en tiempo real
         watchId = navigator.geolocation.watchPosition(
             (position) => {
-                const speedMs = position.coords.speed; // El GPS devuelve metros por segundo
-
-                if (speedMs !== null && speedMs !== undefined && speedMs >= 0) {
-                    // Convertir de m/s a Kilómetros por hora (m/s * 3.6)
-                    let speedKmh = Math.round(speedMs * 3.6);
-                    
-                    // FILTRO DE UMBRAL: Si marca 1 o 2 km/h por el ruido estando quieto, lo fuerza a 0
-                    if (speedKmh < 3) { 
-                        speedKmh = 0; 
-                    }
-                    
-                    updateInterface(speedKmh);
-                } else {
-                    updateInterface(0);
-                }
+                setGpsState("ready", "GPS: Activo");
+                const speedKmh = computeSpeedKmh(position);
+                updateInterface(speedKmh);
             },
             (error) => {
                 console.warn("Señal GPS baja o buscando satélites...", error.message);
+                if (error.code === error.PERMISSION_DENIED) {
+                    setGpsState("off", "GPS: Sin permiso");
+                } else {
+                    setGpsState("searching", "GPS: Señal baja");
+                }
             },
             geoOptions
         );
@@ -159,6 +234,9 @@ document.addEventListener("DOMContentLoaded", () => {
             watchId = null;
         }
         isTracking = false;
+        smoothedSpeed = 0;
+        lastCoords = null;
+        setGpsState("off", "GPS: Detenido");
         updateInterface(0);
         btnAction.textContent = "INICIAR";
         btnAction.style.backgroundColor = "var(--accent-red)";
@@ -170,9 +248,11 @@ document.addEventListener("DOMContentLoaded", () => {
     limitInput.addEventListener("input", (e) => {
         let value = parseInt(e.target.value);
         if (isNaN(value) || value < 0) value = 0;
+        if (value > maxSpeed) value = maxSpeed;
         
         speedLimit = value;
         limitValue.textContent = speedLimit;
+        markActiveLabel(parseInt(speedText.textContent, 10) || 0);
     });
 
     // Escuchar el clic del botón principal (Iniciar/Detener)
@@ -190,9 +270,19 @@ document.addEventListener("DOMContentLoaded", () => {
         clockText.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     }
 
+    function updateConnectivityState() {
+        if (!netStatus) return;
+        netStatus.textContent = navigator.onLine ? "Online" : "Offline";
+    }
+
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
     drawGaugeLabels(); // Esto pintará los números 0, 15, 30... al cargar
     limitValue.textContent = speedLimit;
+    markActiveLabel(0);
+    setGpsState("ready", "GPS: Listo");
+    updateConnectivityState();
+    window.addEventListener("online", updateConnectivityState);
+    window.addEventListener("offline", updateConnectivityState);
     setInterval(updateClock, 1000);
     updateClock();
 });

@@ -1,11 +1,11 @@
-const CACHE_NAME = 'velocimetro-v1';
+const CACHE_NAME = 'velocimetro-v2';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
-  'https://cdn-icons-png.flaticon.com/512/3039/3039433.png'
+  './icon.svg'
 ];
 
 // 1. Instalar el Service Worker y almacenar archivos en caché
@@ -36,14 +36,26 @@ self.addEventListener('activate', (e) => {
 
 // 3. Estrategia de respuesta: Cache First (Priorizar Caché para modo Offline)
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      // Si el archivo está en caché, lo devuelve inmediatamente (no usa internet)
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      // Si no está, lo busca en la red
-      return fetch(e.request);
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(e.request)
+        .then((networkResponse) => {
+          if (e.request.url.startsWith(self.location.origin)) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          if (e.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+          return caches.match('./');
+        });
     })
   );
 });

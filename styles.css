@@ -2,13 +2,16 @@
    VARIABLES Y CONFIGURACIÓN EN RAÍZ
    ========================================================================== */
 :root {
-    --bg-color: #000000;             /* Negro puro para pantallas AMOLED (Ahorro de batería) */
-    --surface-color: #121212;        /* Gris oscuro para paneles y tarjetas */
-    --accent-red: #ff3b30;           /* Rojo deportivo de alta visibilidad */
-    --accent-red-glow: rgba(255, 59, 48, 0.4);
-    --text-main: #ffffff;
-    --text-muted: #8e8e93;           /* Gris para etiquetas secundarias */
-    --gauge-track: #2c2c2e;          /* Color del arco de fondo */
+    --bg-color: #000000;
+    --surface-color: #101113;
+    --surface-color-2: #17191d;
+    --accent-red: #ff2a2a;
+    --accent-red-2: #ff5a1f;
+    --accent-red-glow: rgba(255, 42, 42, 0.45);
+    --text-main: #f8f9ff;
+    --text-muted: #8f95a3;
+    --gauge-track: #242830;
+    --good: #35d07f;
 }
 
 /* ==========================================================================
@@ -18,12 +21,15 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Bahnschrift", "Rajdhani", "Segoe UI", sans-serif;
     -webkit-tap-highlight-color: transparent; /* Elimina el flash azul al tocar botones en móvil */
 }
 
 body {
-    background-color: var(--bg-color);
+    background:
+        radial-gradient(circle at 20% 15%, rgba(255, 42, 42, 0.12), transparent 38%),
+        radial-gradient(circle at 80% 100%, rgba(255, 90, 31, 0.11), transparent 38%),
+        var(--bg-color);
     color: var(--text-main);
     display: flex;
     justify-content: center;
@@ -37,28 +43,28 @@ body {
    ========================================================================== */
 .app-container {
     width: 100%;
-    max-width: 420px;
+    max-width: 460px;
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 24px 20px;
+    padding: 24px 18px 20px;
     position: relative;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
 }
 
 /* --- Alerta visual cuando se supera el límite --- */
 .app-container.speed-warning {
-    background-color: #140202; /* Fondo rojizo sutil muy oscuro */
-    animation: pulse-alert 1.5s infinite alternate ease-in-out;
+    background-color: #130203;
+    animation: pulse-alert 1.1s infinite alternate ease-in-out;
 }
 
 @keyframes pulse-alert {
     0% {
-        box-shadow: inset 0 0 15px rgba(255, 59, 48, 0.15);
+        box-shadow: inset 0 0 15px rgba(255, 42, 42, 0.18);
     }
     100% {
-        box-shadow: inset 0 0 35px rgba(255, 59, 48, 0.45);
+        box-shadow: inset 0 0 40px rgba(255, 42, 42, 0.5);
     }
 }
 
@@ -69,9 +75,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--text-muted);
+    letter-spacing: 0.3px;
 }
 
 .gps-status {
@@ -84,9 +91,19 @@ body {
     display: inline-block;
     width: 8px;
     height: 8px;
-    background-color: #34c759; /* Verde para indicar señal GPS fija */
+    background-color: var(--good);
     border-radius: 50%;
-    box-shadow: 0 0 8px rgba(52, 199, 89, 0.4);
+    box-shadow: 0 0 8px rgba(53, 208, 127, 0.45);
+}
+
+.gps-status.searching .dot {
+    background-color: #f9c74f;
+    box-shadow: 0 0 8px rgba(249, 199, 79, 0.45);
+}
+
+.gps-status.off .dot {
+    background-color: #9aa0a8;
+    box-shadow: none;
 }
 
 /* ==========================================================================
@@ -104,8 +121,7 @@ body {
 }
 
 .gauge {
-    width: 90%;
-    max-width: 340px;
+    width: min(92vw, 380px);
     height: auto;
 }
 
@@ -123,16 +139,21 @@ body {
 /* Estilo para los números impresos en el arco (Inyectados por JS) */
 .gauge-labels text {
     fill: var(--text-muted);
-    font-size: 9.5px;
-    font-weight: 600;
+    font-size: 8.6px;
+    font-weight: 700;
     text-anchor: middle;
     dominant-baseline: central;
-    transition: fill 0.3s ease;
+    letter-spacing: 0.25px;
+    transition: fill 0.2s ease, text-shadow 0.2s ease;
 }
 
-/* Si estás en alerta, los números brillan sutilmente en rojo */
-.speed-warning .gauge-labels text {
-    fill: #e5e5ea;
+.gauge-labels text.active-label {
+    fill: #ffffff;
+}
+
+.speed-warning .gauge-labels text.active-label,
+.speed-warning .gauge-labels text.over-limit-label {
+    fill: #ffd9d9;
 }
 
 /* La Aguja */
@@ -142,7 +163,7 @@ body {
     stroke-linecap: round;
     transform-origin: 100px 100px;
     transform: rotate(-120deg); /* Posición inicial en 0 km/h */
-    transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1); /* Movimiento amortiguado y deportivo */
+    transition: transform 0.16s cubic-bezier(0.1, 0.75, 0.1, 1);
     filter: drop-shadow(0px 0px 5px var(--accent-red-glow));
 }
 
@@ -157,11 +178,11 @@ body {
    ========================================================================== */
 .digital-display {
     position: absolute;
-    top: 58%; /* Ajustado matemáticamente para quedar justo abajo de la aguja */
+    top: 57%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    gap: 18px;
     width: 100%;
 }
 
@@ -169,37 +190,49 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: 40px; /* Compensa visualmente el espacio del widget lateral */
+    margin-left: 30px;
 }
 
 .current-speed {
-    font-size: 84px;
+    font-size: clamp(64px, 20vw, 92px);
     font-weight: 700;
-    line-height: 0.9;
-    letter-spacing: -2px;
-    transition: color 0.2s ease;
+    font-family: "Orbitron", "Bahnschrift", sans-serif;
+    line-height: 0.85;
+    letter-spacing: -1.5px;
+    transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
 }
 
-/* Cambio drástico a rojo del número digital si te pasas del límite */
 .speed-warning .current-speed {
     color: var(--accent-red);
-    text-shadow: 0 0 20px rgba(255, 59, 48, 0.3);
+    text-shadow: 0 0 24px rgba(255, 42, 42, 0.62);
+    animation: red-number-flash 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes red-number-flash {
+    0% {
+        transform: translateY(0) scale(1);
+        text-shadow: 0 0 8px rgba(255, 42, 42, 0.44);
+    }
+    100% {
+        transform: translateY(-1px) scale(1.03);
+        text-shadow: 0 0 20px rgba(255, 42, 42, 0.75);
+    }
 }
 
 .unit {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-muted);
-    font-weight: 500;
-    letter-spacing: 1.5px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
     text-transform: uppercase;
     margin-top: 4px;
 }
 
 /* Widget indicador de límite seleccionado */
 .limit-indicator {
-    background-color: var(--surface-color);
+    background: linear-gradient(160deg, var(--surface-color), var(--surface-color-2));
     border: 2px solid var(--accent-red);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 6px 8px;
     display: flex;
     flex-direction: column;
@@ -210,7 +243,7 @@ body {
 }
 
 .speed-warning .limit-indicator {
-    animation: shake 0.4s ease-in-out infinite alternate;
+    animation: shake 0.24s ease-in-out infinite alternate;
 }
 
 @keyframes shake {
@@ -236,9 +269,10 @@ body {
    PANEL INFERIOR: CONFIGURACIÓN Y ESTADÍSTICAS
    ========================================================================== */
 .controls-panel {
-    background-color: var(--surface-color);
-    border-radius: 20px;
-    padding: 20px;
+    background: linear-gradient(180deg, #101114, #0c0d10 65%);
+    border: 1px solid #1f2229;
+    border-radius: 22px;
+    padding: 18px;
     display: flex;
     flex-direction: column;
     gap: 18px;
@@ -248,6 +282,8 @@ body {
 .stats-grid {
     display: flex;
     justify-content: space-around;
+    gap: 8px;
+    flex-wrap: wrap;
     border-bottom: 1px solid #2c2c2e;
     padding-bottom: 14px;
 }
@@ -256,6 +292,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 88px;
 }
 
 .stat-label {
@@ -268,7 +305,7 @@ body {
 }
 
 .stat-value {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
 }
 
@@ -277,7 +314,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 15px;
+    gap: 12px;
+    font-size: 14px;
     font-weight: 500;
     color: #e5e5ea;
 }
@@ -288,7 +326,7 @@ body {
     color: #ffffff;
     padding: 6px 12px;
     border-radius: 8px;
-    width: 80px;
+    width: 92px;
     text-align: center;
     font-size: 16px;
     font-weight: 600;
@@ -302,7 +340,7 @@ body {
 
 /* Botón de Acción Principal */
 .btn-start {
-    background-color: var(--accent-red);
+    background: linear-gradient(90deg, var(--accent-red), var(--accent-red-2));
     color: #ffffff;
     border: none;
     border-radius: 28px;
@@ -312,10 +350,44 @@ body {
     cursor: pointer;
     letter-spacing: 1px;
     box-shadow: 0 6px 20px var(--accent-red-glow);
-    transition: transform 0.1s ease, background-color 0.2s ease;
+    transition: transform 0.1s ease, filter 0.2s ease;
 }
 
 .btn-start:active {
     transform: scale(0.97);
-    background-color: #e03228;
+    filter: brightness(0.95);
+}
+
+@media (max-width: 380px) {
+    .app-container {
+        padding: 18px 12px 16px;
+    }
+
+    .digital-display {
+        top: 58.5%;
+        gap: 10px;
+    }
+
+    .speed-box {
+        margin-left: 18px;
+    }
+
+    .controls-panel {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .stat-item {
+        min-width: 78px;
+    }
+
+    .setup-row {
+        font-size: 13px;
+    }
+}
+
+@media (min-width: 700px) {
+    .app-container {
+        transform: scale(1.02);
+    }
 }
