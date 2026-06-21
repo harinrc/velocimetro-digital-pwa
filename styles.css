@@ -358,9 +358,16 @@ body {
     font-size: clamp(64px, 20vw, 92px);
     font-weight: 700;
     font-family: "Orbitron", "Bahnschrift", sans-serif;
+    font-variant-numeric: tabular-nums;
     line-height: 0.85;
     letter-spacing: -1.5px;
+    min-width: 2.3ch;
+    text-align: center;
     transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.current-speed.triple-digits {
+    font-size: clamp(54px, 17vw, 78px);
 }
 
 .app-container.app-booting .current-speed {
@@ -619,6 +626,46 @@ body {
     gap: 12px;
 }
 
+.max-speed-row {
+    align-items: center;
+}
+
+.max-speed-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.max-scale-value {
+    min-width: 76px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #d9deeb;
+    background: #0c0f13;
+    border: 1px solid #252a33;
+    border-radius: 10px;
+    padding: 7px 8px;
+}
+
+.max-speed-btn {
+    border: 1px solid #2d3340;
+    border-radius: 10px;
+    background: #0f1218;
+    color: #dbe1ef;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.max-speed-btn:active {
+    border-color: rgba(255, 90, 31, 0.56);
+    color: #ffffff;
+}
+
 .mode-label {
     font-size: 14px;
     color: #e5e5ea;
@@ -753,6 +800,21 @@ body {
     .action-row {
         grid-template-columns: 1fr;
         gap: 8px;
+    }
+
+    .max-speed-actions {
+        gap: 6px;
+    }
+
+    .max-scale-value {
+        min-width: 64px;
+        padding: 6px 7px;
+        font-size: 12px;
+    }
+
+    .max-speed-btn {
+        padding: 6px 7px;
+        font-size: 11px;
     }
 
     .floating-btn,
@@ -926,6 +988,12 @@ body {
     .reload-btn,
     .orientation-btn {
         padding: 5px 7px;
+        font-size: 10px;
+    }
+
+    .max-scale-value,
+    .max-speed-btn {
+        padding: 5px 6px;
         font-size: 10px;
     }
 }

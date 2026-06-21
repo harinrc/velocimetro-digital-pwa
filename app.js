@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const speedText = document.getElementById("speed-text");
     const limitValue = document.getElementById("limit-value");
     const limitInput = document.getElementById("limit-input");
+    const maxSpeedBtn = document.getElementById("max-speed-btn");
+    const maxSpeedScale = document.getElementById("max-speed-scale");
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
     const floatingBtn = document.getElementById("floating-btn");
@@ -37,14 +39,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- CONFIGURACIÓN DEL VELOCÍMETRO ---
     const minSpeed = 0;
-    const maxSpeed = 120;
-    const step = 15;        // Números de 15 en 15 (0, 15, 30, 45... hasta 120)
+    const defaultMaxSpeed = 120;
+    const minAllowedMax = 60;
+    const maxAllowedMax = 240;
     const startAngle = -135; // Sincronizado con el inicio del arco SVG
     const endAngle = 105;    // Sincronizado con el final del arco SVG
     const totalAngle = endAngle - startAngle; // Arco total de 240 grados
 
     // Variables de control de datos
     let speedLimit = parseInt(limitInput.value) || 40;
+    let maxSpeed = Number.parseInt(localStorage.getItem("speedometer_max_scale"), 10) || defaultMaxSpeed;
     let maxSpeedRecorded = 0;
     let speedHistory = [];
     let isTracking = false;
@@ -60,6 +64,48 @@ document.addEventListener("DOMContentLoaded", () => {
     let pipLimitText = null;
     let pipTitleText = null;
     let simulatedLandscape = false;
+    let gaugeStep = 15;
+
+    if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
+        maxSpeed = defaultMaxSpeed;
+    }
+
+    function getGaugeStep(scaleMax) {
+        const candidates = [5, 10, 15, 20, 25, 30, 40, 50];
+        const raw = scaleMax / 8;
+        return candidates.reduce((best, value) =>
+            Math.abs(value - raw) < Math.abs(best - raw) ? value : best
+        , candidates[0]);
+    }
+
+    function applyMaxSpeed(newMax, persist = true) {
+        const parsed = Number.parseInt(newMax, 10);
+        if (Number.isNaN(parsed)) return;
+
+        maxSpeed = Math.max(minAllowedMax, Math.min(maxAllowedMax, parsed));
+        gaugeStep = getGaugeStep(maxSpeed);
+
+        if (limitInput) {
+            limitInput.max = String(maxSpeed);
+        }
+
+        if (speedLimit > maxSpeed) {
+            speedLimit = maxSpeed;
+            limitInput.value = String(speedLimit);
+            limitValue.textContent = String(speedLimit);
+        }
+
+        if (maxSpeedScale) {
+            maxSpeedScale.textContent = `${maxSpeed} km/h`;
+        }
+
+        drawGaugeLabels();
+        updateInterface(Number.parseInt(speedText.textContent, 10) || 0);
+
+        if (persist) {
+            localStorage.setItem("speedometer_max_scale", String(maxSpeed));
+        }
+    }
 
     // --- FUNCIÓN PARA DIBUJAR LOS NÚMEROS EN EL CÍRCULO ---
     function drawGaugeLabels() {
@@ -69,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         labelsContainer.innerHTML = ""; // Limpiar el contenedor por seguridad
 
-        for (let speed = minSpeed; speed <= maxSpeed; speed += step) {
+        for (let speed = minSpeed; speed <= maxSpeed; speed += gaugeStep) {
             // Calcular el ángulo en grados para cada velocidad
             const percentage = (speed - minSpeed) / (maxSpeed - minSpeed);
             const angleDegrees = startAngle + (percentage * totalAngle);
@@ -92,13 +138,31 @@ document.addEventListener("DOMContentLoaded", () => {
             labelsContainer.appendChild(textNode);
         }
 
+        const lastValue = Number.parseInt(labelsContainer.lastChild?.getAttribute("data-speed") || "0", 10);
+        if (lastValue !== maxSpeed) {
+            const percentage = (maxSpeed - minSpeed) / (maxSpeed - minSpeed);
+            const angleDegrees = startAngle + (percentage * totalAngle);
+            const angleRadians = (angleDegrees - 90) * (Math.PI / 180);
+            const cx = 100;
+            const cy = 100;
+            const r = 62;
+            const x = cx + r * Math.cos(angleRadians);
+            const y = cy + r * Math.sin(angleRadians);
+            const maxTextNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            maxTextNode.setAttribute("x", x.toFixed(2));
+            maxTextNode.setAttribute("y", y.toFixed(2));
+            maxTextNode.setAttribute("data-speed", String(maxSpeed));
+            maxTextNode.textContent = maxSpeed;
+            labelsContainer.appendChild(maxTextNode);
+        }
+
         gaugeLabels = Array.from(labelsContainer.querySelectorAll("text"));
     }
 
     function markActiveLabel(currentSpeed) {
         if (!gaugeLabels.length) return;
 
-        const nearest = Math.round(currentSpeed / step) * step;
+        const nearest = Math.round(currentSpeed / gaugeStep) * gaugeStep;
 
         gaugeLabels.forEach((label) => {
             const value = parseInt(label.getAttribute("data-speed"), 10);
@@ -370,6 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
         speedText.textContent = currentSpeed;
+        speedText.classList.toggle("triple-digits", currentSpeed >= 100);
         if (gaugeProgress) gaugeProgress.style.strokeDasharray = `${visibleArc.toFixed(2)} 500`;
 
         speedText.classList.remove("speed-up", "speed-down");
@@ -477,6 +542,14 @@ document.addEventListener("DOMContentLoaded", () => {
         markActiveLabel(parseInt(speedText.textContent, 10) || 0);
     });
 
+    if (maxSpeedBtn) {
+        maxSpeedBtn.addEventListener("click", () => {
+            const input = window.prompt(`Define la escala máxima del velocímetro (${minAllowedMax}-${maxAllowedMax})`, String(maxSpeed));
+            if (input === null) return;
+            applyMaxSpeed(input, true);
+        });
+    }
+
     // Escuchar el clic del botón principal (Iniciar/Detener)
     btnAction.addEventListener("click", () => {
         if (!isTracking) {
@@ -521,7 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
-    drawGaugeLabels(); // Esto pintará los números 0, 15, 30... al cargar
+    applyMaxSpeed(maxSpeed, false);
     runStartupAnimation();
     limitValue.textContent = speedLimit;
     updateInterface(0);
