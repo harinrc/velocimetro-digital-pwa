@@ -592,8 +592,8 @@ body {
 
 /* Selector del límite */
 .setup-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(84px, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 12px;
     font-size: 14px;
@@ -607,7 +607,9 @@ body {
     color: #ffffff;
     padding: 6px 12px;
     border-radius: 8px;
-    width: 92px;
+    width: 100%;
+    max-width: 120px;
+    justify-self: end;
     text-align: center;
     font-size: 16px;
     font-weight: 600;
@@ -620,8 +622,8 @@ body {
 }
 
 .mode-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(84px, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 12px;
 }
@@ -634,10 +636,12 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
 .max-scale-value {
-    min-width: 76px;
+    min-width: 70px;
     text-align: center;
     font-size: 13px;
     font-weight: 700;
@@ -653,7 +657,7 @@ body {
     border-radius: 10px;
     background: #0f1218;
     color: #dbe1ef;
-    padding: 7px 10px;
+    padding: 7px 8px;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.2px;
@@ -674,9 +678,9 @@ body {
 
 .mode-picker {
     display: grid;
-    grid-template-columns: repeat(3, minmax(68px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 7px;
-    width: min(100%, 250px);
+    width: 100%;
 }
 
 .mode-btn {
@@ -701,7 +705,7 @@ body {
 
 .action-row {
     display: grid;
-    grid-template-columns: 1fr 1.15fr;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     align-items: center;
 }
@@ -866,7 +870,7 @@ body {
 .app-container.force-landscape {
     min-height: 100dvh;
     display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-columns: 1.05fr 0.95fr;
     grid-template-rows: auto 1fr;
     gap: 8px 12px;
     align-content: start;
@@ -892,9 +896,16 @@ body {
 .app-container.force-landscape .controls-panel {
     margin-top: 0;
     max-height: 100%;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     gap: 8px;
     padding: 8px;
+}
+
+.app-container.force-landscape .setup-row,
+.app-container.force-landscape .mode-row {
+    grid-template-columns: minmax(72px, 1fr) minmax(0, 1fr);
+    gap: 6px;
 }
 
 .app-container.force-landscape .stats-grid {
@@ -930,7 +941,7 @@ body {
     .app-container {
         min-height: 100dvh;
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
+        grid-template-columns: 1.05fr 0.95fr;
         grid-template-rows: auto 1fr;
         gap: 8px 12px;
         align-content: start;
@@ -957,7 +968,8 @@ body {
     .controls-panel {
         margin-top: 0;
         max-height: 100%;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
         gap: 8px;
         padding: 8px;
     }
@@ -995,6 +1007,16 @@ body {
     .max-speed-btn {
         padding: 5px 6px;
         font-size: 10px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(72px, 1fr) minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .mode-label {
+        font-size: 12px;
     }
 }
 
