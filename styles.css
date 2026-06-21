@@ -52,13 +52,16 @@ body {
    ========================================================================== */
 .app-container {
     width: 100%;
-    max-width: 460px;
+    max-width: min(100%, 560px);
     min-height: 100dvh;
     height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: calc(14px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom));
+    padding:
+        calc(clamp(8px, 1.4vw, 16px) + env(safe-area-inset-top))
+        clamp(10px, 2.2vw, 22px)
+        calc(clamp(8px, 1.4vw, 16px) + env(safe-area-inset-bottom));
     position: relative;
     transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
     overflow: hidden;
@@ -127,7 +130,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 13px;
+    font-size: clamp(11px, 1.6vw, 15px);
     font-weight: 600;
     color: var(--text-muted);
     letter-spacing: 0.3px;
@@ -141,12 +144,12 @@ body {
 
 .time {
     font-family: "Orbitron", "Bahnschrift", sans-serif;
-    font-size: 24px;
+    font-size: clamp(18px, 4.4vw, 32px);
     line-height: 1;
     letter-spacing: 1.3px;
     color: #f5f7ff;
     text-shadow: 0 0 18px rgba(255, 255, 255, 0.14);
-    padding: 6px 10px;
+    padding: clamp(4px, 0.9vw, 8px) clamp(7px, 1.3vw, 12px);
     border-radius: 12px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -157,10 +160,10 @@ body {
     background: #0d1015;
     color: #d4d9e5;
     border-radius: 10px;
-    font-size: 11px;
+    font-size: clamp(9px, 1.45vw, 12px);
     font-weight: 700;
     letter-spacing: 0.4px;
-    padding: 7px 10px;
+    padding: clamp(4px, 0.9vw, 8px) clamp(6px, 1.3vw, 11px);
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease;
 }
@@ -170,10 +173,10 @@ body {
     background: #0d1015;
     color: #d4d9e5;
     border-radius: 10px;
-    font-size: 11px;
+    font-size: clamp(9px, 1.45vw, 12px);
     font-weight: 700;
     letter-spacing: 0.35px;
-    padding: 7px 10px;
+    padding: clamp(4px, 0.9vw, 8px) clamp(6px, 1.3vw, 11px);
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -235,7 +238,7 @@ body {
 }
 
 .gauge {
-    width: min(88vw, 360px);
+    width: min(92vw, clamp(260px, 58vw, 460px));
     height: auto;
 }
 
@@ -343,7 +346,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: clamp(8px, 2.2vw, 20px);
     width: 100%;
 }
 
@@ -351,11 +354,11 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: 30px;
+    margin-left: clamp(6px, 4vw, 34px);
 }
 
 .current-speed {
-    font-size: clamp(64px, 20vw, 92px);
+    font-size: clamp(52px, 18vw, 108px);
     font-weight: 700;
     font-family: "Orbitron", "Bahnschrift", sans-serif;
     font-variant-numeric: tabular-nums;
@@ -367,7 +370,7 @@ body {
 }
 
 .current-speed.triple-digits {
-    font-size: clamp(54px, 17vw, 78px);
+    font-size: clamp(44px, 15vw, 92px);
 }
 
 .app-container.app-booting .current-speed {
@@ -458,7 +461,7 @@ body {
 }
 
 .limit-value {
-    font-size: 22px;
+    font-size: clamp(17px, 3.7vw, 26px);
     font-weight: 700;
     line-height: 1;
 }
@@ -470,10 +473,10 @@ body {
     background: linear-gradient(180deg, #101114, #0c0d10 65%);
     border: 1px solid #1f2229;
     border-radius: 22px;
-    padding: 14px;
+    padding: clamp(8px, 2vw, 18px);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: clamp(7px, 1.6vw, 14px);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
     margin-top: 10px;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -577,7 +580,7 @@ body {
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: clamp(10px, 1.4vw, 13px);
     font-weight: 500;
     color: var(--text-muted);
     margin-bottom: 4px;
@@ -586,7 +589,7 @@ body {
 }
 
 .stat-value {
-    font-size: 18px;
+    font-size: clamp(14px, 2.1vw, 20px);
     font-weight: 600;
 }
 
@@ -596,7 +599,7 @@ body {
     grid-template-columns: minmax(84px, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 12px;
-    font-size: 14px;
+    font-size: clamp(12px, 1.8vw, 15px);
     font-weight: 500;
     color: #e5e5ea;
 }
@@ -611,7 +614,7 @@ body {
     max-width: 120px;
     justify-self: end;
     text-align: center;
-    font-size: 16px;
+    font-size: clamp(13px, 2vw, 16px);
     font-weight: 600;
     outline: none;
     transition: border-color 0.2s ease;
@@ -671,7 +674,7 @@ body {
 }
 
 .mode-label {
-    font-size: 14px;
+    font-size: clamp(12px, 1.8vw, 15px);
     color: #e5e5ea;
     font-weight: 600;
 }
@@ -689,7 +692,7 @@ body {
     border: 1px solid #252a33;
     border-radius: 10px;
     padding: 8px 10px;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4vw, 13px);
     letter-spacing: 0.3px;
     font-weight: 700;
     cursor: pointer;
@@ -716,7 +719,7 @@ body {
     background: #0f1218;
     color: #dbe1ef;
     padding: 12px 10px;
-    font-size: 12px;
+    font-size: clamp(10px, 1.5vw, 13px);
     font-weight: 700;
     letter-spacing: 0.2px;
     cursor: pointer;
@@ -741,7 +744,7 @@ body {
     border: none;
     border-radius: 28px;
     padding: 13px 14px;
-    font-size: 16px;
+    font-size: clamp(13px, 2.1vw, 18px);
     font-weight: 700;
     cursor: pointer;
     letter-spacing: 1px;
@@ -824,6 +827,48 @@ body {
     .floating-btn,
     .btn-start {
         padding: 11px 10px;
+    }
+}
+
+@media (max-width: 340px) and (orientation: portrait) {
+    .status-bar {
+        gap: 4px;
+    }
+
+    .status-right {
+        gap: 3px;
+    }
+
+    .time {
+        font-size: 16px;
+        padding: 3px 5px;
+    }
+
+    .reload-btn,
+    .orientation-btn {
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+
+    .gauge {
+        width: min(94vw, 280px);
+    }
+
+    .digital-display {
+        top: 56.5%;
+        gap: 6px;
+    }
+
+    .speed-box {
+        margin-left: 4px;
+    }
+
+    .current-speed {
+        font-size: clamp(44px, 20vw, 60px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(38px, 16vw, 52px);
     }
 }
 
@@ -1210,5 +1255,44 @@ body {
 
     .current-speed {
         font-size: clamp(82px, 9vw, 118px);
+    }
+}
+
+@media (min-width: 1440px) {
+    .app-container {
+        max-width: min(1500px, 96vw);
+        min-height: min(920px, 95dvh);
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 14px 24px;
+        padding: 22px;
+    }
+
+    .gauge {
+        width: min(56vw, 760px);
+    }
+
+    .current-speed {
+        font-size: clamp(96px, 7.4vw, 156px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(82px, 6.2vw, 132px);
+    }
+}
+
+@media (min-width: 2200px) {
+    .app-container {
+        max-width: min(1900px, 96vw);
+        min-height: min(1080px, 94dvh);
+        grid-template-columns: 1.3fr 0.7fr;
+        padding: 28px;
+    }
+
+    .gauge {
+        width: min(58vw, 980px);
+    }
+
+    .controls-panel {
+        border-radius: 26px;
     }
 }
