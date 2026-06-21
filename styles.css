@@ -19,6 +19,7 @@
     --warning-pulse-duration: 1.1s;
     --warning-max-glow: 0.5;
     --motion-ease: cubic-bezier(0.14, 0.78, 0.12, 1);
+    --boot-duration: 2.45s;
 }
 
 /* ==========================================================================
@@ -64,7 +65,7 @@ body {
 }
 
 .app-container.app-booting {
-    animation: app-boot 1.3s ease-out;
+    animation: app-boot var(--boot-duration) ease-out;
 }
 
 @keyframes app-boot {
@@ -264,12 +265,12 @@ body {
 }
 
 .app-container.app-booting .gauge-progress {
-    animation: ignition-arc 1.55s cubic-bezier(0.22, 0.9, 0.18, 1);
+    animation: ignition-arc var(--boot-duration) cubic-bezier(0.22, 0.9, 0.18, 1);
 }
 
 @keyframes ignition-arc {
     0% { stroke-dashoffset: 335; }
-    55% { stroke-dashoffset: 65; }
+    60% { stroke-dashoffset: 65; }
     100% { stroke-dashoffset: 335; }
 }
 
@@ -315,13 +316,13 @@ body {
 }
 
 .app-container.app-booting .needle {
-    animation: ignition-needle 1.55s cubic-bezier(0.22, 0.9, 0.18, 1);
+    animation: ignition-needle var(--boot-duration) cubic-bezier(0.22, 0.9, 0.18, 1);
 }
 
 @keyframes ignition-needle {
-    0% { transform: rotate(-120deg); }
-    55% { transform: rotate(118deg); }
-    100% { transform: rotate(-120deg); }
+    0% { transform: rotate(-135deg); }
+    60% { transform: rotate(105deg); }
+    100% { transform: rotate(-135deg); }
 }
 
 .app-container.accelerating .needle {
@@ -364,7 +365,7 @@ body {
 }
 
 .app-container.app-booting .current-speed {
-    animation: ignition-numbers 1.1s ease-out;
+    animation: ignition-numbers var(--boot-duration) ease-out;
 }
 
 @keyframes ignition-numbers {
@@ -473,7 +474,7 @@ body {
 }
 
 .app-container.app-booting .controls-panel {
-    animation: ignition-panel 0.9s ease-out;
+    animation: ignition-panel var(--boot-duration) ease-out;
 }
 
 @keyframes ignition-panel {
@@ -481,9 +482,35 @@ body {
         opacity: 0;
         transform: translateY(18px);
     }
+    45% {
+        opacity: 0.65;
+        transform: translateY(7px);
+    }
     100% {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+.app-container.app-booting .limit-indicator {
+    animation: ignition-limit var(--boot-duration) ease-out;
+}
+
+@keyframes ignition-limit {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.8);
+        box-shadow: 0 0 0 rgba(255, 42, 42, 0);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-1px) scale(1.08);
+        box-shadow: 0 0 18px rgba(255, 42, 42, 0.32);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 8px var(--accent-red-glow);
     }
 }
 

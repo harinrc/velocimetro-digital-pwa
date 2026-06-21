@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const minSpeed = 0;
     const maxSpeed = 120;
     const step = 15;        // Números de 15 en 15 (0, 15, 30, 45... hasta 120)
-    const startAngle = -120; // Grados de rotación CSS para 0 km/h
-    const endAngle = 120;   // Grados de rotación CSS para 120 km/h
+    const startAngle = -135; // Sincronizado con el inicio del arco SVG
+    const endAngle = 105;    // Sincronizado con el final del arco SVG
     const totalAngle = endAngle - startAngle; // Arco total de 240 grados
 
     // Variables de control de datos
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         appContainer.classList.add("app-booting");
         setTimeout(() => {
             appContainer.classList.remove("app-booting");
-        }, 1700);
+        }, 2500);
     }
 
     function applySimulatedLandscape(enabled) {
