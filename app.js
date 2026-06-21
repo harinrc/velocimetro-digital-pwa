@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // --- ELEMENTOS DEL DOM ---
     const labelsContainer = document.getElementById("gauge-labels");
+    const gaugeProgress = document.getElementById("gauge-progress");
     const needle = document.getElementById("needle");
     const speedText = document.getElementById("speed-text");
     const limitValue = document.getElementById("limit-value");
@@ -24,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnAction = document.getElementById("btn-action");
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
+    const modeButtons = document.querySelectorAll(".mode-btn");
     
     // Elementos de Estadísticas secundarios
     const maxSpeedText = document.getElementById("max-speed");
@@ -47,6 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastCoords = null;
     let smoothedSpeed = 0;
     let gaugeLabels = [];
+    let previousSpeed = 0;
+    const arcLength = 335;
+    let visualMode = "sport";
 
     // --- FUNCIÓN PARA DIBUJAR LOS NÚMEROS EN EL CÍRCULO ---
     function drawGaugeLabels() {
@@ -101,6 +106,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mode === "searching") gpsStatus.classList.add("searching");
         if (mode === "off") gpsStatus.classList.add("off");
         gpsStatus.innerHTML = `<span class="dot"></span> ${text}`;
+    }
+
+    function setVisualMode(mode) {
+        const modes = ["street", "sport", "track"];
+        if (!modes.includes(mode)) {
+            mode = "sport";
+        }
+
+        visualMode = mode;
+        appContainer.classList.remove("mode-street", "mode-sport", "mode-track");
+        appContainer.classList.add(`mode-${mode}`);
+
+        modeButtons.forEach((button) => {
+            button.classList.toggle("active", button.dataset.mode === mode);
+        });
+
+        localStorage.setItem("speedometer_visual_mode", mode);
     }
 
     function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
@@ -161,10 +183,27 @@ document.addEventListener("DOMContentLoaded", () => {
         // Calcular la rotación de la aguja basándose en la velocidad actual
         const percentage = (boundedSpeed - minSpeed) / (maxSpeed - minSpeed);
         const targetAngle = startAngle + (percentage * totalAngle);
+        const dashOffset = arcLength - (percentage * arcLength);
         
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
         speedText.textContent = currentSpeed;
+        if (gaugeProgress) {
+            gaugeProgress.style.strokeDashoffset = dashOffset.toFixed(2);
+        }
+
+        speedText.classList.remove("speed-up", "speed-down");
+        appContainer.classList.remove("accelerating", "decelerating");
+
+        if (currentSpeed > previousSpeed) {
+            speedText.classList.add("speed-up");
+            appContainer.classList.add("accelerating");
+        } else if (currentSpeed < previousSpeed) {
+            speedText.classList.add("speed-down");
+            appContainer.classList.add("decelerating");
+        }
+
+        previousSpeed = currentSpeed;
         markActiveLabel(currentSpeed);
 
         // COMPROBACIÓN DEL LÍMITE: Si te pasas, se activa la alerta roja
@@ -236,6 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isTracking = false;
         smoothedSpeed = 0;
         lastCoords = null;
+        previousSpeed = 0;
         setGpsState("off", "GPS: Detenido");
         updateInterface(0);
         btnAction.textContent = "INICIAR";
@@ -264,6 +304,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    modeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const nextMode = button.dataset.mode;
+            if (nextMode && nextMode !== visualMode) {
+                setVisualMode(nextMode);
+            }
+        });
+    });
+
     // Reloj interno de la esquina superior derecha
     function updateClock() {
         const now = new Date();
@@ -278,6 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
     drawGaugeLabels(); // Esto pintará los números 0, 15, 30... al cargar
     limitValue.textContent = speedLimit;
+    setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
     markActiveLabel(0);
     setGpsState("ready", "GPS: Listo");
     updateConnectivityState();

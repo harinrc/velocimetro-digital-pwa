@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container mode-sport">
         <header class="status-bar">
             <span class="gps-status" id="gps-status"><span class="dot"></span> GPS: Listo</span>
             <span class="time" id="clock">00:00</span>
@@ -21,6 +21,7 @@
             
             <svg class="gauge" viewBox="0 0 200 200">
                 <circle class="gauge-bg" cx="100" cy="100" r="80" />
+                <circle class="gauge-progress" cx="100" cy="100" r="80" id="gauge-progress" />
                 <g class="gauge-labels" id="gauge-labels"></g>
                 
                 <line class="needle" x1="100" y1="100" x2="100" y2="35" id="needle" />
@@ -59,6 +60,15 @@
             <div class="setup-row">
                 <label for="limit-input">Ajustar Límite:</label>
                 <input type="number" id="limit-input" value="80" min="10" max="120">
+            </div>
+
+            <div class="mode-row" aria-label="Selector de modo visual">
+                <span class="mode-label">Modo Visual</span>
+                <div class="mode-picker" role="group" aria-label="Seleccionar modo visual">
+                    <button type="button" class="mode-btn" data-mode="street">Street</button>
+                    <button type="button" class="mode-btn active" data-mode="sport">Sport</button>
+                    <button type="button" class="mode-btn" data-mode="track">Track</button>
+                </div>
             </div>
 
             <button class="btn-start" id="btn-action">INICIAR</button>
