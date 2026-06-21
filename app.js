@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const limitInput = document.getElementById("limit-input");
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
+    const reloadBtn = document.getElementById("reload-btn");
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
     const modeButtons = document.querySelectorAll(".mode-btn");
@@ -188,9 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
         speedText.textContent = currentSpeed;
-        if (gaugeProgress) {
-            gaugeProgress.style.strokeDashoffset = dashOffset.toFixed(2);
-        }
+        if (gaugeProgress) gaugeProgress.style.strokeDashoffset = dashOffset.toFixed(2);
 
         speedText.classList.remove("speed-up", "speed-down");
         appContainer.classList.remove("accelerating", "decelerating");
@@ -263,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isTracking = true;
         btnAction.textContent = "DETENER";
-        btnAction.style.backgroundColor = "#8e8e93"; // Cambia el botón a gris mientras corre
+        btnAction.classList.add("is-tracking");
     }
 
     // Detener la lectura del GPS para ahorrar batería
@@ -279,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setGpsState("off", "GPS: Detenido");
         updateInterface(0);
         btnAction.textContent = "INICIAR";
-        btnAction.style.backgroundColor = "var(--accent-red)";
+        btnAction.classList.remove("is-tracking");
     }
 
     // --- MANEJO DE ENTRADAS Y EVENTOS ---
@@ -312,6 +311,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    if (reloadBtn) {
+        reloadBtn.addEventListener("click", () => {
+            window.location.reload();
+        });
+    }
 
     // Reloj interno de la esquina superior derecha
     function updateClock() {
