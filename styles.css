@@ -343,34 +343,41 @@ body {
 .digital-display {
     position: absolute;
     top: 56%;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: clamp(8px, 2.2vw, 20px);
     width: 100%;
+    padding-inline: clamp(4px, 1.8vw, 14px);
 }
 
 .speed-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: clamp(6px, 4vw, 34px);
+    margin-left: clamp(0px, 3vw, 28px);
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .current-speed {
-    font-size: clamp(52px, 18vw, 108px);
+    font-size: clamp(44px, min(17vw, 20vh), 102px);
     font-weight: 700;
     font-family: "Orbitron", "Bahnschrift", sans-serif;
     font-variant-numeric: tabular-nums;
     line-height: 0.85;
     letter-spacing: -1.5px;
-    min-width: 2.3ch;
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
     text-align: center;
     transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .current-speed.triple-digits {
-    font-size: clamp(44px, 15vw, 92px);
+    font-size: clamp(36px, min(13.5vw, 16vh), 84px);
 }
 
 .app-container.app-booting .current-speed {
@@ -886,7 +893,11 @@ body {
     }
 
     .current-speed {
-        font-size: clamp(56px, 16vw, 78px);
+        font-size: clamp(46px, 14.5vw, 72px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(38px, 12.5vw, 62px);
     }
 
     .controls-panel {
@@ -1091,16 +1102,16 @@ body {
     }
 
     .speed-box {
-        margin-left: 8px;
+        margin-left: 2px;
     }
 
     .current-speed {
-        font-size: clamp(48px, 11vw, 64px);
+        font-size: clamp(42px, 9.5vw, 58px);
         letter-spacing: -1px;
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(42px, 9.5vw, 56px);
+        font-size: clamp(34px, 8.2vw, 48px);
     }
 
     .unit {
@@ -1213,6 +1224,25 @@ body {
     .app-container.force-landscape .orientation-btn {
         padding: 4px 5px;
         font-size: 9px;
+    }
+}
+
+@media (max-width: 420px) and (orientation: portrait) {
+    .digital-display {
+        top: 55.5%;
+        gap: 7px;
+    }
+
+    .speed-box {
+        margin-left: 0;
+    }
+
+    .current-speed {
+        font-size: clamp(42px, 16.5vw, 72px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(34px, 13.5vw, 58px);
     }
 }
 
