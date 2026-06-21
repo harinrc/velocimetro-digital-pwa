@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const limitInput = document.getElementById("limit-input");
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
+    const floatingBtn = document.getElementById("floating-btn");
     const reloadBtn = document.getElementById("reload-btn");
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
@@ -53,6 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let previousSpeed = 0;
     const arcLength = 335;
     let visualMode = "sport";
+    let pipWindow = null;
+    let pipSpeedText = null;
+    let pipLimitText = null;
+    let pipTitleText = null;
 
     // --- FUNCIÓN PARA DIBUJAR LOS NÚMEROS EN EL CÍRCULO ---
     function drawGaugeLabels() {
@@ -124,6 +129,131 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         localStorage.setItem("speedometer_visual_mode", mode);
+
+        if (pipWindow && !pipWindow.closed) {
+            pipWindow.document.body.className = `mode-${mode}`;
+        }
+    }
+
+    function updateFloatingHud(currentSpeed, isOverLimit) {
+        if (!pipWindow || pipWindow.closed || !pipSpeedText || !pipLimitText || !pipTitleText) return;
+
+        pipSpeedText.textContent = String(currentSpeed);
+        pipLimitText.textContent = `Límite ${speedLimit} km/h`;
+        pipTitleText.textContent = isOverLimit ? "ALERTA" : "Velocidad";
+        pipWindow.document.body.classList.toggle("warning", isOverLimit);
+    }
+
+    async function toggleFloatingWindow() {
+        if (!floatingBtn) return;
+
+        if (!("documentPictureInPicture" in window)) {
+            alert("Tu navegador o teléfono no soporta ventana flotante PWA real. En muchos móviles este permiso no existe todavía.");
+            return;
+        }
+
+        try {
+            if (pipWindow && !pipWindow.closed) {
+                pipWindow.close();
+                return;
+            }
+
+            pipWindow = await window.documentPictureInPicture.requestWindow({
+                width: 250,
+                height: 170
+            });
+
+            pipWindow.document.body.innerHTML = "";
+            pipWindow.document.body.className = `mode-${visualMode}`;
+
+            const style = pipWindow.document.createElement("style");
+            style.textContent = `
+                body {
+                    margin: 0;
+                    height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: Bahnschrift, Segoe UI, sans-serif;
+                    background: #050608;
+                    color: #f8f9ff;
+                }
+                .hud {
+                    width: calc(100% - 14px);
+                    border-radius: 16px;
+                    border: 1px solid #2a2f3a;
+                    background: linear-gradient(165deg, #11131a, #0a0b10);
+                    padding: 10px 12px;
+                    text-align: center;
+                }
+                .title {
+                    font-size: 12px;
+                    font-weight: 800;
+                    color: #aeb5c3;
+                    letter-spacing: 0.4px;
+                    margin-bottom: 2px;
+                }
+                .speed {
+                    font-family: Orbitron, Bahnschrift, sans-serif;
+                    font-size: 52px;
+                    font-weight: 700;
+                    line-height: 0.95;
+                    letter-spacing: -1px;
+                }
+                .unit {
+                    font-size: 12px;
+                    color: #c4cada;
+                    letter-spacing: 1px;
+                    margin-top: 1px;
+                }
+                .limit {
+                    font-size: 12px;
+                    margin-top: 5px;
+                    color: #aeb5c3;
+                }
+                body.warning .speed,
+                body.warning .title {
+                    color: #ff3b30;
+                    text-shadow: 0 0 14px rgba(255, 59, 48, 0.55);
+                }
+                body.mode-track .speed {
+                    transform: scale(1.03);
+                }
+                body.mode-street .speed {
+                    transform: scale(0.97);
+                }
+            `;
+
+            const hud = pipWindow.document.createElement("div");
+            hud.className = "hud";
+            hud.innerHTML = `
+                <div class="title" id="pip-title">Velocidad</div>
+                <div class="speed" id="pip-speed">${speedText.textContent || "0"}</div>
+                <div class="unit">km/h</div>
+                <div class="limit" id="pip-limit">Límite ${speedLimit} km/h</div>
+            `;
+
+            pipWindow.document.head.appendChild(style);
+            pipWindow.document.body.appendChild(hud);
+
+            pipSpeedText = pipWindow.document.getElementById("pip-speed");
+            pipLimitText = pipWindow.document.getElementById("pip-limit");
+            pipTitleText = pipWindow.document.getElementById("pip-title");
+
+            updateFloatingHud(parseInt(speedText.textContent, 10) || 0, (parseInt(speedText.textContent, 10) || 0) > speedLimit);
+            floatingBtn.classList.add("active");
+
+            pipWindow.addEventListener("pagehide", () => {
+                pipWindow = null;
+                pipSpeedText = null;
+                pipLimitText = null;
+                pipTitleText = null;
+                floatingBtn.classList.remove("active");
+            });
+        } catch (error) {
+            console.warn("No se pudo abrir ventana flotante", error);
+            alert("No fue posible abrir la ventana flotante en este dispositivo.");
+        }
     }
 
     function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
@@ -211,6 +341,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             appContainer.classList.remove("speed-warning");
         }
+
+        updateFloatingHud(currentSpeed, currentSpeed > speedLimit);
 
         // Registrar estadísticas sólo si el viaje está iniciado y vas avanzando
         if (isTracking && currentSpeed > 0) {
@@ -316,6 +448,10 @@ document.addEventListener("DOMContentLoaded", () => {
         reloadBtn.addEventListener("click", () => {
             window.location.reload();
         });
+    }
+
+    if (floatingBtn) {
+        floatingBtn.addEventListener("click", toggleFloatingWindow);
     }
 
     // Reloj interno de la esquina superior derecha
