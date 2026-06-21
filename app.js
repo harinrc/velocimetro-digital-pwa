@@ -340,6 +340,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (navMeta) {
             navMeta.setAttribute("content", color);
         }
+        document.documentElement.style.backgroundColor = color;
+        document.body.style.backgroundColor = color;
     }
 
     function clearGpsTimers() {

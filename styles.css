@@ -48,6 +48,10 @@ body {
     overscroll-behavior: none;
 }
 
+html {
+    background-color: #050608;
+}
+
 /* ==========================================================================
    CONTENEDOR DE LA PWA (Pantalla Completa)
    ========================================================================== */
@@ -132,6 +136,20 @@ body {
     font-weight: 600;
     color: var(--text-muted);
     letter-spacing: 0.3px;
+    position: relative;
+    z-index: 3;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+}
+
+.status-bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
 }
 
 .status-right {
