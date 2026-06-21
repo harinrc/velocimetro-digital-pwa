@@ -65,6 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let pipTitleText = null;
     let simulatedLandscape = false;
     let gaugeStep = 15;
+    let lastPositionAt = 0;
+    let gpsHealthTimer = null;
+    let gpsRetryTimer = null;
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
@@ -257,6 +260,76 @@ document.addEventListener("DOMContentLoaded", () => {
         pipLimitText.textContent = `Límite ${speedLimit} km/h`;
         pipTitleText.textContent = isOverLimit ? "ALERTA" : "Velocidad";
         pipWindow.document.body.classList.toggle("warning", isOverLimit);
+    }
+
+    function clearGpsTimers() {
+        if (gpsHealthTimer) {
+            clearInterval(gpsHealthTimer);
+            gpsHealthTimer = null;
+        }
+        if (gpsRetryTimer) {
+            clearTimeout(gpsRetryTimer);
+            gpsRetryTimer = null;
+        }
+    }
+
+    function attachGeolocationWatch() {
+        if (!isTracking) return;
+
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+
+        const geoOptions = {
+            enableHighAccuracy: true,
+            maximumAge: 300,
+            timeout: 9000
+        };
+
+        setGpsState("searching", "GPS: Buscando");
+
+        watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                lastPositionAt = Date.now();
+                setGpsState("ready", "GPS: Activo");
+                const speedKmh = computeSpeedKmh(position);
+                updateInterface(speedKmh);
+            },
+            (error) => {
+                console.warn("Señal GPS baja o buscando satélites...", error.message);
+                if (error.code === error.PERMISSION_DENIED) {
+                    setGpsState("off", "GPS: Sin permiso");
+                    stopTracking();
+                    return;
+                }
+
+                setGpsState("searching", "GPS: Reintentando");
+                if (!gpsRetryTimer && isTracking) {
+                    gpsRetryTimer = setTimeout(() => {
+                        gpsRetryTimer = null;
+                        attachGeolocationWatch();
+                    }, 2500);
+                }
+            },
+            geoOptions
+        );
+    }
+
+    function startGpsHealthMonitor() {
+        clearGpsTimers();
+        gpsHealthTimer = setInterval(() => {
+            if (!isTracking) return;
+
+            const elapsed = Date.now() - lastPositionAt;
+            if (lastPositionAt > 0 && elapsed > 12000) {
+                setGpsState("searching", "GPS: Señal baja");
+            }
+
+            if (lastPositionAt > 0 && elapsed > 22000) {
+                attachGeolocationWatch();
+            }
+        }, 4000);
     }
 
     async function toggleFloatingWindow() {
@@ -482,33 +555,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const geoOptions = {
-            enableHighAccuracy: true, // Fuerza al celular a encender el GPS de alta precisión
-            maximumAge: 500,          // Permite actualizaciones recientes para respuesta fluida
-            timeout: 10000            // Tiempo de espera máximo de respuesta del satélite
-        };
-
-        setGpsState("searching", "GPS: Buscando");
-
-        // Escucha activa de movimiento en tiempo real
-        watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                setGpsState("ready", "GPS: Activo");
-                const speedKmh = computeSpeedKmh(position);
-                updateInterface(speedKmh);
-            },
-            (error) => {
-                console.warn("Señal GPS baja o buscando satélites...", error.message);
-                if (error.code === error.PERMISSION_DENIED) {
-                    setGpsState("off", "GPS: Sin permiso");
-                } else {
-                    setGpsState("searching", "GPS: Señal baja");
-                }
-            },
-            geoOptions
-        );
-
         isTracking = true;
+        lastPositionAt = 0;
+        attachGeolocationWatch();
+        startGpsHealthMonitor();
         btnAction.textContent = "DETENER";
         btnAction.classList.add("is-tracking");
     }
@@ -519,7 +569,9 @@ document.addEventListener("DOMContentLoaded", () => {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
         }
+        clearGpsTimers();
         isTracking = false;
+        lastPositionAt = 0;
         smoothedSpeed = 0;
         lastCoords = null;
         previousSpeed = 0;
@@ -581,6 +633,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (orientationBtn) {
         orientationBtn.addEventListener("click", toggleOrientationMode);
     }
+
+    document.addEventListener("visibilitychange", () => {
+        if (!isTracking) return;
+        if (document.visibilityState === "visible" && watchId === null) {
+            attachGeolocationWatch();
+        }
+    });
 
     // Reloj interno de la esquina superior derecha
     function updateClock() {

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'velocimetro-v2';
+const APP_CACHE = 'velocimetro-app-v3';
+const RUNTIME_CACHE = 'velocimetro-runtime-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -8,10 +9,18 @@ const ASSETS = [
   './icon.svg'
 ];
 
+function isSameOrigin(requestUrl) {
+  return requestUrl.origin === self.location.origin;
+}
+
+function isStaticAsset(pathname) {
+  return /\.(?:css|js|json|svg|png|jpg|jpeg|webp|ico|html)$/.test(pathname);
+}
+
 // 1. Instalar el Service Worker y almacenar archivos en caché
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    caches.open(APP_CACHE).then((cache) => {
       console.log('Cacheando archivos de la interfaz...');
       return cache.addAll(ASSETS);
     }).then(() => self.skipWaiting())
@@ -24,13 +33,18 @@ self.addEventListener('activate', (e) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key !== APP_CACHE && key !== RUNTIME_CACHE) {
             console.log('Eliminando caché antigua:', key);
             return caches.delete(key);
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(async () => {
+      if ('navigationPreload' in self.registration) {
+        await self.registration.navigationPreload.enable();
+      }
+      return self.clients.claim();
+    })
   );
 });
 
@@ -38,24 +52,61 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
 
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+  const requestUrl = new URL(e.request.url);
+  const sameOrigin = isSameOrigin(requestUrl);
 
-      return fetch(e.request)
-        .then((networkResponse) => {
-          if (e.request.url.startsWith(self.location.origin)) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      (async () => {
+        try {
+          const preloadResponse = await e.preloadResponse;
+          if (preloadResponse) {
+            return preloadResponse;
           }
+
+          const networkResponse = await fetch(e.request);
+          const cache = await caches.open(APP_CACHE);
+          cache.put('./index.html', networkResponse.clone());
           return networkResponse;
-        })
-        .catch(() => {
-          if (e.request.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
-          return caches.match('./');
-        });
-    })
+        } catch {
+          const cachedPage = await caches.match('./index.html');
+          return cachedPage || Response.error();
+        }
+      })()
+    );
+    return;
+  }
+
+  if (sameOrigin && isStaticAsset(requestUrl.pathname)) {
+    e.respondWith(
+      (async () => {
+        const cachedResponse = await caches.match(e.request);
+        const networkPromise = fetch(e.request)
+          .then(async (networkResponse) => {
+            const cache = await caches.open(APP_CACHE);
+            cache.put(e.request, networkResponse.clone());
+            return networkResponse;
+          })
+          .catch(() => null);
+
+        return cachedResponse || networkPromise || Response.error();
+      })()
+    );
+    return;
+  }
+
+  e.respondWith(
+    fetch(e.request)
+      .then(async (networkResponse) => {
+        if (sameOrigin) {
+          const cache = await caches.open(RUNTIME_CACHE);
+          cache.put(e.request, networkResponse.clone());
+        }
+        return networkResponse;
+      })
+      .catch(async () => {
+        const cachedResponse = await caches.match(e.request);
+        return cachedResponse || Response.error();
+      })
   );
 });
