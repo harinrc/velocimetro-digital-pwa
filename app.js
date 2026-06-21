@@ -78,7 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let mapAccuracyCircle = null;
     let latestLatLng = null;
     let followMap = true;
-    let panelCollapsed = localStorage.getItem("speedometer_panel_collapsed") === "1";
+    let panelCollapsed = window.matchMedia("(max-width: 379px)").matches
+        ? true
+        : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
     const isCompactPanelMode = window.matchMedia("(max-width: 379px)").matches;
