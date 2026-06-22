@@ -496,6 +496,12 @@ html {
     animation: shake 0.24s ease-in-out infinite alternate;
 }
 
+.speed-warning .weather-info {
+    animation: shake 0.24s ease-in-out infinite alternate;
+    border-color: rgba(255, 42, 42, 0.66);
+    box-shadow: 0 0 12px rgba(255, 42, 42, 0.25);
+}
+
 @keyframes shake {
     0% { transform: translateY(0); }
     100% { transform: translateY(-2px); }
