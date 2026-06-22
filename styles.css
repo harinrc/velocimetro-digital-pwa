@@ -506,13 +506,14 @@ html {
 .panel-handle {
     border: 0;
     background: transparent;
-    padding: 2px 0 8px;
+    padding: 10px 0 14px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: grab;
     touch-action: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .panel-handle,
@@ -525,11 +526,11 @@ html {
 }
 
 .panel-handle-bar {
-    width: 54px;
-    height: 5px;
+    width: 88px;
+    height: 6px;
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.24), rgba(255, 42, 42, 0.72), rgba(255, 255, 255, 0.24));
-    box-shadow: 0 0 10px rgba(255, 42, 42, 0.2);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 42, 42, 0.85), rgba(255, 255, 255, 0.18));
+    box-shadow: 0 0 12px rgba(255, 42, 42, 0.35);
 }
 
 .app-container.panel-collapsed .controls-panel {
@@ -566,7 +567,7 @@ html {
 }
 
 .app-container.panel-collapsed .digital-display {
-    top: 55%;
+    top: 46%;
     flex-direction: column;
     gap: 10px;
 }
@@ -1048,7 +1049,7 @@ html {
     }
 
     .panel-handle-bar {
-        width: 46px;
+        width: 78px;
     }
 }
 
