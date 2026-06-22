@@ -83,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
         : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
-    let panelHandlePointerHandled = false;
     const isCompactPanelMode = window.matchMedia("(max-width: 379px)").matches;
     const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
     const normalSystemColor = "#050608";
@@ -817,40 +816,53 @@ document.addEventListener("DOMContentLoaded", () => {
             panelHandle.style.display = "none";
         }
 
-        panelHandle.addEventListener("pointerdown", (event) => {
-            panelHandlePointerHandled = false;
-            panelSwipeStartY = event.clientY;
-            panelSwipePointerId = event.pointerId;
-            panelHandle.setPointerCapture(event.pointerId);
-        });
+        // Seguimiento del gesto — funciona con Pointer Events y con Touch Events como fallback
+        function handleStart(y) {
+            panelSwipeStartY = y;
+        }
 
-        panelHandle.addEventListener("pointermove", (event) => {
-            if (panelSwipeStartY === null || panelSwipePointerId !== event.pointerId) return;
-            if (Math.abs(event.clientY - panelSwipeStartY) > 8) {
-                panelHandlePointerHandled = true;
-            }
-        });
-
-        panelHandle.addEventListener("pointerup", (event) => {
-            if (panelSwipePointerId !== event.pointerId || panelSwipeStartY === null) return;
-
-            const deltaY = event.clientY - panelSwipeStartY;
+        function handleEnd(y) {
+            if (panelSwipeStartY === null) return;
+            const deltaY = y - panelSwipeStartY;
             panelSwipeStartY = null;
             panelSwipePointerId = null;
-            panelHandlePointerHandled = true;
             setPanelFromSwipe(deltaY);
-        });
+        }
 
-        panelHandle.addEventListener("pointercancel", () => {
+        function handleCancel() {
             panelSwipeStartY = null;
             panelSwipePointerId = null;
-            panelHandlePointerHandled = false;
+        }
+
+        // Pointer Events (escritorio + móvil moderno)
+        panelHandle.addEventListener("pointerdown", (e) => {
+            panelSwipePointerId = e.pointerId;
+            try { panelHandle.setPointerCapture(e.pointerId); } catch (_) { /* no-op */ }
+            handleStart(e.clientY);
         });
 
-        panelHandle.addEventListener("click", () => {
-            if (panelHandlePointerHandled) return;
-            applyPanelState(!panelCollapsed, true);
+        panelHandle.addEventListener("pointerup", (e) => {
+            if (panelSwipePointerId !== e.pointerId) return;
+            handleEnd(e.clientY);
         });
+
+        panelHandle.addEventListener("pointercancel", handleCancel);
+
+        // Touch Events — fallback para WebView/browsers que no disparan pointerup bien
+        panelHandle.addEventListener("touchstart", (e) => {
+            if (panelSwipeStartY !== null) return; // ya manejado por pointer events
+            handleStart(e.touches[0].clientY);
+        }, { passive: true });
+
+        panelHandle.addEventListener("touchend", (e) => {
+            if (panelSwipePointerId !== null) return; // ya manejado por pointer events
+            handleEnd(e.changedTouches[0].clientY);
+        }, { passive: true });
+
+        panelHandle.addEventListener("touchcancel", () => {
+            if (panelSwipePointerId !== null) return;
+            handleCancel();
+        }, { passive: true });
     }
 
     window.addEventListener("resize", syncPanelMode);
