@@ -766,6 +766,10 @@ html {
     overflow: hidden;
     flex: 1;
     min-width: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #232837;
+    border-radius: 10px;
+    padding: 4px 8px;
 }
 
 .location-pin {
@@ -879,6 +883,27 @@ html {
     border-color: rgba(255, 42, 42, 0.72);
     box-shadow: 0 0 18px rgba(255, 42, 42, 0.24);
     animation: map-alert 0.55s ease-in-out infinite alternate;
+}
+
+.speed-warning .weather-location-strip {
+    border-color: rgba(255, 42, 42, 0.62);
+    box-shadow: 0 0 14px rgba(255, 42, 42, 0.18);
+}
+
+.speed-warning .location-info {
+    animation: shake 0.24s ease-in-out infinite alternate;
+    border-color: rgba(255, 42, 42, 0.66);
+    box-shadow: 0 0 10px rgba(255, 42, 42, 0.2);
+}
+
+.speed-warning .map-location-tag {
+    color: #ffd4d4;
+    text-shadow: 0 0 8px rgba(255, 42, 42, 0.4);
+}
+
+.speed-warning .mini-map {
+    border-color: rgba(255, 42, 42, 0.72);
+    box-shadow: inset 0 0 0 1px rgba(255, 42, 42, 0.2), 0 0 12px rgba(255, 42, 42, 0.18);
 }
 
 .speed-warning .map-center-btn {
