@@ -1,5 +1,5 @@
-const APP_CACHE = 'velocimetro-app-v3';
-const RUNTIME_CACHE = 'velocimetro-runtime-v3';
+const APP_CACHE = 'velocimetro-app-v4';
+const RUNTIME_CACHE = 'velocimetro-runtime-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -15,6 +15,14 @@ function isSameOrigin(requestUrl) {
 
 function isStaticAsset(pathname) {
   return /\.(?:css|js|json|svg|png|jpg|jpeg|webp|ico|html)$/.test(pathname);
+}
+
+function isThirdPartyAsset(url) {
+  return (
+    url.hostname.includes('unpkg.com') ||
+    url.hostname.includes('cartocdn.com') ||
+    url.hostname.includes('openstreetmap.org')
+  );
 }
 
 // 1. Instalar el Service Worker y almacenar archivos en caché
@@ -90,6 +98,27 @@ self.addEventListener('fetch', (e) => {
           .catch(() => null);
 
         return cachedResponse || networkPromise || Response.error();
+      })()
+    );
+    return;
+  }
+
+  if (isThirdPartyAsset(requestUrl)) {
+    e.respondWith(
+      (async () => {
+        const cache = await caches.open(RUNTIME_CACHE);
+        const cached = await cache.match(e.request);
+
+        try {
+          const networkResponse = await fetch(e.request);
+          // Aceptar respuestas opaque para recursos CORS de CDNs.
+          if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
+            cache.put(e.request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch {
+          return cached || Response.error();
+        }
       })()
     );
     return;

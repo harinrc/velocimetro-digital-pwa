@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const floatingBtn = document.getElementById("floating-btn");
     const orientationBtn = document.getElementById("orientation-btn");
     const reloadBtn = document.getElementById("reload-btn");
+    const installBtn = document.getElementById("install-btn");
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
     const modeButtons = document.querySelectorAll(".mode-btn");
@@ -68,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let pipSpeedText = null;
     let pipLimitText = null;
     let pipTitleText = null;
+    let deferredInstallPrompt = null;
     let simulatedLandscape = false;
     let gaugeStep = 15;
     let lastPositionAt = 0;
@@ -239,6 +241,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function isStandaloneMode() {
+        return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }
+
+    function setInstallButtonVisibility(visible) {
+        if (!installBtn) return;
+        installBtn.hidden = !visible;
+    }
+
     function applyPanelState(collapsed, persist = true) {
         if (!isCompactPanelMode) {
             panelCollapsed = false;
@@ -352,7 +363,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function ensureMap() {
-        if (mapInstance || !miniMapContainer || typeof L === "undefined") return;
+        if (mapInstance || !miniMapContainer) return;
+
+        if (typeof L === "undefined") {
+            miniMapContainer.innerHTML = '<div class="mini-map-fallback">Mapa no disponible sin internet.</div>';
+            const controlsPanel = document.querySelector(".controls-panel");
+            if (controlsPanel) {
+                controlsPanel.classList.add("map-offline");
+            }
+            return;
+        }
 
         mapInstance = L.map(miniMapContainer, {
             zoomControl: false,
@@ -784,6 +804,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    if (installBtn) {
+        installBtn.addEventListener("click", async () => {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const result = await deferredInstallPrompt.userChoice;
+                if (result && result.outcome === "accepted") {
+                    setInstallButtonVisibility(false);
+                }
+                deferredInstallPrompt = null;
+                return;
+            }
+
+            // Fallback útil cuando no existe beforeinstallprompt (ej. iOS)
+            alert("Para instalar, abre el menú del navegador y elige 'Agregar a pantalla de inicio'.");
+        });
+    }
+
     if (floatingBtn) {
         floatingBtn.addEventListener("click", toggleFloatingWindow);
     }
@@ -867,6 +904,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", syncPanelMode);
 
+    window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        if (!isStandaloneMode()) {
+            setInstallButtonVisibility(true);
+        }
+    });
+
+    window.addEventListener("appinstalled", () => {
+        deferredInstallPrompt = null;
+        setInstallButtonVisibility(false);
+    });
+
     document.addEventListener("visibilitychange", () => {
         if (!isTracking) return;
         if (document.visibilityState === "visible" && watchId === null) {
@@ -902,6 +952,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setGpsState("ready", "GPS: Listo");
     updateSystemBarColors(false);
     updateConnectivityState();
+    setInstallButtonVisibility(false);
+    if (!isStandaloneMode()) {
+        // Si el navegador no emite beforeinstallprompt, dejamos el botón visible como ayuda.
+        setInstallButtonVisibility(true);
+    }
     window.addEventListener("online", updateConnectivityState);
     window.addEventListener("offline", updateConnectivityState);
     setInterval(updateClock, 1000);
