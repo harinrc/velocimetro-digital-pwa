@@ -70,6 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let pipLimitText = null;
     let pipTitleText = null;
     let deferredInstallPrompt = null;
+    let wakeLock = null;
+    let lastGeocodedLatLng = null;
+    let lastWeatherLatLng = null;
+    let lastWeatherTime = 0;
+    let lastGeocodeTime = 0;
     let simulatedLandscape = false;
     let gaugeStep = 15;
     let lastPositionAt = 0;
@@ -248,6 +253,94 @@ document.addEventListener("DOMContentLoaded", () => {
     function setInstallButtonVisibility(visible) {
         if (!installBtn) return;
         installBtn.hidden = !visible;
+    }
+
+    // ---- WAKE LOCK: mantener pantalla encendida mientras se rastrea ----
+    async function requestWakeLock() {
+        if (!('wakeLock' in navigator)) return;
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => { wakeLock = null; });
+        } catch (_) { /* Ignorar si el navegador lo rechaza */ }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLock) {
+            wakeLock.release();
+            wakeLock = null;
+        }
+    }
+
+    // ---- ICONOS WMO (Open-Meteo) ----
+    const WMO_ICONS = {
+        0: '\u2600\ufe0f',
+        1: '\uD83C\uDF24\uFE0F',
+        2: '\u26C5',
+        3: '\u2601\ufe0f',
+        45: '\uD83C\uDF2B\uFE0F', 48: '\uD83C\uDF2B\uFE0F',
+        51: '\uD83C\uDF26\uFE0F', 53: '\uD83C\uDF26\uFE0F', 55: '\uD83C\uDF26\uFE0F',
+        56: '\uD83C\uDF27\uFE0F', 57: '\uD83C\uDF27\uFE0F',
+        61: '\uD83C\uDF27\uFE0F', 63: '\uD83C\uDF27\uFE0F', 65: '\uD83C\uDF27\uFE0F',
+        66: '\uD83C\uDF27\uFE0F', 67: '\uD83C\uDF27\uFE0F',
+        71: '\u2744\ufe0f', 73: '\u2744\ufe0f', 75: '\u2744\ufe0f', 77: '\uD83C\uDF28\uFE0F',
+        80: '\uD83C\uDF26\uFE0F', 81: '\uD83C\uDF26\uFE0F', 82: '\u26C8\ufe0f',
+        85: '\uD83C\uDF28\uFE0F', 86: '\uD83C\uDF28\uFE0F',
+        95: '\u26C8\ufe0f', 96: '\u26C8\ufe0f', 99: '\u26C8\ufe0f'
+    };
+
+    function getWmoIcon(code) {
+        return WMO_ICONS[code] ?? '\uD83C\uDF21\uFE0F';
+    }
+
+    // ---- CLIMA: Open-Meteo (sin API key) ----
+    async function fetchWeather(lat, lon) {
+        if (!navigator.onLine) return;
+        const now = Date.now();
+        if (lastWeatherLatLng) {
+            const dist = calculateDistanceMeters(lastWeatherLatLng[0], lastWeatherLatLng[1], lat, lon);
+            if (dist < 2000 && (now - lastWeatherTime) < 10 * 60 * 1000) return;
+        }
+        try {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,weather_code&timezone=auto&forecast_days=1`;
+            const res = await fetch(url);
+            if (!res.ok) return;
+            const data = await res.json();
+            const temp = data.current?.temperature_2m;
+            const code = data.current?.weather_code;
+            if (temp !== undefined && code !== undefined) {
+                const iconEl = document.getElementById('weather-icon');
+                const tempEl = document.getElementById('weather-temp');
+                if (iconEl) iconEl.textContent = getWmoIcon(code);
+                if (tempEl) tempEl.textContent = `${Math.round(temp)}\u00b0C`;
+                lastWeatherLatLng = [lat, lon];
+                lastWeatherTime = now;
+            }
+        } catch (_) { /* sin conexi\u00f3n */ }
+    }
+
+    // ---- GEOCODING: Nominatim (OpenStreetMap, sin API key) ----
+    async function fetchLocationName(lat, lon) {
+        if (!navigator.onLine) return;
+        const now = Date.now();
+        if (lastGeocodedLatLng) {
+            const dist = calculateDistanceMeters(lastGeocodedLatLng[0], lastGeocodedLatLng[1], lat, lon);
+            if (dist < 300 && (now - lastGeocodeTime) < 30 * 1000) return;
+        }
+        try {
+            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=14&accept-language=es`;
+            const res = await fetch(url, { headers: { 'User-Agent': 'VelocimetroPWA/1.0' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            const a = data.address || {};
+            const name = a.suburb ?? a.neighbourhood ?? a.village ?? a.town ?? a.city ?? a.county ?? data.display_name?.split(',')[0] ?? '';
+            const trimmed = name.trim();
+            const locationTextEl = document.getElementById('location-text');
+            const mapLocationTag = document.getElementById('map-location-tag');
+            if (locationTextEl && trimmed) locationTextEl.textContent = trimmed;
+            if (mapLocationTag && trimmed) mapLocationTag.textContent = trimmed;
+            lastGeocodedLatLng = [lat, lon];
+            lastGeocodeTime = now;
+        } catch (_) { /* sin conexi\u00f3n */ }
     }
 
     function applyPanelState(collapsed, persist = true) {
@@ -470,7 +563,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 setGpsState("ready", "GPS: Activo");
                 const speedKmh = computeSpeedKmh(position);
                 updateInterface(speedKmh);
-                updateMapPosition(position.coords.latitude, position.coords.longitude, position.coords.accuracy);
+                const { latitude, longitude, accuracy } = position.coords;
+                updateMapPosition(latitude, longitude, accuracy);
+                fetchLocationName(latitude, longitude);
+                fetchWeather(latitude, longitude);
             },
             (error) => {
                 console.warn("Señal GPS baja o buscando satélites...", error.message);
@@ -737,6 +833,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lastPositionAt = 0;
         attachGeolocationWatch();
         startGpsHealthMonitor();
+        requestWakeLock();
         btnAction.textContent = "DETENER";
         btnAction.classList.add("is-tracking");
     }
@@ -754,6 +851,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lastCoords = null;
         previousSpeed = 0;
         setGpsState("off", "GPS: Detenido");
+        releaseWakeLock();
         updateInterface(0);
         btnAction.textContent = "INICIAR";
         btnAction.classList.remove("is-tracking");
@@ -919,8 +1017,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("visibilitychange", () => {
         if (!isTracking) return;
-        if (document.visibilityState === "visible" && watchId === null) {
-            attachGeolocationWatch();
+        if (document.visibilityState === "visible") {
+            if (watchId === null) attachGeolocationWatch();
+            requestWakeLock();
         }
     });
 
