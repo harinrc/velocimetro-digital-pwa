@@ -597,7 +597,7 @@ html {
     padding-bottom: 10px;
 }
 
-.app-container.app-booting .controls-panel {
+.app-container.app-booting:not(.panel-collapsed) .controls-panel {
     animation: ignition-panel var(--boot-duration) ease-out;
 }
 
@@ -616,7 +616,7 @@ html {
     }
 }
 
-.app-container.app-booting .controls-panel,
+.app-container.app-booting:not(.panel-collapsed) .controls-panel,
 .app-container.app-booting .limit-indicator {
     animation-name: ignition-panel, ignition-color;
     animation-duration: var(--boot-duration), var(--boot-duration);

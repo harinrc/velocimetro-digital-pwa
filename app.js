@@ -879,12 +879,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
     applyMaxSpeed(maxSpeed, false);
+    // Aplicar estado del panel ANTES de la animación para evitar salto visual al recargar
+    applyPanelState(isCompactPanelMode ? panelCollapsed : false, false);
+    syncPanelMode();
     runStartupAnimation();
     limitValue.textContent = speedLimit;
     updateInterface(0);
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
-    applyPanelState(isCompactPanelMode ? panelCollapsed : false, false);
-    syncPanelMode();
     markActiveLabel(0);
     setGpsState("ready", "GPS: Listo");
     updateSystemBarColors(false);
