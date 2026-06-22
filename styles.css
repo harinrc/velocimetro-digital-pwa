@@ -569,6 +569,8 @@ html {
 
 .app-container.panel-collapsed .digital-display {
     top: 55%;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .app-container.panel-collapsed .current-speed {
@@ -581,6 +583,14 @@ html {
 
 .app-container.panel-collapsed .mini-map {
     height: clamp(108px, 30vw, 150px);
+}
+
+.app-container.panel-collapsed .speed-box {
+    margin-left: 0;
+}
+
+.app-container.panel-collapsed .limit-indicator {
+    min-width: clamp(68px, 20vw, 78px);
 }
 
 .app-container.panel-collapsed .controls-panel {

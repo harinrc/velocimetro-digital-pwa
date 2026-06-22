@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
+    let panelHandlePointerHandled = false;
     const isCompactPanelMode = window.matchMedia("(max-width: 379px)").matches;
     const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
     const normalSystemColor = "#050608";
@@ -817,9 +818,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         panelHandle.addEventListener("pointerdown", (event) => {
+            panelHandlePointerHandled = false;
             panelSwipeStartY = event.clientY;
             panelSwipePointerId = event.pointerId;
             panelHandle.setPointerCapture(event.pointerId);
+        });
+
+        panelHandle.addEventListener("pointermove", (event) => {
+            if (panelSwipeStartY === null || panelSwipePointerId !== event.pointerId) return;
+            if (Math.abs(event.clientY - panelSwipeStartY) > 8) {
+                panelHandlePointerHandled = true;
+            }
         });
 
         panelHandle.addEventListener("pointerup", (event) => {
@@ -828,12 +837,19 @@ document.addEventListener("DOMContentLoaded", () => {
             const deltaY = event.clientY - panelSwipeStartY;
             panelSwipeStartY = null;
             panelSwipePointerId = null;
+            panelHandlePointerHandled = true;
             setPanelFromSwipe(deltaY);
         });
 
         panelHandle.addEventListener("pointercancel", () => {
             panelSwipeStartY = null;
             panelSwipePointerId = null;
+            panelHandlePointerHandled = false;
+        });
+
+        panelHandle.addEventListener("click", () => {
+            if (panelHandlePointerHandled) return;
+            applyPanelState(!panelCollapsed, true);
         });
     }
 
