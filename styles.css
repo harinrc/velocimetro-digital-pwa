@@ -22,7 +22,6 @@
     --motion-ease: cubic-bezier(0.14, 0.78, 0.12, 1);
     --boot-duration: 3s;
     --gauge-arc-length: 314.44;
-    --gauge-arc-rotation: -128deg;
     --gauge-start-angle: -128deg;
     --gauge-end-angle: 98deg;
 }
@@ -322,10 +321,8 @@ html {
     fill: none;
     stroke: var(--gauge-track);
     stroke-width: 4;
-    stroke-dasharray: var(--gauge-arc-length) 500; /* Corta la base inferior del círculo */
+    stroke-dasharray: var(--gauge-arc-length) 500;
     stroke-linecap: round;
-    transform: rotate(var(--gauge-arc-rotation));
-    transform-origin: 100px 100px;
 }
 
 .gauge-progress {
@@ -334,8 +331,6 @@ html {
     stroke-width: 5.2;
     stroke-dasharray: 0 500;
     stroke-linecap: round;
-    transform: rotate(var(--gauge-arc-rotation));
-    transform-origin: 100px 100px;
     transition: stroke-dasharray var(--gauge-motion-duration) var(--motion-ease), stroke 0.2s ease;
     filter: drop-shadow(0 0 5px rgba(255, 42, 42, 0.44));
     will-change: stroke-dasharray;

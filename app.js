@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // --- ELEMENTOS DEL DOM ---
     const labelsContainer = document.getElementById("gauge-labels");
+    const gaugeBg = document.getElementById("gauge-bg");
     const gaugeProgress = document.getElementById("gauge-progress");
     const needle = document.getElementById("needle");
     const speedText = document.getElementById("speed-text");
@@ -109,9 +110,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Mantener en sincronía CSS (arco/aguja/animaciones) y JS (cálculo de ángulos).
     appContainer.style.setProperty("--gauge-arc-length", String(arcLength));
-    appContainer.style.setProperty("--gauge-arc-rotation", `${startAngle}deg`);
     appContainer.style.setProperty("--gauge-start-angle", `${startAngle}deg`);
     appContainer.style.setProperty("--gauge-end-angle", `${endAngle}deg`);
+
+    function toGaugePoint(angleDegrees, radius = 80, cx = 100, cy = 100) {
+        const angleRadians = (angleDegrees - 90) * (Math.PI / 180);
+        return {
+            x: cx + radius * Math.cos(angleRadians),
+            y: cy + radius * Math.sin(angleRadians),
+        };
+    }
+
+    function drawGaugeArcPath() {
+        if (!gaugeBg || !gaugeProgress) return;
+
+        const start = toGaugePoint(startAngle);
+        const end = toGaugePoint(endAngle);
+        const largeArc = totalAngle > 180 ? 1 : 0;
+        const sweep = 1;
+        const arcPath = `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A 80 80 0 ${largeArc} ${sweep} ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
+
+        gaugeBg.setAttribute("d", arcPath);
+        gaugeProgress.setAttribute("d", arcPath);
+    }
 
     function getGaugeStep(scaleMax) {
         const candidates = [5, 10, 15, 20, 25, 30, 40, 50];
@@ -142,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             maxSpeedScale.textContent = `${maxSpeed} km/h`;
         }
 
+        drawGaugeArcPath();
         drawGaugeLabels();
         updateInterface(Number.parseInt(speedText.textContent, 10) || 0);
 
