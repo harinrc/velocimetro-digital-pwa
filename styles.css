@@ -22,7 +22,7 @@
     --motion-ease: cubic-bezier(0.14, 0.78, 0.12, 1);
     --boot-duration: 3s;
     --gauge-arc-length: 314.44;
-    --gauge-arc-rotation: 128deg;
+    --gauge-arc-rotation: -128deg;
     --gauge-start-angle: -128deg;
     --gauge-end-angle: 98deg;
 }
@@ -342,12 +342,12 @@ html {
 }
 
 .app-container.app-booting:not(.sequence-synced) .gauge-progress {
-    animation: ignition-arc calc(var(--boot-duration) * 0.95) cubic-bezier(0.25, 0.85, 0.15, 1);
+    animation: ignition-arc var(--boot-duration) cubic-bezier(0.22, 0.9, 0.18, 1);
 }
 
 @keyframes ignition-arc {
     0% { stroke-dasharray: 0 500; }
-    50% { stroke-dasharray: var(--gauge-arc-length) 500; }
+    60% { stroke-dasharray: var(--gauge-arc-length) 500; }
     100% { stroke-dasharray: 0 500; }
 }
 
