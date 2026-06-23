@@ -214,6 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function formatSpeedDisplay(speed) {
+        return String(Math.max(0, Math.round(Number(speed) || 0))).padStart(3, "0");
+    }
+
     function setGpsState(mode, text) {
         if (!gpsStatus) return;
 
@@ -295,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateInterface(rounded);
 
             if (speedText) {
-                const padded = String(rounded).padStart(3, "0");
+                const padded = formatSpeedDisplay(rounded);
                 if (padded !== lastBootDisplayed) {
                     speedText.classList.remove("boot-count-tick");
                     void speedText.offsetWidth;
@@ -967,11 +971,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const percentage = (boundedSpeed - minSpeed) / (maxSpeed - minSpeed);
         const targetAngle = startAngle + (percentage * totalAngle);
         const visibleArc = percentage * arcLength;
+        const formattedSpeed = formatSpeedDisplay(displaySpeed);
         
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
-        speedText.textContent = displaySpeed;
-        speedText.classList.toggle("triple-digits", displaySpeed >= 100);
+        speedText.textContent = formattedSpeed;
+        speedText.classList.add("triple-digits");
         if (gaugeProgress) gaugeProgress.style.strokeDasharray = `${visibleArc.toFixed(2)} 500`;
 
         speedText.classList.remove("speed-up", "speed-down");
