@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let simulatedLandscape = false;
     let gaugeStep = 15;
     let lastPositionAt = 0;
+    let startupTimer = null;
     let gpsHealthTimer = null;
     let gpsRetryTimer = null;
     let mapInstance = null;
@@ -233,10 +234,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function runStartupAnimation() {
+        if (startupTimer) {
+            clearInterval(startupTimer);
+            startupTimer = null;
+        }
+
         appContainer.classList.add("app-booting");
-        setTimeout(() => {
-            appContainer.classList.remove("app-booting");
-        }, 3000);
+
+        const duration = 3000;
+        const tickMs = 50;
+        const startedAt = performance.now();
+        let lastBootDisplayed = "";
+        const peakSpeed = speedLimit >= 75
+            ? Math.min(maxSpeed, Math.max(speedLimit + 18, 112))
+            : Math.min(maxSpeed, Math.max(speedLimit + 14, 92));
+
+        startupTimer = setInterval(() => {
+            const elapsed = performance.now() - startedAt;
+            const progress = Math.min(1, elapsed / duration);
+            let speed;
+
+            // Secuencia: subir (aguja cruza el límite), sostener, y volver suave a cero.
+            if (progress < 0.48) {
+                speed = peakSpeed * (progress / 0.48);
+            } else if (progress < 0.68) {
+                speed = peakSpeed;
+            } else {
+                speed = peakSpeed * (1 - ((progress - 0.68) / 0.32));
+            }
+
+            const rounded = Math.max(0, Math.round(speed));
+            updateInterface(rounded);
+
+            if (speedText) {
+                const padded = String(rounded).padStart(3, "0");
+                if (padded !== lastBootDisplayed) {
+                    speedText.classList.remove("boot-count-tick");
+                    void speedText.offsetWidth;
+                    speedText.classList.add("boot-count-tick");
+                    lastBootDisplayed = padded;
+                }
+
+                speedText.textContent = padded;
+                speedText.classList.add("triple-digits", "boot-digital");
+            }
+
+            if (progress >= 1) {
+                clearInterval(startupTimer);
+                startupTimer = null;
+                appContainer.classList.remove("app-booting");
+                updateInterface(0);
+                if (speedText) {
+                    speedText.classList.remove("boot-digital", "boot-count-tick");
+                }
+            }
+        }, tickMs);
     }
 
     function applySimulatedLandscape(enabled) {
@@ -818,16 +870,21 @@ document.addEventListener("DOMContentLoaded", () => {
         previousSpeed = displaySpeed;
         markActiveLabel(displaySpeed);
 
-        // COMPROBACIÓN DEL LÍMITE: Si te pasas, se activa la alerta roja
-        if (displaySpeed > speedLimit) {
+        // COMPROBACIÓN DEL LÍMITE: alerta normal y alerta agresiva deportiva
+        const isOverLimit = displaySpeed > speedLimit;
+        const isAggressiveWarning = isOverLimit && (speedLimit >= 75 || displaySpeed >= 75);
+
+        if (isOverLimit) {
             appContainer.classList.add("speed-warning");
         } else {
             appContainer.classList.remove("speed-warning");
         }
 
-        updateSystemBarColors(displaySpeed > speedLimit);
+        appContainer.classList.toggle("speed-warning-aggressive", isAggressiveWarning);
 
-        updateFloatingHud(displaySpeed, displaySpeed > speedLimit);
+        updateSystemBarColors(isOverLimit);
+
+        updateFloatingHud(displaySpeed, isOverLimit);
 
         // Registrar estadísticas sólo si el viaje está iniciado y vas avanzando
         if (isTracking && displaySpeed > 0) {
