@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Mantener en sincronía CSS (arco/aguja/animaciones) y JS (cálculo de ángulos).
     appContainer.style.setProperty("--gauge-arc-length", String(arcLength));
-    appContainer.style.setProperty("--gauge-arc-rotation", `${startAngle}deg`);
+    appContainer.style.setProperty("--gauge-arc-rotation", `${Math.abs(startAngle)}deg`);
     appContainer.style.setProperty("--gauge-start-angle", `${startAngle}deg`);
     appContainer.style.setProperty("--gauge-end-angle", `${endAngle}deg`);
 
