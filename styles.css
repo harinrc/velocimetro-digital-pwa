@@ -722,9 +722,10 @@ html {
 }
 
 .app-container.panel-collapsed .digital-display {
-    top: 46%;
-    flex-direction: column;
-    gap: 10px;
+    top: 53.4%;
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(7px, 2vw, 12px);
 }
 
 .app-container.panel-collapsed .current-speed {
@@ -745,7 +746,13 @@ html {
 }
 
 .app-container.panel-collapsed .limit-indicator {
-    min-width: clamp(68px, 20vw, 78px);
+    min-width: clamp(56px, 16vw, 68px);
+}
+
+@media (max-width: 420px) {
+    .panel-handle {
+        display: flex;
+    }
 }
 
 .app-container.panel-collapsed .controls-panel {

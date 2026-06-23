@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let smoothedMapPoint = null;
     let lastMapCenterAt = 0;
     let followMap = true;
-    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 379px)").matches;
+    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 420px)").matches;
 
     let panelCollapsed = isCompactPanelModeNow()
         ? true
