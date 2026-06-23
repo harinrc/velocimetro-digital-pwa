@@ -337,7 +337,7 @@ html {
     will-change: stroke-dasharray;
 }
 
-.app-container.app-booting .gauge-progress {
+.app-container.app-booting:not(.sequence-synced) .gauge-progress {
     animation: ignition-arc var(--boot-duration) cubic-bezier(0.22, 0.9, 0.18, 1);
 }
 
@@ -388,7 +388,7 @@ html {
     will-change: transform;
 }
 
-.app-container.app-booting .needle {
+.app-container.app-booting:not(.sequence-synced) .needle {
     animation: ignition-needle var(--boot-duration) cubic-bezier(0.22, 0.9, 0.18, 1);
 }
 
@@ -447,7 +447,7 @@ html {
     letter-spacing: -1.1px;
 }
 
-.app-container.app-booting .current-speed {
+.app-container.app-booting:not(.sequence-synced) .current-speed {
     animation: ignition-numbers var(--boot-duration) ease-out;
 }
 

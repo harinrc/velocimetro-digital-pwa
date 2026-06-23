@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastPositionAt = 0;
     let startupTimer = null;
     let demoTimer = null;
+    let sequenceMode = "none";
     let reloadPressTimer = null;
     let reloadLongPressTriggered = false;
     let gpsHealthTimer = null;
@@ -243,15 +244,27 @@ document.addEventListener("DOMContentLoaded", () => {
             startupTimer = null;
         }
 
+        if (demoTimer) {
+            clearInterval(demoTimer);
+            demoTimer = null;
+        }
+
+        sequenceMode = "startup";
+        appContainer.classList.add("sequence-synced");
         appContainer.classList.add("app-booting");
 
         const duration = 3000;
         const tickMs = 50;
         const startedAt = performance.now();
         let lastBootDisplayed = "";
-        const peakSpeed = speedLimit >= 75
-            ? Math.min(maxSpeed, Math.max(speedLimit + 18, 112))
-            : Math.min(maxSpeed, Math.max(speedLimit + 14, 92));
+        const peakSpeed = Math.min(
+            maxSpeed,
+            Math.max(
+                Math.round(maxSpeed * 0.82),
+                speedLimit + 14,
+                maxSpeed >= 75 ? 76 : speedLimit + 8
+            )
+        );
 
         startupTimer = setInterval(() => {
             const elapsed = performance.now() - startedAt;
@@ -286,7 +299,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (progress >= 1) {
                 clearInterval(startupTimer);
                 startupTimer = null;
+                sequenceMode = "none";
                 appContainer.classList.remove("app-booting");
+                appContainer.classList.remove("sequence-synced");
                 updateInterface(0);
                 if (speedText) {
                     speedText.classList.remove("boot-digital", "boot-count-tick");
@@ -311,15 +326,18 @@ document.addEventListener("DOMContentLoaded", () => {
             demoTimer = null;
         }
 
+        sequenceMode = "demo";
+        appContainer.classList.add("sequence-synced");
         appContainer.classList.remove("app-booting");
         appContainer.classList.add("app-demoing");
         previousSpeed = 0;
         setGpsState("searching", "GPS: DEMO visual");
 
-        const cruiseSpeed = Math.max(18, Math.min(42, speedLimit - 18));
-        const limitLeadSpeed = Math.max(cruiseSpeed + 6, Math.min(speedLimit - 4, 72));
+        const baseCruise = Math.round(maxSpeed * 0.24);
+        const cruiseSpeed = Math.max(20, Math.min(baseCruise, speedLimit - 14, maxSpeed - 45));
+        const limitLeadSpeed = Math.max(cruiseSpeed + 8, Math.min(speedLimit - 3, Math.round(maxSpeed * 0.48)));
         const thresholdSpeed = Math.min(maxSpeed, Math.max(speedLimit + 8, 76));
-        const highSpeed = Math.min(maxSpeed, Math.max(thresholdSpeed + 12, 92));
+        const highSpeed = Math.min(maxSpeed, Math.max(Math.round(maxSpeed * 0.94), thresholdSpeed + 12, 92));
         const lowSpeed = Math.max(0, Math.min(cruiseSpeed, 12));
         const demoPhases = [
             { from: 0, to: cruiseSpeed, duration: 720 },
@@ -368,7 +386,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (progress >= 1) {
                 clearInterval(demoTimer);
                 demoTimer = null;
+                sequenceMode = "none";
                 appContainer.classList.remove("app-demoing");
+                appContainer.classList.remove("sequence-synced");
                 setGpsState("ready", "GPS: Listo");
                 updateInterface(0);
                 if (speedText) {
@@ -957,10 +977,10 @@ document.addEventListener("DOMContentLoaded", () => {
         previousSpeed = displaySpeed;
         markActiveLabel(displaySpeed);
 
-        // COMPROBACIÓN DEL LÍMITE: alerta normal y alerta agresiva deportiva
-        // Durante boot/demo evitamos el pulso de warning para que no haya bajón visual al final.
-        const isBooting = appContainer.classList.contains("app-booting");
-        const isOverLimit = !isBooting && displaySpeed > speedLimit;
+        // COMPROBACIÓN DEL LÍMITE: alerta normal y alerta agresiva deportiva.
+        // Solo suprimimos warnings durante el arranque para evitar el bajón visual final.
+        const suppressWarnings = sequenceMode === "startup";
+        const isOverLimit = !suppressWarnings && displaySpeed > speedLimit;
         const isAggressiveWarning = isOverLimit && (speedLimit >= 75 || displaySpeed >= 75);
 
         if (isOverLimit) {
@@ -1014,6 +1034,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         clearGpsTimers();
         isTracking = false;
+        sequenceMode = "none";
+        appContainer.classList.remove("app-booting", "app-demoing", "sequence-synced");
         lastPositionAt = 0;
         smoothedSpeed = 0;
         lastCoords = null;
