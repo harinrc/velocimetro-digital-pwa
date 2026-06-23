@@ -53,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const endAngle = 98;
     const totalAngle = endAngle - startAngle; // Arco total de 226 grados
     const gaugePathLength = 500; // Path SVG normalizado (pathLength="500").
-    const arcLeadFactor = 1.012; // Ajuste fino para compensar desfase visual mínimo del trazo.
-    const arcLeadOffset = 0.9;   // Pequeño empuje inicial para alinear mejor con la aguja.
+    const arcLeadFactor = 1.015; // Ajuste ultra fino para dejar el arco sincronizado con la aguja.
+    const arcLeadOffset = 1.4;   // Compensación mínima inicial para evitar retraso visual en bajas velocidades.
 
     // Variables de control de datos
     let speedLimit = parseInt(limitInput.value) || 40;
