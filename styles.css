@@ -376,6 +376,12 @@ html {
     fill: #ffd9d9;
 }
 
+.app-container.speed-warning-startup .gauge-labels text.active-label,
+.app-container.speed-warning-startup .gauge-labels text.over-limit-label {
+    fill: #ffd9d9;
+    text-shadow: 0 0 8px rgba(255, 42, 42, 0.32);
+}
+
 /* La Aguja */
 .needle {
     stroke: var(--accent-red);
@@ -400,6 +406,16 @@ html {
 
 .app-container.accelerating .needle {
     filter: drop-shadow(0px 0px 8px rgba(255, 42, 42, 0.62));
+}
+
+.app-container.speed-warning-startup .needle,
+.app-container.speed-warning-startup .gauge-progress {
+    filter: drop-shadow(0 0 10px rgba(255, 42, 42, 0.58));
+}
+
+.app-container.speed-warning-aggressive-startup .needle,
+.app-container.speed-warning-aggressive-startup .gauge-progress {
+    filter: drop-shadow(0 0 14px rgba(255, 42, 42, 0.85));
 }
 
 .needle-center {
@@ -505,6 +521,12 @@ html {
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
+.app-container.speed-warning-startup .current-speed {
+    color: var(--accent-red);
+    text-shadow: 0 0 24px rgba(255, 42, 42, 0.62);
+    animation: red-number-flash 0.7s ease-in-out infinite alternate;
+}
+
 @keyframes red-number-flash {
     0% {
         transform: translateY(0) scale(1);
@@ -517,6 +539,10 @@ html {
 }
 
 .app-container.speed-warning-aggressive .current-speed {
+    animation: red-number-flash-aggressive 0.34s ease-in-out infinite alternate;
+}
+
+.app-container.speed-warning-aggressive-startup .current-speed {
     animation: red-number-flash-aggressive 0.34s ease-in-out infinite alternate;
 }
 
@@ -558,6 +584,10 @@ html {
     animation: shake 0.24s ease-in-out infinite alternate;
 }
 
+.app-container.speed-warning-startup .limit-indicator {
+    animation: shake 0.24s ease-in-out infinite alternate;
+}
+
 .speed-warning .weather-info {
     animation: shake 0.24s ease-in-out infinite alternate;
     border-color: rgba(255, 42, 42, 0.66);
@@ -572,6 +602,10 @@ html {
 .app-container.speed-warning-aggressive .limit-indicator,
 .app-container.speed-warning-aggressive .weather-info,
 .app-container.speed-warning-aggressive .location-info {
+    animation: shake-aggressive 0.15s ease-in-out infinite alternate;
+}
+
+.app-container.speed-warning-aggressive-startup .limit-indicator {
     animation: shake-aggressive 0.15s ease-in-out infinite alternate;
 }
 

@@ -199,7 +199,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function markActiveLabel(currentSpeed) {
         if (!gaugeLabels.length) return;
 
-        const nearest = Math.round(currentSpeed / gaugeStep) * gaugeStep;
+        const nearestLabel = gaugeLabels.reduce((best, label) => {
+            const value = parseInt(label.getAttribute("data-speed"), 10);
+            const bestValue = parseInt(best.getAttribute("data-speed"), 10);
+            return Math.abs(value - currentSpeed) < Math.abs(bestValue - currentSpeed) ? label : best;
+        }, gaugeLabels[0]);
+
+        const nearest = parseInt(nearestLabel.getAttribute("data-speed"), 10);
 
         gaugeLabels.forEach((label) => {
             const value = parseInt(label.getAttribute("data-speed"), 10);
@@ -249,21 +255,22 @@ document.addEventListener("DOMContentLoaded", () => {
             demoTimer = null;
         }
 
+        appContainer.classList.remove("app-demoing");
         sequenceMode = "startup";
         appContainer.classList.add("sequence-synced");
         appContainer.classList.add("app-booting");
+        previousSpeed = 0;
 
         const duration = 3000;
         const tickMs = 50;
         const startedAt = performance.now();
         let lastBootDisplayed = "";
-        const peakSpeed = Math.min(
-            maxSpeed,
-            Math.max(
-                Math.round(maxSpeed * 0.82),
-                speedLimit + 14,
-                maxSpeed >= 75 ? 76 : speedLimit + 8
-            )
+        const peakSpeed = maxSpeed;
+        const upperSweepSpeed = Math.max(Math.round(maxSpeed * 0.78), speedLimit + 10, maxSpeed >= 75 ? 76 : speedLimit + 6);
+        const easeInOutCubic = (value) => (
+            value < 0.5
+                ? 4 * value * value * value
+                : 1 - Math.pow(-2 * value + 2, 3) / 2
         );
 
         startupTimer = setInterval(() => {
@@ -271,13 +278,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const progress = Math.min(1, elapsed / duration);
             let speed;
 
-            // Secuencia: subir (aguja cruza el límite), sostener, y volver suave a cero.
-            if (progress < 0.48) {
-                speed = peakSpeed * (progress / 0.48);
-            } else if (progress < 0.68) {
+            // Secuencia: subida rápida, barrido al tope real, sostén corto y caída limpia.
+            if (progress < 0.42) {
+                speed = upperSweepSpeed * easeInOutCubic(progress / 0.42);
+            } else if (progress < 0.62) {
+                const phaseProgress = easeInOutCubic((progress - 0.42) / 0.20);
+                speed = upperSweepSpeed + ((peakSpeed - upperSweepSpeed) * phaseProgress);
+            } else if (progress < 0.74) {
                 speed = peakSpeed;
             } else {
-                speed = peakSpeed * (1 - ((progress - 0.68) / 0.32));
+                const phaseProgress = easeInOutCubic((progress - 0.74) / 0.26);
+                speed = peakSpeed * (1 - phaseProgress);
             }
 
             const rounded = Math.max(0, Math.round(speed));
@@ -978,10 +989,16 @@ document.addEventListener("DOMContentLoaded", () => {
         markActiveLabel(displaySpeed);
 
         // COMPROBACIÓN DEL LÍMITE: alerta normal y alerta agresiva deportiva.
-        // Solo suprimimos warnings durante el arranque para evitar el bajón visual final.
-        const suppressWarnings = sequenceMode === "startup";
-        const isOverLimit = !suppressWarnings && displaySpeed > speedLimit;
-        const isAggressiveWarning = isOverLimit && (speedLimit >= 75 || displaySpeed >= 75);
+        // En arranque usamos una versión focalizada del warning para no oscurecer toda la pantalla.
+        const isOverLimitRaw = displaySpeed > speedLimit;
+        const isAggressiveWarningRaw = isOverLimitRaw && (speedLimit >= 75 || displaySpeed >= 75);
+        const isStartupWarning = sequenceMode === "startup" && isOverLimitRaw;
+        const isStartupAggressiveWarning = sequenceMode === "startup" && isAggressiveWarningRaw;
+        const isOverLimit = sequenceMode !== "startup" && isOverLimitRaw;
+        const isAggressiveWarning = sequenceMode !== "startup" && isAggressiveWarningRaw;
+
+        appContainer.classList.toggle("speed-warning-startup", isStartupWarning);
+        appContainer.classList.toggle("speed-warning-aggressive-startup", isStartupAggressiveWarning);
 
         if (isOverLimit) {
             appContainer.classList.add("speed-warning");
@@ -991,9 +1008,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         appContainer.classList.toggle("speed-warning-aggressive", isAggressiveWarning);
 
-        updateSystemBarColors(isOverLimit);
+        updateSystemBarColors(isOverLimit || isStartupWarning);
 
-        updateFloatingHud(displaySpeed, isOverLimit);
+        updateFloatingHud(displaySpeed, isOverLimit || isStartupWarning);
 
         // Registrar estadísticas sólo si el viaje está iniciado y vas avanzando
         if (isTracking && displaySpeed > 0) {
