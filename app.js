@@ -91,12 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let smoothedMapPoint = null;
     let lastMapCenterAt = 0;
     let followMap = true;
-    let panelCollapsed = window.matchMedia("(max-width: 379px)").matches
+    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 379px)").matches;
+
+    let panelCollapsed = isCompactPanelModeNow()
         ? true
         : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
-    const isCompactPanelMode = window.matchMedia("(max-width: 379px)").matches;
     const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
     const normalSystemColor = "#050608";
     const warningSystemColor = "#250808";
@@ -457,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyPanelState(collapsed, persist = true) {
-        if (!isCompactPanelMode) {
+        if (!isCompactPanelModeNow()) {
             panelCollapsed = false;
             appContainer.classList.remove("panel-collapsed");
             if (panelHandle) {
@@ -1113,7 +1114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (panelHandle) {
-        if (!isCompactPanelMode) {
+        if (!isCompactPanelModeNow()) {
             panelHandle.style.display = "none";
         }
 
@@ -1207,7 +1208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
     applyMaxSpeed(maxSpeed, false);
     // Aplicar estado del panel ANTES de la animación para evitar salto visual al recargar
-    applyPanelState(isCompactPanelMode ? panelCollapsed : false, false);
+    applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
     runStartupAnimation();
     limitValue.textContent = speedLimit;
