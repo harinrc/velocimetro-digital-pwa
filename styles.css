@@ -21,6 +21,10 @@
     --warning-max-glow: 0.5;
     --motion-ease: cubic-bezier(0.14, 0.78, 0.12, 1);
     --boot-duration: 3s;
+    --gauge-arc-length: 313.89;
+    --gauge-arc-rotation: 128deg;
+    --gauge-start-angle: -128deg;
+    --gauge-end-angle: 98deg;
 }
 
 /* ==========================================================================
@@ -318,9 +322,9 @@ html {
     fill: none;
     stroke: var(--gauge-track);
     stroke-width: 4;
-    stroke-dasharray: 335 500; /* Corta la base inferior del círculo */
+    stroke-dasharray: var(--gauge-arc-length) 500; /* Corta la base inferior del círculo */
     stroke-linecap: round;
-    transform: rotate(135deg);
+    transform: rotate(var(--gauge-arc-rotation));
     transform-origin: 100px 100px;
 }
 
@@ -330,7 +334,7 @@ html {
     stroke-width: 5.2;
     stroke-dasharray: 0 500;
     stroke-linecap: round;
-    transform: rotate(135deg);
+    transform: rotate(var(--gauge-arc-rotation));
     transform-origin: 100px 100px;
     transition: stroke-dasharray var(--gauge-motion-duration) var(--motion-ease), stroke 0.2s ease;
     filter: drop-shadow(0 0 5px rgba(255, 42, 42, 0.44));
@@ -343,7 +347,7 @@ html {
 
 @keyframes ignition-arc {
     0% { stroke-dasharray: 0 500; }
-    60% { stroke-dasharray: 335 500; }
+    60% { stroke-dasharray: var(--gauge-arc-length) 500; }
     100% { stroke-dasharray: 0 500; }
 }
 
@@ -388,7 +392,7 @@ html {
     stroke-width: 3;
     stroke-linecap: round;
     transform-origin: 100px 100px;
-    transform: rotate(-135deg); /* Posición inicial en 0 km/h sincronizada con el arco */
+    transform: rotate(var(--gauge-start-angle)); /* Posición inicial en 0 km/h sincronizada con el arco */
     transition: transform var(--gauge-motion-duration) var(--motion-ease);
     filter: drop-shadow(0px 0px 5px var(--accent-red-glow));
     will-change: transform;
@@ -399,9 +403,9 @@ html {
 }
 
 @keyframes ignition-needle {
-    0% { transform: rotate(-135deg); }
-    60% { transform: rotate(105deg); }
-    100% { transform: rotate(-135deg); }
+    0% { transform: rotate(var(--gauge-start-angle)); }
+    60% { transform: rotate(var(--gauge-end-angle)); }
+    100% { transform: rotate(var(--gauge-start-angle)); }
 }
 
 .app-container.accelerating .needle {
@@ -665,8 +669,7 @@ html {
     -webkit-user-select: none;
 }
 
-.panel-handle,
-.app-container.panel-collapsed .panel-handle {
+.panel-handle {
     display: none;
 }
 
@@ -749,8 +752,9 @@ html {
     min-width: clamp(56px, 16vw, 68px);
 }
 
-@media (max-width: 420px) {
-    .panel-handle {
+@media (max-width: 430px) {
+    .panel-handle,
+    .app-container.panel-collapsed .panel-handle {
         display: flex;
     }
 }

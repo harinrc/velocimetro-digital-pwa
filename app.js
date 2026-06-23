@@ -48,9 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultMaxSpeed = 120;
     const minAllowedMax = 60;
     const maxAllowedMax = 240;
-    const startAngle = -135; // Sincronizado con el inicio del arco SVG
-    const endAngle = 105;    // Sincronizado con el final del arco SVG
-    const totalAngle = endAngle - startAngle; // Arco total de 240 grados
+    const startAngle = -128; // Arco más abierto para liberar espacio en la zona inferior del display
+    const endAngle = 98;
+    const totalAngle = endAngle - startAngle; // Arco total de 226 grados
 
     // Variables de control de datos
     let speedLimit = parseInt(limitInput.value) || 40;
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let smoothedSpeed = 0;
     let gaugeLabels = [];
     let previousSpeed = 0;
-    const arcLength = 335;
+    const arcLength = Number(((totalAngle / 360) * 500).toFixed(2));
     let visualMode = "sport";
     let pipWindow = null;
     let pipSpeedText = null;
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let smoothedMapPoint = null;
     let lastMapCenterAt = 0;
     let followMap = true;
-    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 420px)").matches;
+    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 430px)").matches;
 
     let panelCollapsed = isCompactPanelModeNow()
         ? true
@@ -106,6 +106,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
     }
+
+    // Mantener en sincronía CSS (arco/aguja/animaciones) y JS (cálculo de ángulos).
+    appContainer.style.setProperty("--gauge-arc-length", String(arcLength));
+    appContainer.style.setProperty("--gauge-arc-rotation", `${Math.abs(startAngle)}deg`);
+    appContainer.style.setProperty("--gauge-start-angle", `${startAngle}deg`);
+    appContainer.style.setProperty("--gauge-end-angle", `${endAngle}deg`);
 
     function getGaugeStep(scaleMax) {
         const candidates = [5, 10, 15, 20, 25, 30, 40, 50];
@@ -570,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function syncPanelMode() {
-        if (window.matchMedia("(max-width: 379px)").matches) {
+        if (isCompactPanelModeNow()) {
             if (panelHandle) {
                 panelHandle.style.display = "flex";
             }
