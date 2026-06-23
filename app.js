@@ -79,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let gaugeStep = 15;
     let lastPositionAt = 0;
     let startupTimer = null;
+    let demoTimer = null;
+    let reloadPressTimer = null;
+    let reloadLongPressTriggered = false;
     let gpsHealthTimer = null;
     let gpsRetryTimer = null;
     let mapInstance = null;
@@ -283,6 +286,62 @@ document.addEventListener("DOMContentLoaded", () => {
                 clearInterval(startupTimer);
                 startupTimer = null;
                 appContainer.classList.remove("app-booting");
+                updateInterface(0);
+                if (speedText) {
+                    speedText.classList.remove("boot-digital", "boot-count-tick");
+                }
+            }
+        }, tickMs);
+    }
+
+    function runDemoSequence() {
+        if (isTracking) {
+            alert("Detén el rastreo para ejecutar la demo visual.");
+            return;
+        }
+
+        if (startupTimer) {
+            clearInterval(startupTimer);
+            startupTimer = null;
+        }
+
+        if (demoTimer) {
+            clearInterval(demoTimer);
+            demoTimer = null;
+        }
+
+        appContainer.classList.add("app-booting");
+        setGpsState("searching", "GPS: DEMO visual");
+
+        const duration = 4200;
+        const tickMs = 50;
+        const startedAt = performance.now();
+        const peakSpeed = Math.min(maxSpeed, Math.max(speedLimit + 26, 128));
+
+        demoTimer = setInterval(() => {
+            const elapsed = performance.now() - startedAt;
+            const progress = Math.min(1, elapsed / duration);
+            let speed;
+
+            if (progress < 0.55) {
+                speed = peakSpeed * (progress / 0.55);
+            } else {
+                speed = peakSpeed * (1 - ((progress - 0.55) / 0.45));
+            }
+
+            const rounded = Math.max(0, Math.round(speed));
+            updateInterface(rounded);
+
+            if (speedText) {
+                speedText.textContent = String(rounded).padStart(3, "0");
+                speedText.classList.add("triple-digits", "boot-digital");
+            }
+
+            if (progress >= 1) {
+                clearInterval(demoTimer);
+                demoTimer = null;
+                appContainer.classList.remove("app-booting");
+                setGpsState("ready", "GPS: Listo");
                 updateInterface(0);
                 if (speedText) {
                     speedText.classList.remove("boot-digital", "boot-count-tick");
@@ -978,7 +1037,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (reloadBtn) {
-        reloadBtn.addEventListener("click", () => {
+        const holdMs = 1100;
+        const clearReloadPressTimer = () => {
+            if (reloadPressTimer) {
+                clearTimeout(reloadPressTimer);
+                reloadPressTimer = null;
+            }
+        };
+
+        reloadBtn.addEventListener("pointerdown", () => {
+            reloadLongPressTriggered = false;
+            clearReloadPressTimer();
+            reloadPressTimer = setTimeout(() => {
+                reloadLongPressTriggered = true;
+                runDemoSequence();
+            }, holdMs);
+        });
+
+        reloadBtn.addEventListener("pointerup", clearReloadPressTimer);
+        reloadBtn.addEventListener("pointerleave", clearReloadPressTimer);
+        reloadBtn.addEventListener("pointercancel", clearReloadPressTimer);
+
+        reloadBtn.addEventListener("click", (event) => {
+            if (reloadLongPressTriggered) {
+                event.preventDefault();
+                reloadLongPressTriggered = false;
+                return;
+            }
             window.location.reload();
         });
     }
