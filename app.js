@@ -311,26 +311,53 @@ document.addEventListener("DOMContentLoaded", () => {
             demoTimer = null;
         }
 
-        appContainer.classList.add("app-booting");
+        appContainer.classList.remove("app-booting");
+        appContainer.classList.add("app-demoing");
+        previousSpeed = 0;
         setGpsState("searching", "GPS: DEMO visual");
 
-        const duration = 4200;
-        const tickMs = 50;
+        const cruiseSpeed = Math.max(18, Math.min(42, speedLimit - 18));
+        const limitLeadSpeed = Math.max(cruiseSpeed + 6, Math.min(speedLimit - 4, 72));
+        const thresholdSpeed = Math.min(maxSpeed, Math.max(speedLimit + 8, 76));
+        const highSpeed = Math.min(maxSpeed, Math.max(thresholdSpeed + 12, 92));
+        const lowSpeed = Math.max(0, Math.min(cruiseSpeed, 12));
+        const demoPhases = [
+            { from: 0, to: cruiseSpeed, duration: 720 },
+            { from: cruiseSpeed, to: limitLeadSpeed, duration: 620 },
+            { from: limitLeadSpeed, to: thresholdSpeed, duration: 620 },
+            { from: thresholdSpeed, to: highSpeed, duration: 540 },
+            { from: highSpeed, to: thresholdSpeed, duration: 520 },
+            { from: thresholdSpeed, to: limitLeadSpeed, duration: 620 },
+            { from: limitLeadSpeed, to: lowSpeed, duration: 780 },
+        ];
+        const tickMs = 40;
+        const totalDuration = demoPhases.reduce((sum, phase) => sum + phase.duration, 0);
         const startedAt = performance.now();
-        const peakSpeed = Math.min(maxSpeed, Math.max(speedLimit + 26, 128));
+
+        const easeInOutCubic = (value) => (
+            value < 0.5
+                ? 4 * value * value * value
+                : 1 - Math.pow(-2 * value + 2, 3) / 2
+        );
+
+        const getDemoSpeed = (elapsed) => {
+            let cursor = 0;
+            for (const phase of demoPhases) {
+                const phaseEnd = cursor + phase.duration;
+                if (elapsed <= phaseEnd) {
+                    const phaseProgress = Math.min(1, Math.max(0, (elapsed - cursor) / phase.duration));
+                    return phase.from + ((phase.to - phase.from) * easeInOutCubic(phaseProgress));
+                }
+                cursor = phaseEnd;
+            }
+
+            return demoPhases[demoPhases.length - 1].to;
+        };
 
         demoTimer = setInterval(() => {
             const elapsed = performance.now() - startedAt;
-            const progress = Math.min(1, elapsed / duration);
-            let speed;
-
-            if (progress < 0.55) {
-                speed = peakSpeed * (progress / 0.55);
-            } else {
-                speed = peakSpeed * (1 - ((progress - 0.55) / 0.45));
-            }
-
-            const rounded = Math.max(0, Math.round(speed));
+            const progress = Math.min(1, elapsed / totalDuration);
+            const rounded = Math.max(0, Math.round(getDemoSpeed(elapsed)));
             updateInterface(rounded);
 
             if (speedText) {
@@ -341,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (progress >= 1) {
                 clearInterval(demoTimer);
                 demoTimer = null;
-                appContainer.classList.remove("app-booting");
+                appContainer.classList.remove("app-demoing");
                 setGpsState("ready", "GPS: Listo");
                 updateInterface(0);
                 if (speedText) {

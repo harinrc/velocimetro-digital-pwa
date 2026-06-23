@@ -71,6 +71,12 @@ html {
     animation: app-boot var(--boot-duration) ease-out;
 }
 
+.app-container.app-demoing {
+    --gauge-motion-duration: 0.08s;
+    --warning-pulse-duration: 0.8s;
+    --warning-max-glow: 0.62;
+}
+
 @keyframes app-boot {
     0% {
         opacity: 0.2;
