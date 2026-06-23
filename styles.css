@@ -342,12 +342,12 @@ html {
 }
 
 .app-container.app-booting:not(.sequence-synced) .gauge-progress {
-    animation: ignition-arc var(--boot-duration) cubic-bezier(0.22, 0.9, 0.18, 1);
+    animation: ignition-arc calc(var(--boot-duration) * 0.95) cubic-bezier(0.25, 0.85, 0.15, 1);
 }
 
 @keyframes ignition-arc {
     0% { stroke-dasharray: 0 500; }
-    60% { stroke-dasharray: var(--gauge-arc-length) 500; }
+    50% { stroke-dasharray: var(--gauge-arc-length) 500; }
     100% { stroke-dasharray: 0 500; }
 }
 
