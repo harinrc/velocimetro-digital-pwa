@@ -53,6 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const endAngle = 98;
     const totalAngle = endAngle - startAngle; // Arco total de 226 grados
     const gaugePathLength = 500; // Path SVG normalizado (pathLength="500").
+    const arcLeadFactor = 1.012; // Ajuste fino para compensar desfase visual mínimo del trazo.
+    const arcLeadOffset = 0.9;   // Pequeño empuje inicial para alinear mejor con la aguja.
 
     // Variables de control de datos
     let speedLimit = parseInt(limitInput.value) || 40;
@@ -999,7 +1001,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Calcular la rotación de la aguja basándose en la velocidad actual
         const percentage = (boundedSpeed - minSpeed) / (maxSpeed - minSpeed);
         const targetAngle = startAngle + (percentage * totalAngle);
-        const visibleArc = percentage * arcLength;
+        const visibleArcRaw = (percentage * arcLength * arcLeadFactor) + (percentage > 0 ? arcLeadOffset : 0);
+        const visibleArc = Math.min(arcLength, Math.max(0, visibleArcRaw));
         const formattedSpeed = formatSpeedDisplay(displaySpeed);
         
         // Mover la aguja con CSS y cambiar el texto central
