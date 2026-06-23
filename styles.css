@@ -21,7 +21,7 @@
     --warning-max-glow: 0.5;
     --motion-ease: cubic-bezier(0.14, 0.78, 0.12, 1);
     --boot-duration: 3s;
-    --gauge-arc-length: 314.44;
+    --gauge-arc-length: 500;
     --gauge-start-angle: -128deg;
     --gauge-end-angle: 98deg;
 }

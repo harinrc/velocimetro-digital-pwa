@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const startAngle = -128; // Arco más abierto para liberar espacio en la zona inferior del display
     const endAngle = 98;
     const totalAngle = endAngle - startAngle; // Arco total de 226 grados
+    const gaugePathLength = 500; // Path SVG normalizado (pathLength="500").
 
     // Variables de control de datos
     let speedLimit = parseInt(limitInput.value) || 40;
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let smoothedSpeed = 0;
     let gaugeLabels = [];
     let previousSpeed = 0;
-    const arcLength = Number(((totalAngle / 360) * 500).toFixed(2));
+    const arcLength = gaugePathLength;
     let visualMode = "sport";
     let pipWindow = null;
     let pipSpeedText = null;
