@@ -84,6 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let mapMarker = null;
     let mapAccuracyCircle = null;
     let latestLatLng = null;
+    let smoothedMapPoint = null;
+    let lastMapCenterAt = 0;
     let followMap = true;
     let panelCollapsed = window.matchMedia("(max-width: 379px)").matches
         ? true
@@ -484,7 +486,21 @@ document.addEventListener("DOMContentLoaded", () => {
         ensureMap();
         if (!mapInstance) return;
 
-        const point = [lat, lon];
+        let point = [lat, lon];
+
+        // Suavizar pequeños saltos del GPS para que el punto no "baile" en el mapa.
+        if (smoothedMapPoint) {
+            const jitterMeters = calculateDistanceMeters(smoothedMapPoint[0], smoothedMapPoint[1], lat, lon);
+            const mapAlpha = jitterMeters < 7 ? 0.12 : (jitterMeters < 25 ? 0.3 : 0.55);
+            smoothedMapPoint = [
+                smoothedMapPoint[0] + (lat - smoothedMapPoint[0]) * mapAlpha,
+                smoothedMapPoint[1] + (lon - smoothedMapPoint[1]) * mapAlpha
+            ];
+            point = smoothedMapPoint;
+        } else {
+            smoothedMapPoint = point;
+        }
+
         latestLatLng = point;
 
         if (!mapMarker) {
@@ -514,7 +530,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (followMap) {
-            mapInstance.setView(point, 16, { animate: false });
+            const now = Date.now();
+            const shouldRecenter = !lastMapCenterAt || (now - lastMapCenterAt) > 750;
+            if (shouldRecenter) {
+                mapInstance.setView(point, mapInstance.getZoom() || 16, { animate: false });
+                lastMapCenterAt = now;
+            }
         }
     }
 
@@ -851,6 +872,8 @@ document.addEventListener("DOMContentLoaded", () => {
         smoothedSpeed = 0;
         lastCoords = null;
         previousSpeed = 0;
+        smoothedMapPoint = null;
+        lastMapCenterAt = 0;
         setGpsState("off", "GPS: Detenido");
         releaseWakeLock();
         updateInterface(0);
