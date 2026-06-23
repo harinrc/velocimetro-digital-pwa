@@ -419,7 +419,9 @@ html {
 }
 
 .current-speed.triple-digits {
-    font-size: clamp(42px, 14vw, 78px);
+    font-size: clamp(38px, 12.5vw, 72px);
+    min-width: 3ch;
+    letter-spacing: -1.1px;
 }
 
 .app-container.app-booting .current-speed {
@@ -619,7 +621,8 @@ html {
 }
 
 .app-container.panel-collapsed .current-speed.triple-digits {
-    font-size: clamp(48px, 16vw, 88px);
+    font-size: clamp(44px, 14vw, 80px);
+    min-width: 3ch;
 }
 
 .app-container.panel-collapsed .mini-map {
@@ -913,7 +916,7 @@ html {
 }
 
 .speed-warning .map-speed-marker {
-    animation: marker-pulse 0.45s ease-in-out infinite alternate;
+    animation: marker-pulse 0.7s ease-in-out infinite;
 }
 
 @keyframes map-alert {
@@ -929,12 +932,19 @@ html {
 
 @keyframes marker-pulse {
     0% {
-        opacity: 0.72;
-        transform: scale(1);
+        opacity: 0.92;
+        stroke-width: 2;
+        fill-opacity: 0.88;
+    }
+    50% {
+        opacity: 1;
+        stroke-width: 3.4;
+        fill-opacity: 1;
     }
     100% {
-        opacity: 1;
-        transform: scale(1.1);
+        opacity: 0.92;
+        stroke-width: 2;
+        fill-opacity: 0.88;
     }
 }
 
@@ -1288,7 +1298,8 @@ html {
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(38px, 13vw, 68px);
+        font-size: clamp(34px, 11.8vw, 62px);
+        min-width: 3ch;
     }
 
     .mini-map {

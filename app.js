@@ -761,15 +761,16 @@ document.addEventListener("DOMContentLoaded", () => {
             rawKmh = 0;
         }
 
-        const alpha = rawKmh < 8 ? 0.58 : 0.38;
+        const alpha = rawKmh < 8 ? 0.58 : (rawKmh < 60 ? 0.38 : 0.68);
         smoothedSpeed = alpha * rawKmh + (1 - alpha) * smoothedSpeed;
         return Math.max(0, Math.round(smoothedSpeed));
     }
 
     // --- FUNCIÓN PARA ACTUALIZAR LA AGUJA Y EL DISPLAY ---
     function updateInterface(currentSpeed) {
+        const displaySpeed = Math.max(0, Math.round(Number(currentSpeed) || 0));
         // Evitar que la aguja se salga físicamente de los límites visuales (0 - 120)
-        const boundedSpeed = Math.max(minSpeed, Math.min(maxSpeed, currentSpeed));
+        const boundedSpeed = Math.max(minSpeed, Math.min(maxSpeed, displaySpeed));
         
         // Calcular la rotación de la aguja basándose en la velocidad actual
         const percentage = (boundedSpeed - minSpeed) / (maxSpeed - minSpeed);
@@ -778,44 +779,44 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Mover la aguja con CSS y cambiar el texto central
         needle.style.transform = `rotate(${targetAngle}deg)`;
-        speedText.textContent = currentSpeed;
-        speedText.classList.toggle("triple-digits", currentSpeed >= 100);
+        speedText.textContent = displaySpeed;
+        speedText.classList.toggle("triple-digits", displaySpeed >= 100);
         if (gaugeProgress) gaugeProgress.style.strokeDasharray = `${visibleArc.toFixed(2)} 500`;
 
         speedText.classList.remove("speed-up", "speed-down");
         appContainer.classList.remove("accelerating", "decelerating");
 
-        if (currentSpeed > previousSpeed) {
+        if (displaySpeed > previousSpeed) {
             speedText.classList.add("speed-up");
             appContainer.classList.add("accelerating");
-        } else if (currentSpeed < previousSpeed) {
+        } else if (displaySpeed < previousSpeed) {
             speedText.classList.add("speed-down");
             appContainer.classList.add("decelerating");
         }
 
-        previousSpeed = currentSpeed;
-        markActiveLabel(currentSpeed);
+        previousSpeed = displaySpeed;
+        markActiveLabel(displaySpeed);
 
         // COMPROBACIÓN DEL LÍMITE: Si te pasas, se activa la alerta roja
-        if (currentSpeed > speedLimit) {
+        if (displaySpeed > speedLimit) {
             appContainer.classList.add("speed-warning");
         } else {
             appContainer.classList.remove("speed-warning");
         }
 
-        updateSystemBarColors(currentSpeed > speedLimit);
+        updateSystemBarColors(displaySpeed > speedLimit);
 
-        updateFloatingHud(currentSpeed, currentSpeed > speedLimit);
+        updateFloatingHud(displaySpeed, displaySpeed > speedLimit);
 
         // Registrar estadísticas sólo si el viaje está iniciado y vas avanzando
-        if (isTracking && currentSpeed > 0) {
+        if (isTracking && displaySpeed > 0) {
             // Registrar Velocidad Máxima
-            if (currentSpeed > maxSpeedRecorded) {
-                maxSpeedRecorded = currentSpeed;
+            if (displaySpeed > maxSpeedRecorded) {
+                maxSpeedRecorded = displaySpeed;
                 maxSpeedText.textContent = `${maxSpeedRecorded} km/h`;
             }
             // Calcular Velocidad Promedio
-            speedHistory.push(currentSpeed);
+            speedHistory.push(displaySpeed);
             const sum = speedHistory.reduce((a, b) => a + b, 0);
             const avg = Math.round(sum / speedHistory.length);
             avgSpeedText.textContent = `${avg} km/h`;
