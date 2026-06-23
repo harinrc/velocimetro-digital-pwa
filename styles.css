@@ -754,6 +754,13 @@ html {
     }
 }
 
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 560px) {
+    .panel-handle,
+    .app-container.panel-collapsed .panel-handle {
+        display: flex;
+    }
+}
+
 .app-container.panel-collapsed .controls-panel {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -1552,18 +1559,18 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 560px) {
     body {
-        overflow: auto;
+        overflow: hidden;
     }
 
     .app-container {
-        height: auto;
+        height: 100dvh;
         min-height: 100dvh;
         display: grid;
         grid-template-columns: minmax(230px, 46vw) minmax(0, 1fr);
         grid-template-rows: auto 1fr;
         gap: 8px 12px;
         padding: calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom));
-        overflow: visible;
+        overflow: hidden;
         align-content: start;
     }
 
@@ -1575,10 +1582,11 @@ html {
     .gauge-container {
         margin: 0;
         align-self: center;
+        min-height: 0;
     }
 
     .gauge {
-        width: min(42vw, 280px);
+        width: min(40vw, 262px);
     }
 
     .digital-display {
@@ -1601,6 +1609,10 @@ html {
     .controls-panel {
         margin-top: 0;
         align-self: stretch;
+        min-height: 0;
+        max-height: calc(100dvh - 58px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 8px;
         gap: 8px;
         border-radius: 16px;
@@ -1699,6 +1711,7 @@ html {
         padding: 7px;
         gap: 6px;
         border-radius: 14px;
+        max-height: calc(100dvh - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
 
     .weather-location-strip {
