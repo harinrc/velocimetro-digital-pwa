@@ -931,7 +931,9 @@ document.addEventListener("DOMContentLoaded", () => {
         markActiveLabel(displaySpeed);
 
         // COMPROBACIÓN DEL LÍMITE: alerta normal y alerta agresiva deportiva
-        const isOverLimit = displaySpeed > speedLimit;
+        // Durante boot/demo evitamos el pulso de warning para que no haya bajón visual al final.
+        const isBooting = appContainer.classList.contains("app-booting");
+        const isOverLimit = !isBooting && displaySpeed > speedLimit;
         const isAggressiveWarning = isOverLimit && (speedLimit >= 75 || displaySpeed >= 75);
 
         if (isOverLimit) {
@@ -1046,7 +1048,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
 
-        reloadBtn.addEventListener("pointerdown", () => {
+        reloadBtn.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+        });
+
+        reloadBtn.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
             reloadLongPressTriggered = false;
             clearReloadPressTimer();
             reloadPressTimer = setTimeout(() => {
