@@ -83,6 +83,20 @@ html {
     overflow: hidden;
 }
 
+.app-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 0;
+}
+
+.app-container > * {
+    position: relative;
+    z-index: 1;
+}
+
 .app-container.app-booting {
     animation: app-boot var(--boot-duration) ease-out;
 }
@@ -202,40 +216,50 @@ html {
 /* --- Alerta visual cuando se supera el límite --- */
 .app-container.speed-warning {
     background-color: #000000;
+    animation: none;
+}
+
+.app-container.speed-warning::before {
+    opacity: 1;
     animation: pulse-alert var(--warning-pulse-duration) infinite alternate ease-in-out;
 }
 
 @keyframes pulse-alert {
     0% {
         box-shadow:
-            0 0 26px color-mix(in srgb, var(--mode-alert-shadow) 34%, transparent),
-            0 0 56px color-mix(in srgb, var(--mode-button-active-glow) 22%, transparent),
-            0 0 94px color-mix(in srgb, var(--mode-button-active-glow) 16%, transparent);
+            inset 0 0 16px color-mix(in srgb, var(--mode-alert-shadow) 44%, transparent),
+            inset 0 0 36px color-mix(in srgb, var(--mode-button-active-glow) 28%, transparent),
+            inset 0 0 68px color-mix(in srgb, var(--mode-button-active-glow) 18%, transparent);
     }
     100% {
         box-shadow:
-            0 0 36px color-mix(in srgb, var(--mode-alert-shadow) 54%, transparent),
-            0 0 78px color-mix(in srgb, var(--mode-button-active-glow) 38%, transparent),
-            0 0 136px color-mix(in srgb, var(--mode-button-active-glow) 28%, transparent);
+            inset 0 0 24px color-mix(in srgb, var(--mode-alert-shadow) 62%, transparent),
+            inset 0 0 52px color-mix(in srgb, var(--mode-button-active-glow) 42%, transparent),
+            inset 0 0 92px color-mix(in srgb, var(--mode-button-active-glow) 30%, transparent);
     }
 }
 
 .app-container.speed-warning.speed-warning-aggressive {
+    animation: none;
+}
+
+.app-container.speed-warning.speed-warning-aggressive::before {
+    opacity: 1;
     animation: pulse-alert-aggressive 0.52s infinite alternate ease-in-out;
 }
 
 @keyframes pulse-alert-aggressive {
     0% {
         box-shadow:
-            0 0 42px color-mix(in srgb, var(--mode-alert-shadow) 58%, transparent),
-            0 0 94px color-mix(in srgb, var(--mode-button-active-glow) 42%, transparent),
-            0 0 162px color-mix(in srgb, var(--mode-button-active-glow) 30%, transparent);
+            inset 0 0 28px color-mix(in srgb, var(--mode-alert-shadow) 72%, transparent),
+            inset 0 0 62px color-mix(in srgb, var(--mode-button-active-glow) 52%, transparent),
+            inset 0 0 108px color-mix(in srgb, var(--mode-button-active-glow) 36%, transparent);
     }
     100% {
         box-shadow:
-            0 0 56px color-mix(in srgb, var(--mode-alert-shadow) 72%, transparent),
-            0 0 122px color-mix(in srgb, var(--mode-button-active-glow) 58%, transparent),
-            0 0 206px color-mix(in srgb, var(--mode-button-active-glow) 42%, transparent);
+            inset 0 0 40px color-mix(in srgb, var(--mode-alert-shadow) 84%, transparent),
+            inset 0 0 84px color-mix(in srgb, var(--mode-button-active-glow) 66%, transparent),
+            inset 0 0 136px color-mix(in srgb, var(--mode-button-active-glow) 48%, transparent);
     }
 }
 
