@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let reloadLongPressTriggered = false;
     let gpsHealthTimer = null;
     let gpsRetryTimer = null;
+    let gpsRefreshTimer = null;
     let mapInstance = null;
     let mapMarker = null;
     let mapAccuracyCircle = null;
@@ -483,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Iconos base para distinguir claramente dia y noche en estados despejados/parcialmente nublados.
         const clearIcon = isDay ? "\u2600\ufe0f" : "\uD83C\uDF19";
         const mostlyClearIcon = isDay ? "\uD83C\uDF24\uFE0F" : "\uD83C\uDF19";
-        const partlyCloudyIcon = isDay ? "\u26C5" : "\u2601\ufe0f";
+        const partlyCloudyIcon = isDay ? "\u26C5" : "\uD83C\uDF25\uFE0F";
 
         const definitions = {
             0: { icon: clearIcon, label: isDay ? "Despejado" : "Despejado (noche)" },
@@ -516,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
             99: { icon: "\u26C8\ufe0f", label: "Tormenta con granizo fuerte" },
         };
 
-        return definitions[code] ?? { icon: "\uD83C\uDF21\uFE0F", label: "Condicion desconocida" };
+        return definitions[code] ?? { icon: isDay ? "\u2600\ufe0f" : "\uD83C\uDF19", label: isDay ? "Condicion desconocida" : "Condicion desconocida (noche)" };
     }
 
     // ---- CLIMA: Open-Meteo (sin API key) ----
@@ -525,7 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = Date.now();
         if (lastWeatherLatLng) {
             const dist = calculateDistanceMeters(lastWeatherLatLng[0], lastWeatherLatLng[1], lat, lon);
-            if (dist < 2000 && (now - lastWeatherTime) < 10 * 60 * 1000) return;
+            if (dist < 1000 && (now - lastWeatherTime) < 90 * 1000) return;
         }
         try {
             const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,weather_code,is_day&timezone=auto&forecast_days=1`;
@@ -560,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = Date.now();
         if (lastGeocodedLatLng) {
             const dist = calculateDistanceMeters(lastGeocodedLatLng[0], lastGeocodedLatLng[1], lat, lon);
-            if (dist < 300 && (now - lastGeocodeTime) < 30 * 1000) return;
+            if (dist < 150 && (now - lastGeocodeTime) < 20 * 1000) return;
         }
         try {
             const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=14&accept-language=es`;
@@ -790,6 +791,10 @@ document.addEventListener("DOMContentLoaded", () => {
             clearInterval(gpsHealthTimer);
             gpsHealthTimer = null;
         }
+        if (gpsRefreshTimer) {
+            clearInterval(gpsRefreshTimer);
+            gpsRefreshTimer = null;
+        }
         if (gpsRetryTimer) {
             clearTimeout(gpsRetryTimer);
             gpsRetryTimer = null;
@@ -806,7 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const geoOptions = {
             enableHighAccuracy: true,
-            maximumAge: 300,
+            maximumAge: 0,
             timeout: 9000
         };
 
@@ -857,6 +862,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 attachGeolocationWatch();
             }
         }, 4000);
+
+        gpsRefreshTimer = setInterval(() => {
+            if (!isTracking || !latestLatLng) return;
+
+            fetchLocationName(latestLatLng[0], latestLatLng[1]);
+            fetchWeather(latestLatLng[0], latestLatLng[1]);
+        }, 30000);
     }
 
     async function toggleFloatingWindow() {
