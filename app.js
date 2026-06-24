@@ -484,7 +484,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Iconos base para distinguir claramente dia y noche en estados despejados/parcialmente nublados.
         const clearIcon = isDay ? "\u2600\ufe0f" : "\uD83C\uDF19";
         const mostlyClearIcon = isDay ? "\uD83C\uDF24\uFE0F" : "\uD83C\uDF19";
-        const partlyCloudyIcon = isDay ? "\u26C5" : "\uD83C\uDF25\uFE0F";
+        const partlyCloudyIcon = isDay ? "\u26C5" : "\u2601\ufe0f";
+        const rainIcon = "\uD83C\uDF27\uFE0F";
 
         const definitions = {
             0: { icon: clearIcon, label: isDay ? "Despejado" : "Despejado (noche)" },
@@ -493,9 +494,9 @@ document.addEventListener("DOMContentLoaded", () => {
             3: { icon: "\u2601\ufe0f", label: "Nublado" },
             45: { icon: "\uD83C\uDF2B\uFE0F", label: "Niebla" },
             48: { icon: "\uD83C\uDF2B\uFE0F", label: "Niebla con escarcha" },
-            51: { icon: "\uD83C\uDF26\uFE0F", label: "Llovizna ligera" },
-            53: { icon: "\uD83C\uDF26\uFE0F", label: "Llovizna moderada" },
-            55: { icon: "\uD83C\uDF26\uFE0F", label: "Llovizna intensa" },
+            51: { icon: rainIcon, label: "Llovizna ligera" },
+            53: { icon: rainIcon, label: "Llovizna moderada" },
+            55: { icon: rainIcon, label: "Llovizna intensa" },
             56: { icon: "\uD83C\uDF27\uFE0F", label: "Llovizna helada ligera" },
             57: { icon: "\uD83C\uDF27\uFE0F", label: "Llovizna helada intensa" },
             61: { icon: "\uD83C\uDF27\uFE0F", label: "Lluvia ligera" },
@@ -507,8 +508,8 @@ document.addEventListener("DOMContentLoaded", () => {
             73: { icon: "\u2744\ufe0f", label: "Nieve moderada" },
             75: { icon: "\u2744\ufe0f", label: "Nieve intensa" },
             77: { icon: "\uD83C\uDF28\uFE0F", label: "Granizo suave" },
-            80: { icon: "\uD83C\uDF26\uFE0F", label: "Chubascos ligeros" },
-            81: { icon: "\uD83C\uDF26\uFE0F", label: "Chubascos moderados" },
+            80: { icon: rainIcon, label: "Chubascos ligeros" },
+            81: { icon: rainIcon, label: "Chubascos moderados" },
             82: { icon: "\u26C8\ufe0f", label: "Chubascos intensos" },
             85: { icon: "\uD83C\uDF28\uFE0F", label: "Chubascos de nieve ligeros" },
             86: { icon: "\uD83C\uDF28\uFE0F", label: "Chubascos de nieve intensos" },
