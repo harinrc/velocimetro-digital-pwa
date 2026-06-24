@@ -1388,7 +1388,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Reloj interno de la esquina superior derecha
     function updateClock() {
         const now = new Date();
-        clockText.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        clockText.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
     }
 
     function updateConnectivityState() {

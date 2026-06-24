@@ -36,6 +36,7 @@
     --mode-alert-shadow: rgba(255, 42, 42, 0.16);
     --mode-alert-title: rgba(255, 42, 42, 0.96);
     --mode-section-title: #cfd5e4;
+    --mode-gps-text: #cfd5e4;
 }
 
 /* ==========================================================================
@@ -128,6 +129,7 @@ html {
     --mode-alert-shadow: rgba(42, 183, 255, 0.18);
     --mode-alert-title: rgba(34, 242, 211, 0.95);
     --mode-section-title: #33e8d4;
+    --mode-gps-text: #7af5e8;
     --gauge-motion-duration: 0.25s;
     --speed-pop-up-scale: 1.03;
     --speed-pop-down-scale: 0.985;
@@ -158,6 +160,7 @@ html {
     --mode-alert-shadow: rgba(255, 42, 42, 0.16);
     --mode-alert-title: rgba(255, 42, 42, 0.96);
     --mode-section-title: #ff6f6f;
+    --mode-gps-text: #ff8a8a;
     --gauge-motion-duration: 0.19s;
     --speed-pop-up-scale: 1.05;
     --speed-pop-down-scale: 0.97;
@@ -188,6 +191,7 @@ html {
     --mode-alert-shadow: rgba(255, 123, 211, 0.2);
     --mode-alert-title: rgba(217, 75, 255, 0.96);
     --mode-section-title: #d15cff;
+    --mode-gps-text: #ef9dff;
     --gauge-motion-duration: 0.12s;
     --speed-pop-up-scale: 1.08;
     --speed-pop-down-scale: 0.94;
@@ -355,6 +359,15 @@ html {
     display: flex;
     align-items: center;
     gap: 6px;
+    color: var(--mode-gps-text);
+}
+
+.gps-status.searching {
+    color: #f9c74f;
+}
+
+.gps-status.off {
+    color: #9aa0a8;
 }
 
 .dot {
