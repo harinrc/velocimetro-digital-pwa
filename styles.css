@@ -94,6 +94,16 @@ html {
 }
 
 .app-container.mode-street {
+    --bg-color: #030d12;
+    --surface-color: #07151b;
+    --surface-color-2: #0b1d25;
+    --accent-red: #22f2d3;
+    --accent-red-2: #2ab7ff;
+    --accent-red-glow: rgba(34, 242, 211, 0.45);
+    --text-main: #effcff;
+    --text-muted: #95d9e6;
+    --gauge-track: #17323c;
+    --good: #49f0b3;
     --gauge-motion-duration: 0.25s;
     --speed-pop-up-scale: 1.03;
     --speed-pop-down-scale: 0.985;
@@ -102,6 +112,16 @@ html {
 }
 
 .app-container.mode-sport {
+    --bg-color: #000000;
+    --surface-color: #101113;
+    --surface-color-2: #17191d;
+    --accent-red: #ff2a2a;
+    --accent-red-2: #ff5a1f;
+    --accent-red-glow: rgba(255, 42, 42, 0.45);
+    --text-main: #f8f9ff;
+    --text-muted: #8f95a3;
+    --gauge-track: #242830;
+    --good: #35d07f;
     --gauge-motion-duration: 0.19s;
     --speed-pop-up-scale: 1.05;
     --speed-pop-down-scale: 0.97;
@@ -110,6 +130,16 @@ html {
 }
 
 .app-container.mode-track {
+    --bg-color: #09020f;
+    --surface-color: #12081b;
+    --surface-color-2: #1a0d27;
+    --accent-red: #d94bff;
+    --accent-red-2: #ff7bd3;
+    --accent-red-glow: rgba(217, 75, 255, 0.48);
+    --text-main: #fff7ff;
+    --text-muted: #c9a7dc;
+    --gauge-track: #34203e;
+    --good: #8cf7ff;
     --gauge-motion-duration: 0.12s;
     --speed-pop-up-scale: 1.08;
     --speed-pop-down-scale: 0.94;
