@@ -478,25 +478,45 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---- ICONOS WMO (Open-Meteo) ----
-    const WMO_ICONS = {
-        0: '\u2600\ufe0f',
-        1: '\uD83C\uDF24\uFE0F',
-        2: '\u26C5',
-        3: '\u2601\ufe0f',
-        45: '\uD83C\uDF2B\uFE0F', 48: '\uD83C\uDF2B\uFE0F',
-        51: '\uD83C\uDF26\uFE0F', 53: '\uD83C\uDF26\uFE0F', 55: '\uD83C\uDF26\uFE0F',
-        56: '\uD83C\uDF27\uFE0F', 57: '\uD83C\uDF27\uFE0F',
-        61: '\uD83C\uDF27\uFE0F', 63: '\uD83C\uDF27\uFE0F', 65: '\uD83C\uDF27\uFE0F',
-        66: '\uD83C\uDF27\uFE0F', 67: '\uD83C\uDF27\uFE0F',
-        71: '\u2744\ufe0f', 73: '\u2744\ufe0f', 75: '\u2744\ufe0f', 77: '\uD83C\uDF28\uFE0F',
-        80: '\uD83C\uDF26\uFE0F', 81: '\uD83C\uDF26\uFE0F', 82: '\u26C8\ufe0f',
-        85: '\uD83C\uDF28\uFE0F', 86: '\uD83C\uDF28\uFE0F',
-        95: '\u26C8\ufe0f', 96: '\u26C8\ufe0f', 99: '\u26C8\ufe0f'
-    };
+    // ---- ICONOS + DESCRIPCION WMO (Open-Meteo) ----
+    function getWmoWeatherInfo(code, isDay = true) {
+        // Iconos base para distinguir claramente dia y noche en estados despejados/parcialmente nublados.
+        const clearIcon = isDay ? "\u2600\ufe0f" : "\uD83C\uDF19";
+        const mostlyClearIcon = isDay ? "\uD83C\uDF24\uFE0F" : "\uD83C\uDF19";
+        const partlyCloudyIcon = isDay ? "\u26C5" : "\u2601\ufe0f";
 
-    function getWmoIcon(code) {
-        return WMO_ICONS[code] ?? '\uD83C\uDF21\uFE0F';
+        const definitions = {
+            0: { icon: clearIcon, label: isDay ? "Despejado" : "Despejado (noche)" },
+            1: { icon: mostlyClearIcon, label: isDay ? "Mayormente despejado" : "Mayormente despejado (noche)" },
+            2: { icon: partlyCloudyIcon, label: "Parcialmente nublado" },
+            3: { icon: "\u2601\ufe0f", label: "Nublado" },
+            45: { icon: "\uD83C\uDF2B\uFE0F", label: "Niebla" },
+            48: { icon: "\uD83C\uDF2B\uFE0F", label: "Niebla con escarcha" },
+            51: { icon: "\uD83C\uDF26\uFE0F", label: "Llovizna ligera" },
+            53: { icon: "\uD83C\uDF26\uFE0F", label: "Llovizna moderada" },
+            55: { icon: "\uD83C\uDF26\uFE0F", label: "Llovizna intensa" },
+            56: { icon: "\uD83C\uDF27\uFE0F", label: "Llovizna helada ligera" },
+            57: { icon: "\uD83C\uDF27\uFE0F", label: "Llovizna helada intensa" },
+            61: { icon: "\uD83C\uDF27\uFE0F", label: "Lluvia ligera" },
+            63: { icon: "\uD83C\uDF27\uFE0F", label: "Lluvia moderada" },
+            65: { icon: "\uD83C\uDF27\uFE0F", label: "Lluvia intensa" },
+            66: { icon: "\uD83C\uDF27\uFE0F", label: "Lluvia helada ligera" },
+            67: { icon: "\uD83C\uDF27\uFE0F", label: "Lluvia helada intensa" },
+            71: { icon: "\u2744\ufe0f", label: "Nieve ligera" },
+            73: { icon: "\u2744\ufe0f", label: "Nieve moderada" },
+            75: { icon: "\u2744\ufe0f", label: "Nieve intensa" },
+            77: { icon: "\uD83C\uDF28\uFE0F", label: "Granizo suave" },
+            80: { icon: "\uD83C\uDF26\uFE0F", label: "Chubascos ligeros" },
+            81: { icon: "\uD83C\uDF26\uFE0F", label: "Chubascos moderados" },
+            82: { icon: "\u26C8\ufe0f", label: "Chubascos intensos" },
+            85: { icon: "\uD83C\uDF28\uFE0F", label: "Chubascos de nieve ligeros" },
+            86: { icon: "\uD83C\uDF28\uFE0F", label: "Chubascos de nieve intensos" },
+            95: { icon: "\u26C8\ufe0f", label: "Tormenta" },
+            96: { icon: "\u26C8\ufe0f", label: "Tormenta con granizo leve" },
+            99: { icon: "\u26C8\ufe0f", label: "Tormenta con granizo fuerte" },
+        };
+
+        return definitions[code] ?? { icon: "\uD83C\uDF21\uFE0F", label: "Condicion desconocida" };
     }
 
     // ---- CLIMA: Open-Meteo (sin API key) ----
@@ -508,17 +528,26 @@ document.addEventListener("DOMContentLoaded", () => {
             if (dist < 2000 && (now - lastWeatherTime) < 10 * 60 * 1000) return;
         }
         try {
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,weather_code&timezone=auto&forecast_days=1`;
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,weather_code,is_day&timezone=auto&forecast_days=1`;
             const res = await fetch(url);
             if (!res.ok) return;
             const data = await res.json();
             const temp = data.current?.temperature_2m;
             const code = data.current?.weather_code;
+            const isDayValue = data.current?.is_day;
+            const isDay = typeof isDayValue === "number"
+                ? isDayValue === 1
+                : (new Date().getHours() >= 6 && new Date().getHours() < 18);
             if (temp !== undefined && code !== undefined) {
                 const iconEl = document.getElementById('weather-icon');
                 const tempEl = document.getElementById('weather-temp');
-                if (iconEl) iconEl.textContent = getWmoIcon(code);
+                const weatherInfo = getWmoWeatherInfo(code, isDay);
+                if (iconEl) {
+                    iconEl.textContent = weatherInfo.icon;
+                    iconEl.title = weatherInfo.label;
+                }
                 if (tempEl) tempEl.textContent = `${Math.round(temp)}\u00b0C`;
+                if (tempEl) tempEl.title = weatherInfo.label;
                 lastWeatherLatLng = [lat, lon];
                 lastWeatherTime = now;
             }
