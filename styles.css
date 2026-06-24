@@ -24,6 +24,17 @@
     --gauge-arc-length: 500;
     --gauge-start-angle: -128deg;
     --gauge-end-angle: 98deg;
+    --mode-button-surface: #0f1218;
+    --mode-button-border: #2d3340;
+    --mode-button-text: #dbe1ef;
+    --mode-button-active-border: rgba(255, 42, 42, 0.58);
+    --mode-button-active-glow: rgba(255, 42, 42, 0.22);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(255, 42, 42, 0.2), rgba(255, 90, 31, 0.16));
+    --mode-button-active-text: #fff7f7;
+    --mode-button-glow: 0 0 10px rgba(255, 42, 42, 0.22);
+    --mode-alert-border: rgba(255, 42, 42, 0.58);
+    --mode-alert-shadow: rgba(255, 42, 42, 0.16);
+    --mode-alert-title: rgba(255, 42, 42, 0.96);
 }
 
 /* ==========================================================================
@@ -104,6 +115,17 @@ html {
     --text-muted: #95d9e6;
     --gauge-track: #17323c;
     --good: #49f0b3;
+    --mode-button-surface: linear-gradient(180deg, rgba(6, 21, 28, 0.98), rgba(8, 28, 36, 0.98));
+    --mode-button-border: rgba(34, 242, 211, 0.22);
+    --mode-button-text: #dffcff;
+    --mode-button-active-border: rgba(42, 183, 255, 0.82);
+    --mode-button-active-glow: rgba(42, 183, 255, 0.28);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(34, 242, 211, 0.26), rgba(42, 183, 255, 0.22));
+    --mode-button-active-text: #f3ffff;
+    --mode-button-glow: 0 0 14px rgba(42, 183, 255, 0.24);
+    --mode-alert-border: rgba(34, 242, 211, 0.42);
+    --mode-alert-shadow: rgba(42, 183, 255, 0.18);
+    --mode-alert-title: rgba(34, 242, 211, 0.95);
     --gauge-motion-duration: 0.25s;
     --speed-pop-up-scale: 1.03;
     --speed-pop-down-scale: 0.985;
@@ -122,6 +144,17 @@ html {
     --text-muted: #8f95a3;
     --gauge-track: #242830;
     --good: #35d07f;
+    --mode-button-surface: #0f1218;
+    --mode-button-border: #2d3340;
+    --mode-button-text: #dbe1ef;
+    --mode-button-active-border: rgba(255, 42, 42, 0.58);
+    --mode-button-active-glow: rgba(255, 42, 42, 0.22);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(255, 42, 42, 0.2), rgba(255, 90, 31, 0.16));
+    --mode-button-active-text: #fff7f7;
+    --mode-button-glow: 0 0 10px rgba(255, 42, 42, 0.22);
+    --mode-alert-border: rgba(255, 42, 42, 0.58);
+    --mode-alert-shadow: rgba(255, 42, 42, 0.16);
+    --mode-alert-title: rgba(255, 42, 42, 0.96);
     --gauge-motion-duration: 0.19s;
     --speed-pop-up-scale: 1.05;
     --speed-pop-down-scale: 0.97;
@@ -140,6 +173,17 @@ html {
     --text-muted: #c9a7dc;
     --gauge-track: #34203e;
     --good: #8cf7ff;
+    --mode-button-surface: linear-gradient(180deg, rgba(19, 8, 29, 0.98), rgba(24, 10, 36, 0.98));
+    --mode-button-border: rgba(217, 75, 255, 0.24);
+    --mode-button-text: #fff1ff;
+    --mode-button-active-border: rgba(217, 75, 255, 0.88);
+    --mode-button-active-glow: rgba(255, 123, 211, 0.3);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(217, 75, 255, 0.24), rgba(255, 123, 211, 0.22));
+    --mode-button-active-text: #fff9ff;
+    --mode-button-glow: 0 0 14px rgba(217, 75, 255, 0.28);
+    --mode-alert-border: rgba(217, 75, 255, 0.5);
+    --mode-alert-shadow: rgba(255, 123, 211, 0.2);
+    --mode-alert-title: rgba(217, 75, 255, 0.96);
     --gauge-motion-duration: 0.12s;
     --speed-pop-up-scale: 1.08;
     --speed-pop-down-scale: 0.94;
@@ -222,16 +266,17 @@ html {
 }
 
 .reload-btn {
-    border: 1px solid #2c313d;
-    background: #0d1015;
-    color: #d4d9e5;
+    border: 1px solid var(--mode-button-border);
+    background: var(--mode-button-surface);
+    color: var(--mode-button-text);
     border-radius: 10px;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.4px;
     padding: 7px 10px;
     cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease;
+    box-shadow: var(--mode-button-glow);
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -239,59 +284,60 @@ html {
 }
 
 .install-btn {
-    border: 1px solid rgba(255, 42, 42, 0.58);
-    background: linear-gradient(180deg, rgba(255, 42, 42, 0.2), rgba(255, 42, 42, 0.08));
-    color: #fff2f2;
+    border: 1px solid var(--mode-button-active-border);
+    background: var(--mode-button-active-bg);
+    color: var(--mode-button-active-text);
     border-radius: 10px;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.35px;
     padding: 7px 10px;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(255, 42, 42, 0.22);
+    box-shadow: 0 0 12px var(--mode-button-active-glow);
     animation: install-pulse 1.35s ease-in-out infinite alternate;
 }
 
 @keyframes install-pulse {
     0% {
-        box-shadow: 0 0 8px rgba(255, 42, 42, 0.16);
+        box-shadow: 0 0 8px var(--mode-button-active-glow);
     }
     100% {
-        box-shadow: 0 0 16px rgba(255, 42, 42, 0.35);
+        box-shadow: 0 0 16px var(--mode-button-active-glow);
     }
 }
 
 .orientation-btn {
-    border: 1px solid #2c313d;
-    background: #0d1015;
-    color: #d4d9e5;
+    border: 1px solid var(--mode-button-border);
+    background: var(--mode-button-surface);
+    color: var(--mode-button-text);
     border-radius: 10px;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.35px;
     padding: 7px 10px;
     cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--mode-button-glow);
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .orientation-btn.active {
-    border-color: rgba(255, 90, 31, 0.65);
-    box-shadow: 0 0 10px rgba(255, 90, 31, 0.25);
-    color: #fff5ee;
+    border-color: var(--mode-button-active-border);
+    box-shadow: 0 0 12px var(--mode-button-active-glow);
+    color: var(--mode-button-active-text);
 }
 
 .reload-btn:active {
-    border-color: rgba(255, 90, 31, 0.6);
+    border-color: var(--mode-button-active-border);
     color: #ffffff;
 }
 
 .install-btn:active {
-    border-color: rgba(255, 90, 31, 0.76);
+    border-color: var(--mode-button-active-border);
     color: #ffffff;
 }
 
 .orientation-btn:active {
-    border-color: rgba(255, 90, 31, 0.6);
+    border-color: var(--mode-button-active-border);
     color: #ffffff;
 }
 
@@ -549,14 +595,14 @@ html {
 }
 
 .speed-warning .current-speed {
-    color: var(--accent-red);
-    text-shadow: 0 0 24px rgba(255, 42, 42, 0.62);
+    color: var(--mode-button-active-text);
+    text-shadow: 0 0 24px var(--mode-button-active-glow);
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
 .app-container.speed-warning-startup .current-speed {
-    color: var(--accent-red);
-    text-shadow: 0 0 24px rgba(255, 42, 42, 0.62);
+    color: var(--mode-button-active-text);
+    text-shadow: 0 0 24px var(--mode-button-active-glow);
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
@@ -617,6 +663,19 @@ html {
 
 .speed-warning .limit-indicator {
     animation: shake 0.24s ease-in-out infinite alternate;
+}
+
+.speed-warning .limit-label,
+.speed-warning .mode-label,
+.speed-warning .map-title,
+.speed-warning .stat-label {
+    color: var(--mode-alert-title);
+}
+
+.speed-warning .weather-info,
+.speed-warning .location-info {
+    border-color: var(--mode-alert-border);
+    box-shadow: 0 0 12px var(--mode-alert-shadow);
 }
 
 .app-container.speed-warning-startup .limit-indicator {
@@ -1281,23 +1340,24 @@ html {
 }
 
 .mode-btn {
-    background: #0c0f13;
-    color: #a9afbb;
-    border: 1px solid #252a33;
+    background: var(--mode-button-surface);
+    color: var(--mode-button-text);
+    border: 1px solid var(--mode-button-border);
     border-radius: 10px;
     padding: 8px 10px;
     font-size: clamp(10px, 1.4vw, 12px);
     letter-spacing: 0.3px;
     font-weight: 700;
     cursor: pointer;
+    box-shadow: var(--mode-button-glow);
     transition: all 0.18s ease;
 }
 
 .mode-btn.active {
-    color: #fff7f7;
-    border-color: rgba(255, 42, 42, 0.58);
-    box-shadow: inset 0 0 0 1px rgba(255, 90, 31, 0.4), 0 0 10px rgba(255, 42, 42, 0.22);
-    background: linear-gradient(165deg, rgba(255, 42, 42, 0.2), rgba(255, 90, 31, 0.16));
+    color: var(--mode-button-active-text);
+    border-color: var(--mode-button-active-border);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 12px var(--mode-button-active-glow);
+    background: var(--mode-button-active-bg);
 }
 
 .action-row {
@@ -1308,27 +1368,29 @@ html {
 }
 
 .floating-btn {
-    border: 1px solid #2d3340;
+    border: 1px solid var(--mode-button-border);
     border-radius: 14px;
-    background: #0f1218;
-    color: #dbe1ef;
+    background: var(--mode-button-surface);
+    color: var(--mode-button-text);
     padding: 12px 10px;
     font-size: clamp(10px, 1.5vw, 12px);
     font-weight: 700;
     letter-spacing: 0.2px;
     cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--mode-button-glow);
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .floating-btn:active {
-    border-color: rgba(255, 90, 31, 0.56);
+    border-color: var(--mode-button-active-border);
     color: #ffffff;
 }
 
 .floating-btn.active {
-    border-color: rgba(255, 42, 42, 0.64);
-    box-shadow: 0 0 12px rgba(255, 42, 42, 0.26);
-    color: #fff5f5;
+    border-color: var(--mode-button-active-border);
+    box-shadow: 0 0 14px var(--mode-button-active-glow);
+    color: var(--mode-button-active-text);
+    background: var(--mode-button-active-bg);
 }
 
 .speed-warning .stat-item,
@@ -1337,8 +1399,8 @@ html {
 .speed-warning .max-speed-btn,
 .speed-warning .mode-btn,
 .speed-warning .floating-btn {
-    border-color: rgba(255, 42, 42, 0.58);
-    box-shadow: 0 0 10px rgba(255, 42, 42, 0.16);
+    border-color: var(--mode-alert-border);
+    box-shadow: 0 0 10px var(--mode-alert-shadow);
 }
 
 .speed-warning .stat-value,
@@ -1346,7 +1408,7 @@ html {
 .speed-warning .max-speed-btn,
 .speed-warning .floating-btn,
 .speed-warning .mode-btn {
-    color: #fff0f0;
+    color: var(--mode-button-active-text);
 }
 
 .app-container.speed-warning-aggressive .stat-item,
@@ -1355,8 +1417,8 @@ html {
 .app-container.speed-warning-aggressive .max-speed-btn,
 .app-container.speed-warning-aggressive .mode-btn,
 .app-container.speed-warning-aggressive .floating-btn {
-    border-color: rgba(255, 42, 42, 0.78);
-    box-shadow: 0 0 16px rgba(255, 42, 42, 0.3);
+    border-color: var(--mode-button-active-border);
+    box-shadow: 0 0 16px var(--mode-button-active-glow);
 }
 
 .app-container.speed-warning-aggressive .stat-item,
