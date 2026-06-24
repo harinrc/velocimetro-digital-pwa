@@ -569,19 +569,20 @@ html {
 }
 
 .gauge-labels text.active-label {
-    fill: #ffffff;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    fill: color-mix(in srgb, var(--text-main) 76%, var(--accent-red) 24%);
+    text-shadow: 0 0 8px var(--accent-red-glow);
 }
 
 .speed-warning .gauge-labels text.active-label,
 .speed-warning .gauge-labels text.over-limit-label {
-    fill: color-mix(in srgb, var(--text-main) 86%, var(--accent-red) 14%);
+    fill: color-mix(in srgb, var(--text-main) 68%, var(--accent-red) 32%);
+    text-shadow: 0 0 10px var(--accent-red-glow);
 }
 
 .app-container.speed-warning-startup .gauge-labels text.active-label,
 .app-container.speed-warning-startup .gauge-labels text.over-limit-label {
-    fill: color-mix(in srgb, var(--text-main) 86%, var(--accent-red) 14%);
-    text-shadow: 0 0 8px var(--accent-red-glow);
+    fill: color-mix(in srgb, var(--text-main) 68%, var(--accent-red) 32%);
+    text-shadow: 0 0 10px var(--accent-red-glow);
 }
 
 /* La Aguja */
