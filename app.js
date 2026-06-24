@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let pipTitleText = null;
     let deferredInstallPrompt = null;
     let wakeLock = null;
+    let previousClockParts = null;
     let lastGeocodedLatLng = null;
     let lastWeatherLatLng = null;
     let lastWeatherTime = 0;
@@ -1388,7 +1389,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // Reloj interno de la esquina superior derecha
     function updateClock() {
         const now = new Date();
-        clockText.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        const parts = {
+            hours: String(now.getHours()).padStart(2, "0"),
+            minutes: String(now.getMinutes()).padStart(2, "0"),
+            seconds: String(now.getSeconds()).padStart(2, "0"),
+        };
+
+        const getChangeClass = (key) => {
+            if (!previousClockParts) return "";
+
+            const current = Number(parts[key]);
+            const previous = Number(previousClockParts[key]);
+            if (current === previous) return "";
+
+            return current > previous ? "clock-part-up" : "clock-part-down";
+        };
+
+        const isMinuteHot = Number(parts.minutes) >= 50;
+        const isSecondHot = Number(parts.seconds) >= 50;
+
+        clockText.innerHTML = `
+            <span class="clock-part ${getChangeClass("hours")}">${parts.hours}</span>
+            <span class="clock-separator ${getChangeClass("minutes")} ${isMinuteHot ? "clock-part-hot" : ""}">:</span>
+            <span class="clock-part ${getChangeClass("minutes")} ${isMinuteHot ? "clock-part-hot" : ""}">${parts.minutes}</span>
+            <span class="clock-separator ${getChangeClass("seconds")} ${isSecondHot ? "clock-part-hot" : ""}">:</span>
+            <span class="clock-part ${getChangeClass("seconds")} ${isSecondHot ? "clock-part-hot" : ""}">${parts.seconds}</span>
+        `;
+
+        previousClockParts = parts;
     }
 
     function updateConnectivityState() {

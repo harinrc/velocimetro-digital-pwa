@@ -291,6 +291,75 @@ html {
     border-radius: 12px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
     border: 1px solid rgba(255, 255, 255, 0.08);
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    font-variant-numeric: tabular-nums;
+}
+
+.clock-part,
+.clock-separator {
+    display: inline-block;
+    min-width: 2ch;
+    text-align: center;
+}
+
+.clock-separator {
+    min-width: auto;
+    opacity: 0.85;
+}
+
+.clock-separator.clock-part-hot {
+    opacity: 1;
+}
+
+.clock-part-up {
+    animation: clock-pop-up 0.22s ease-out;
+}
+
+.clock-part-down {
+    animation: clock-pop-down 0.22s ease-out;
+}
+
+.clock-part-hot {
+    color: var(--accent-red);
+    text-shadow: 0 0 10px var(--accent-red-glow), 0 0 18px var(--mode-button-active-glow);
+}
+
+@keyframes clock-pop-up {
+    0% {
+        opacity: 0.72;
+        transform: translateY(1px) scale(0.96);
+        filter: saturate(0.9);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(-1px) scale(1.05);
+        filter: saturate(1.06);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: saturate(1);
+    }
+}
+
+@keyframes clock-pop-down {
+    0% {
+        opacity: 0.76;
+        transform: translateY(-1px) scale(1.05);
+        filter: saturate(1.02);
+    }
+    70% {
+        opacity: 1;
+        transform: translateY(1px) scale(0.96);
+        filter: saturate(0.92);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: saturate(1);
+    }
 }
 
 .reload-btn {
