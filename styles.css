@@ -202,21 +202,7 @@ html {
 /* --- Alerta visual cuando se supera el límite --- */
 .app-container.speed-warning {
     background-color: #000000;
-    animation: none;
-}
-
-.app-container.speed-warning::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
     animation: pulse-alert var(--warning-pulse-duration) infinite alternate ease-in-out;
-}
-
-.app-container.speed-warning > * {
-    position: relative;
-    z-index: 1;
 }
 
 @keyframes pulse-alert {
@@ -235,10 +221,6 @@ html {
 }
 
 .app-container.speed-warning.speed-warning-aggressive {
-    animation: none;
-}
-
-.app-container.speed-warning.speed-warning-aggressive::after {
     animation: pulse-alert-aggressive 0.52s infinite alternate ease-in-out;
 }
 
@@ -1042,30 +1024,9 @@ html {
 }
 
 .speed-warning .controls-panel {
-    border-color: color-mix(in srgb, var(--mode-alert-border) 26%, transparent);
-    box-shadow: 0 0 16px color-mix(in srgb, var(--mode-alert-shadow) 26%, transparent), 0 -10px 30px rgba(0, 0, 0, 0.35);
-    animation: actions-alert 0.55s ease-in-out infinite alternate;
-}
-
-.speed-warning .controls-panel::before,
-.app-container.speed-warning-aggressive .controls-panel::before {
-    content: "";
-    position: absolute;
-    inset: -12px;
-    border-radius: inherit;
-    background:
-        radial-gradient(closest-side at 50% 50%, color-mix(in srgb, var(--mode-alert-shadow) 45%, transparent) 0%, transparent 72%),
-        radial-gradient(closest-side at 50% 50%, color-mix(in srgb, var(--mode-button-active-glow) 30%, transparent) 0%, transparent 82%);
-    filter: blur(10px);
-    opacity: 0.88;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.speed-warning .controls-panel > *,
-.app-container.speed-warning-aggressive .controls-panel > * {
-    position: relative;
-    z-index: 1;
+    border-color: color-mix(in srgb, var(--mode-alert-border) 18%, transparent);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+    animation: none;
 }
 
 @keyframes actions-alert {
@@ -1080,18 +1041,9 @@ html {
 }
 
 .app-container.speed-warning-aggressive .controls-panel {
-    animation: actions-alert-aggressive 0.35s ease-in-out infinite alternate;
-    border-color: color-mix(in srgb, var(--mode-button-active-border) 36%, transparent);
-    box-shadow: 0 0 24px color-mix(in srgb, var(--mode-button-active-glow) 52%, transparent), 0 -10px 30px rgba(0, 0, 0, 0.42);
-}
-
-.app-container.speed-warning-aggressive .controls-panel::before {
-    inset: -16px;
-    background:
-        radial-gradient(closest-side at 50% 50%, color-mix(in srgb, var(--mode-button-active-glow) 65%, transparent) 0%, transparent 68%),
-        radial-gradient(closest-side at 50% 50%, color-mix(in srgb, var(--mode-alert-shadow) 52%, transparent) 0%, transparent 80%);
-    filter: blur(14px);
-    opacity: 1;
+    border-color: color-mix(in srgb, var(--mode-button-active-border) 24%, transparent);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.42);
+    animation: none;
 }
 
 @keyframes actions-alert-aggressive {
