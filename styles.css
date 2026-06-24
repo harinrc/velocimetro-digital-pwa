@@ -207,10 +207,20 @@ html {
 
 @keyframes pulse-alert {
     0% {
-        box-shadow: inset 0 0 0 1px var(--mode-alert-border), 0 0 10px transparent;
+        box-shadow:
+            inset 0 0 0 1px color-mix(in srgb, var(--mode-alert-border) 82%, transparent),
+            inset 0 0 10px color-mix(in srgb, var(--mode-alert-shadow) 38%, transparent),
+            0 0 10px color-mix(in srgb, var(--mode-alert-shadow) 18%, transparent),
+            0 0 22px color-mix(in srgb, var(--mode-alert-shadow) 12%, transparent);
     }
     100% {
-        box-shadow: inset 0 0 0 2px var(--mode-alert-border), inset 0 0 22px var(--mode-alert-shadow), 0 0 26px var(--mode-alert-shadow);
+        box-shadow:
+            inset 0 0 0 2px var(--mode-alert-border),
+            inset 0 0 18px color-mix(in srgb, var(--mode-alert-shadow) 78%, transparent),
+            inset 0 0 34px color-mix(in srgb, var(--mode-button-active-glow) 58%, transparent),
+            0 0 18px color-mix(in srgb, var(--mode-alert-shadow) 34%, transparent),
+            0 0 42px color-mix(in srgb, var(--mode-button-active-glow) 26%, transparent),
+            0 0 70px color-mix(in srgb, var(--mode-button-active-glow) 18%, transparent);
     }
 }
 
@@ -220,10 +230,20 @@ html {
 
 @keyframes pulse-alert-aggressive {
     0% {
-        box-shadow: inset 0 0 0 1px var(--mode-alert-border), 0 0 12px transparent;
+        box-shadow:
+            inset 0 0 0 2px color-mix(in srgb, var(--mode-alert-border) 88%, transparent),
+            inset 0 0 14px color-mix(in srgb, var(--mode-alert-shadow) 48%, transparent),
+            0 0 16px color-mix(in srgb, var(--mode-alert-shadow) 26%, transparent),
+            0 0 34px color-mix(in srgb, var(--mode-button-active-glow) 14%, transparent);
     }
     100% {
-        box-shadow: inset 0 0 0 3px var(--mode-button-active-border), inset 0 0 30px var(--mode-button-active-glow), 0 0 34px var(--mode-button-active-glow);
+        box-shadow:
+            inset 0 0 0 3px var(--mode-button-active-border),
+            inset 0 0 24px color-mix(in srgb, var(--mode-alert-shadow) 84%, transparent),
+            inset 0 0 42px color-mix(in srgb, var(--mode-button-active-glow) 72%, transparent),
+            0 0 24px color-mix(in srgb, var(--mode-alert-shadow) 42%, transparent),
+            0 0 52px color-mix(in srgb, var(--mode-button-active-glow) 34%, transparent),
+            0 0 88px color-mix(in srgb, var(--mode-button-active-glow) 24%, transparent);
     }
 }
 
