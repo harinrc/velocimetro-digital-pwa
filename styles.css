@@ -194,7 +194,7 @@ html {
 /* --- Alerta visual cuando se supera el límite --- */
 .app-container.speed-warning {
     background-color: #000000;
-    animation: none;
+    animation: pulse-alert var(--warning-pulse-duration) infinite alternate ease-in-out;
 }
 
 @keyframes pulse-alert {
@@ -207,7 +207,7 @@ html {
 }
 
 .app-container.speed-warning.speed-warning-aggressive {
-    animation: none;
+    animation: pulse-alert-aggressive 0.52s infinite alternate ease-in-out;
 }
 
 @keyframes pulse-alert-aggressive {
@@ -595,13 +595,13 @@ html {
 }
 
 .speed-warning .current-speed {
-    color: var(--mode-button-active-text);
+    color: var(--accent-red);
     text-shadow: 0 0 24px var(--mode-button-active-glow);
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
 .app-container.speed-warning-startup .current-speed {
-    color: var(--mode-button-active-text);
+    color: var(--accent-red);
     text-shadow: 0 0 24px var(--mode-button-active-glow);
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
@@ -609,11 +609,11 @@ html {
 @keyframes red-number-flash {
     0% {
         transform: translateY(0) scale(1);
-        text-shadow: 0 0 8px rgba(255, 42, 42, 0.44);
+        text-shadow: 0 0 8px var(--mode-alert-shadow);
     }
     100% {
         transform: translateY(-1px) scale(1.03);
-        text-shadow: 0 0 20px rgba(255, 42, 42, 0.75);
+        text-shadow: 0 0 20px var(--mode-button-active-glow);
     }
 }
 
@@ -628,11 +628,11 @@ html {
 @keyframes red-number-flash-aggressive {
     0% {
         transform: translateY(0) scale(1.01);
-        text-shadow: 0 0 12px rgba(255, 42, 42, 0.62);
+        text-shadow: 0 0 12px var(--mode-alert-shadow);
     }
     100% {
         transform: translateY(-1px) scale(1.07);
-        text-shadow: 0 0 28px rgba(255, 42, 42, 0.92);
+        text-shadow: 0 0 28px var(--mode-button-active-glow);
     }
 }
 
@@ -1031,7 +1031,7 @@ html {
 .map-location-tag {
     font-size: 10px;
     font-weight: 700;
-    color: rgba(255, 42, 42, 0.8);
+    color: var(--text-muted);
     letter-spacing: 0.3px;
     white-space: nowrap;
     overflow: hidden;
