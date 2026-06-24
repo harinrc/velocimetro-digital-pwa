@@ -832,14 +832,14 @@ html {
    PANEL INFERIOR: CONFIGURACIÓN Y ESTADÍSTICAS
    ========================================================================== */
 .controls-panel {
-    background: linear-gradient(180deg, #101114, #0c0d10 65%);
-    border: 1px solid #1f2229;
+    background: linear-gradient(180deg, var(--surface-color), var(--surface-color-2) 65%);
+    border: 1px solid var(--mode-alert-border);
     border-radius: 22px;
     padding: 14px;
     display: flex;
     flex-direction: column;
     gap: clamp(8px, 2vw, 12px);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px color-mix(in srgb, var(--mode-alert-border) 28%, transparent);
     margin-top: 10px;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -871,14 +871,14 @@ html {
     width: min(72%, 260px);
     height: 8px;
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), rgba(255, 42, 42, 0.9), rgba(255, 255, 255, 0.12));
-    box-shadow: 0 0 16px rgba(255, 42, 42, 0.45);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), var(--mode-button-active-border), rgba(255, 255, 255, 0.12));
+    box-shadow: 0 0 16px var(--mode-button-active-glow);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .panel-handle:active .panel-handle-bar {
     transform: scaleX(0.95);
-    box-shadow: 0 0 22px rgba(255, 42, 42, 0.65);
+    box-shadow: 0 0 22px var(--mode-button-active-glow);
 }
 
 .app-container.panel-collapsed .controls-panel {
