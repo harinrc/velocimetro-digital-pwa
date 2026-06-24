@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let panelSwipePointerId = null;
     const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
     const normalSystemColor = "#050608";
-    const warningSystemColor = "#250808";
+    const warningSystemColor = "#050608";
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
@@ -259,6 +259,45 @@ document.addEventListener("DOMContentLoaded", () => {
         gpsStatus.innerHTML = `<span class="dot"></span> ${text}`;
     }
 
+    function getMapThemeColors() {
+        if (visualMode === "street") {
+            return {
+                markerStroke: "#22f2d3",
+                markerFill: "#2ab7ff",
+            };
+        }
+
+        if (visualMode === "track") {
+            return {
+                markerStroke: "#d94bff",
+                markerFill: "#ff7bd3",
+            };
+        }
+
+        return {
+            markerStroke: "#ff2a2a",
+            markerFill: "#ff5a1f",
+        };
+    }
+
+    function applyMapThemeStyles() {
+        const { markerStroke, markerFill } = getMapThemeColors();
+
+        if (mapMarker) {
+            mapMarker.setStyle({
+                color: markerStroke,
+                fillColor: markerFill,
+            });
+        }
+
+        if (mapAccuracyCircle) {
+            mapAccuracyCircle.setStyle({
+                color: markerStroke,
+                fillColor: markerFill,
+            });
+        }
+    }
+
     function setVisualMode(mode) {
         const modes = ["street", "sport", "track"];
         if (!modes.includes(mode)) {
@@ -274,6 +313,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         localStorage.setItem("speedometer_visual_mode", mode);
+
+        applyMapThemeStyles();
 
         if (pipWindow && !pipWindow.closed) {
             pipWindow.document.body.className = `mode-${mode}`;
@@ -740,11 +781,12 @@ document.addEventListener("DOMContentLoaded", () => {
         latestLatLng = point;
 
         if (!mapMarker) {
+            const { markerStroke, markerFill } = getMapThemeColors();
             mapMarker = L.circleMarker(point, {
                 radius: 7,
-                color: "#ff2a2a",
+                color: markerStroke,
                 weight: 2,
-                fillColor: "#ff5a1f",
+                fillColor: markerFill,
                 fillOpacity: 0.9,
                 className: "map-speed-marker"
             }).addTo(mapInstance);
@@ -753,11 +795,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!mapAccuracyCircle) {
+            const { markerStroke, markerFill } = getMapThemeColors();
             mapAccuracyCircle = L.circle(point, {
                 radius: Math.max(8, accuracy || 8),
-                color: "#ff2a2a",
+                color: markerStroke,
                 weight: 1,
-                fillColor: "#ff2a2a",
+                fillColor: markerFill,
                 fillOpacity: 0.12
             }).addTo(mapInstance);
         } else {

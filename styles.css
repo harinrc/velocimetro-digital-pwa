@@ -193,8 +193,8 @@ html {
 
 /* --- Alerta visual cuando se supera el límite --- */
 .app-container.speed-warning {
-    background-color: color-mix(in srgb, var(--bg-color) 78%, var(--accent-red) 22%);
-    animation: pulse-alert var(--warning-pulse-duration) infinite alternate ease-in-out;
+    background-color: #000000;
+    animation: none;
 }
 
 @keyframes pulse-alert {
@@ -207,7 +207,7 @@ html {
 }
 
 .app-container.speed-warning.speed-warning-aggressive {
-    animation: pulse-alert-aggressive 0.52s infinite alternate ease-in-out;
+    animation: none;
 }
 
 @keyframes pulse-alert-aggressive {
@@ -684,8 +684,8 @@ html {
 
 .speed-warning .weather-info {
     animation: shake 0.24s ease-in-out infinite alternate;
-    border-color: rgba(255, 42, 42, 0.66);
-    box-shadow: 0 0 12px rgba(255, 42, 42, 0.25);
+    border-color: var(--mode-alert-border);
+    box-shadow: 0 0 12px var(--mode-alert-shadow);
 }
 
 @keyframes shake {
@@ -920,8 +920,8 @@ html {
 }
 
 .speed-warning .controls-panel {
-    border-color: rgba(255, 42, 42, 0.7);
-    box-shadow: 0 0 22px rgba(255, 42, 42, 0.24), 0 -10px 30px rgba(0, 0, 0, 0.35);
+    border-color: var(--mode-alert-border);
+    box-shadow: 0 0 22px var(--mode-alert-shadow), 0 -10px 30px rgba(0, 0, 0, 0.35);
     animation: actions-alert 0.55s ease-in-out infinite alternate;
 }
 
@@ -938,7 +938,7 @@ html {
 
 .app-container.speed-warning-aggressive .controls-panel {
     animation: actions-alert-aggressive 0.35s ease-in-out infinite alternate;
-    box-shadow: 0 0 30px rgba(255, 42, 42, 0.38), 0 -10px 30px rgba(0, 0, 0, 0.42);
+    box-shadow: 0 0 30px var(--mode-button-active-glow), 0 -10px 30px rgba(0, 0, 0, 0.42);
 }
 
 @keyframes actions-alert-aggressive {
