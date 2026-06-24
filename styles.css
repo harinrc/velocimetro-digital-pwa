@@ -35,6 +35,7 @@
     --mode-alert-border: rgba(255, 42, 42, 0.58);
     --mode-alert-shadow: rgba(255, 42, 42, 0.16);
     --mode-alert-title: rgba(255, 42, 42, 0.96);
+    --mode-section-title: #cfd5e4;
 }
 
 /* ==========================================================================
@@ -126,6 +127,7 @@ html {
     --mode-alert-border: rgba(34, 242, 211, 0.42);
     --mode-alert-shadow: rgba(42, 183, 255, 0.18);
     --mode-alert-title: rgba(34, 242, 211, 0.95);
+    --mode-section-title: #33e8d4;
     --gauge-motion-duration: 0.25s;
     --speed-pop-up-scale: 1.03;
     --speed-pop-down-scale: 0.985;
@@ -155,6 +157,7 @@ html {
     --mode-alert-border: rgba(255, 42, 42, 0.58);
     --mode-alert-shadow: rgba(255, 42, 42, 0.16);
     --mode-alert-title: rgba(255, 42, 42, 0.96);
+    --mode-section-title: #ff6f6f;
     --gauge-motion-duration: 0.19s;
     --speed-pop-up-scale: 1.05;
     --speed-pop-down-scale: 0.97;
@@ -184,6 +187,7 @@ html {
     --mode-alert-border: rgba(217, 75, 255, 0.5);
     --mode-alert-shadow: rgba(255, 123, 211, 0.2);
     --mode-alert-title: rgba(217, 75, 255, 0.96);
+    --mode-section-title: #d15cff;
     --gauge-motion-duration: 0.12s;
     --speed-pop-up-scale: 1.08;
     --speed-pop-down-scale: 0.94;
@@ -199,10 +203,10 @@ html {
 
 @keyframes pulse-alert {
     0% {
-        box-shadow: inset 0 0 15px var(--mode-alert-shadow);
+        box-shadow: inset 0 0 0 1px var(--mode-alert-border), 0 0 10px transparent;
     }
     100% {
-        box-shadow: inset 0 0 40px var(--mode-button-active-glow);
+        box-shadow: inset 0 0 0 2px var(--mode-alert-border), inset 0 0 22px var(--mode-alert-shadow), 0 0 26px var(--mode-alert-shadow);
     }
 }
 
@@ -212,10 +216,10 @@ html {
 
 @keyframes pulse-alert-aggressive {
     0% {
-        box-shadow: inset 0 0 20px var(--mode-alert-shadow);
+        box-shadow: inset 0 0 0 1px var(--mode-alert-border), 0 0 12px transparent;
     }
     100% {
-        box-shadow: inset 0 0 58px var(--mode-button-active-glow);
+        box-shadow: inset 0 0 0 3px var(--mode-button-active-border), inset 0 0 30px var(--mode-button-active-glow), 0 0 34px var(--mode-button-active-glow);
     }
 }
 
@@ -1234,7 +1238,7 @@ html {
 .stat-label {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--mode-section-title);
     margin-bottom: 4px;
     text-transform: uppercase;
     min-width: clamp(70px, 22vw, 88px);
@@ -1328,7 +1332,7 @@ html {
 
 .mode-label {
     font-size: clamp(12px, 1.8vw, 14px);
-    color: #e5e5ea;
+    color: var(--mode-section-title);
     font-weight: 600;
 }
 
@@ -1852,7 +1856,7 @@ html {
 
     .map-title,
     .map-location-tag {
-        font-size: 10px;
+        color: var(--mode-section-title);
     }
 
     .action-row {
