@@ -219,7 +219,8 @@ html {
     animation: none;
 }
 
-.app-container.speed-warning::before {
+.app-container.speed-warning::before,
+.app-container.speed-warning-startup::before {
     opacity: 1;
     animation: pulse-alert var(--warning-pulse-duration) infinite alternate ease-in-out;
 }
@@ -227,15 +228,15 @@ html {
 @keyframes pulse-alert {
     0% {
         box-shadow:
-            inset 0 0 16px color-mix(in srgb, var(--mode-alert-shadow) 44%, transparent),
-            inset 0 0 36px color-mix(in srgb, var(--mode-button-active-glow) 28%, transparent),
-            inset 0 0 68px color-mix(in srgb, var(--mode-button-active-glow) 18%, transparent);
+            inset 0 0 20px color-mix(in srgb, var(--mode-alert-shadow) 58%, transparent),
+            inset 0 0 48px color-mix(in srgb, var(--mode-button-active-glow) 40%, transparent),
+            inset 0 0 90px color-mix(in srgb, var(--mode-button-active-glow) 28%, transparent);
     }
     100% {
         box-shadow:
-            inset 0 0 24px color-mix(in srgb, var(--mode-alert-shadow) 62%, transparent),
-            inset 0 0 52px color-mix(in srgb, var(--mode-button-active-glow) 42%, transparent),
-            inset 0 0 92px color-mix(in srgb, var(--mode-button-active-glow) 30%, transparent);
+            inset 0 0 32px color-mix(in srgb, var(--mode-alert-shadow) 76%, transparent),
+            inset 0 0 74px color-mix(in srgb, var(--mode-button-active-glow) 58%, transparent),
+            inset 0 0 132px color-mix(in srgb, var(--mode-button-active-glow) 44%, transparent);
     }
 }
 
@@ -243,7 +244,8 @@ html {
     animation: none;
 }
 
-.app-container.speed-warning.speed-warning-aggressive::before {
+.app-container.speed-warning.speed-warning-aggressive::before,
+.app-container.speed-warning-aggressive-startup::before {
     opacity: 1;
     animation: pulse-alert-aggressive 0.52s infinite alternate ease-in-out;
 }
@@ -251,15 +253,15 @@ html {
 @keyframes pulse-alert-aggressive {
     0% {
         box-shadow:
-            inset 0 0 28px color-mix(in srgb, var(--mode-alert-shadow) 72%, transparent),
-            inset 0 0 62px color-mix(in srgb, var(--mode-button-active-glow) 52%, transparent),
-            inset 0 0 108px color-mix(in srgb, var(--mode-button-active-glow) 36%, transparent);
+            inset 0 0 38px color-mix(in srgb, var(--mode-alert-shadow) 82%, transparent),
+            inset 0 0 88px color-mix(in srgb, var(--mode-button-active-glow) 66%, transparent),
+            inset 0 0 148px color-mix(in srgb, var(--mode-button-active-glow) 48%, transparent);
     }
     100% {
         box-shadow:
-            inset 0 0 40px color-mix(in srgb, var(--mode-alert-shadow) 84%, transparent),
-            inset 0 0 84px color-mix(in srgb, var(--mode-button-active-glow) 66%, transparent),
-            inset 0 0 136px color-mix(in srgb, var(--mode-button-active-glow) 48%, transparent);
+            inset 0 0 52px color-mix(in srgb, var(--mode-alert-shadow) 92%, transparent),
+            inset 0 0 114px color-mix(in srgb, var(--mode-button-active-glow) 84%, transparent),
+            inset 0 0 184px color-mix(in srgb, var(--mode-button-active-glow) 62%, transparent);
     }
 }
 
