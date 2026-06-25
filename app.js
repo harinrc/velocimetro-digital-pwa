@@ -39,6 +39,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshAgeText = document.getElementById("refresh-age");
     const modeButtons = document.querySelectorAll(".mode-btn");
     const panelHandle = document.getElementById("panel-handle");
+    const musicPlayer = document.getElementById("music-player");
+    const musicPlayerHead = document.getElementById("music-player-head");
+    const musicCloseBtn = document.getElementById("music-close-btn");
+    const musicLoadBtn = document.getElementById("music-load");
+    const musicFileInput = document.getElementById("music-file-input");
+    const musicAudio = document.getElementById("music-audio");
+    const musicCover = document.getElementById("music-cover");
+    const musicCoverImage = document.getElementById("music-cover-image");
+    const musicCoverFallback = document.getElementById("music-cover-fallback");
+    const musicTrackName = document.getElementById("music-track-name");
+    const musicTrackArtist = document.getElementById("music-track-artist");
+    const musicTrackAlbum = document.getElementById("music-track-album");
+    const musicSeek = document.getElementById("music-seek");
+    const musicTimeCurrent = document.getElementById("music-time-current");
+    const musicTimeTotal = document.getElementById("music-time-total");
+    const musicPrevBtn = document.getElementById("music-prev");
+    const musicPlayBtn = document.getElementById("music-play");
+    const musicNextBtn = document.getElementById("music-next");
+    const musicShuffleBtn = document.getElementById("music-shuffle");
+    const musicRepeatBtn = document.getElementById("music-repeat");
+    const musicPlaylist = document.getElementById("music-playlist");
     
     // Elementos de Estadísticas secundarios
     const maxSpeedText = document.getElementById("max-speed");
@@ -108,6 +129,25 @@ document.addEventListener("DOMContentLoaded", () => {
     let panelSwipePointerId = null;
     const normalSystemColor = "#050608";
     const warningSystemColor = "#050608";
+
+    let musicTracks = [];
+    let musicTrackIndex = -1;
+    let musicShuffleEnabled = false;
+    let musicRepeatMode = "all";
+    let musicObjectUrl = null;
+    let musicCoverObjectUrl = null;
+    let musicDragging = false;
+    let musicDragOffsetX = 0;
+    let musicDragOffsetY = 0;
+    let musicDragPointerId = null;
+    let musicHoldTimer = null;
+    let playlistReorderActive = false;
+    let playlistReorderPointerId = null;
+    let playlistReorderFromIndex = -1;
+    let playlistReorderToIndex = -1;
+    let playlistReorderHoldTimer = null;
+    let playlistReorderStartY = 0;
+    let suppressPlaylistClickUntil = 0;
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
@@ -1098,6 +1138,377 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function formatMediaTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+        const total = Math.floor(seconds);
+        const mins = Math.floor(total / 60);
+        const secs = total % 60;
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function syncMusicUiState() {
+        if (!musicPlayer || !floatingBtn || !musicAudio) return;
+        const isOpen = !musicPlayer.hidden;
+        const isPlaying = !musicAudio.paused;
+        musicPlayer.classList.toggle("playing", isPlaying);
+        floatingBtn.classList.toggle("active", isOpen || isPlaying);
+        floatingBtn.textContent = isOpen ? "Cerrar musica" : "Musica";
+        if (musicPlayBtn) {
+            musicPlayBtn.textContent = isPlaying ? "Pausa" : "Play";
+        }
+    }
+
+    function syncMusicOptionButtons() {
+        if (musicShuffleBtn) {
+            musicShuffleBtn.classList.toggle("active", musicShuffleEnabled);
+            musicShuffleBtn.textContent = `Aleatorio: ${musicShuffleEnabled ? "On" : "Off"}`;
+        }
+
+        if (musicRepeatBtn) {
+            const label = musicRepeatMode === "one" ? "Una" : "Lista";
+            musicRepeatBtn.classList.toggle("active", musicRepeatMode === "one");
+            musicRepeatBtn.textContent = `Repetir: ${label}`;
+        }
+    }
+
+    function renderMusicPlaylist() {
+        if (!musicPlaylist) return;
+        musicPlaylist.innerHTML = "";
+
+        if (!musicTracks.length) {
+            musicPlaylist.innerHTML = '<button type="button" class="music-playlist-item empty" disabled>No hay canciones cargadas</button>';
+            return;
+        }
+
+        musicTracks.forEach((track, index) => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "music-playlist-item";
+            item.dataset.index = String(index);
+            if (index === musicTrackIndex) {
+                item.classList.add("active");
+            }
+            item.innerHTML = `
+                <strong>${track.title || track.name}</strong>
+                <span>${track.artist || "Artista desconocido"}</span>
+            `;
+            item.addEventListener("click", () => {
+                if (Date.now() < suppressPlaylistClickUntil) return;
+                setMusicTrack(index, true);
+            });
+            musicPlaylist.appendChild(item);
+        });
+    }
+
+    function clearPlaylistDropMarkers() {
+        if (!musicPlaylist) return;
+        musicPlaylist.querySelectorAll(".music-playlist-item.drop-target, .music-playlist-item.reorder-source")
+            .forEach((item) => item.classList.remove("drop-target", "reorder-source"));
+    }
+
+    function setPlaylistDropTarget(index) {
+        if (!musicPlaylist) return;
+        clearPlaylistDropMarkers();
+
+        const source = musicPlaylist.querySelector(`.music-playlist-item[data-index="${playlistReorderFromIndex}"]`);
+        const target = musicPlaylist.querySelector(`.music-playlist-item[data-index="${index}"]`);
+        if (source) source.classList.add("reorder-source");
+        if (target) target.classList.add("drop-target");
+    }
+
+    function reorderMusicTracks(fromIndex, toIndex) {
+        if (!musicTracks.length) return;
+        if (fromIndex < 0 || toIndex < 0 || fromIndex >= musicTracks.length || toIndex >= musicTracks.length) return;
+        if (fromIndex === toIndex) return;
+
+        const activeTrackId = musicTrackIndex >= 0 && musicTrackIndex < musicTracks.length
+            ? musicTracks[musicTrackIndex].id
+            : null;
+
+        const [movedTrack] = musicTracks.splice(fromIndex, 1);
+        musicTracks.splice(toIndex, 0, movedTrack);
+
+        if (activeTrackId) {
+            musicTrackIndex = musicTracks.findIndex((track) => track.id === activeTrackId);
+        }
+
+        renderMusicPlaylist();
+    }
+
+    function decodeId3SyncSafeInt(bytes, start) {
+        return ((bytes[start] & 0x7f) << 21)
+            | ((bytes[start + 1] & 0x7f) << 14)
+            | ((bytes[start + 2] & 0x7f) << 7)
+            | (bytes[start + 3] & 0x7f);
+    }
+
+    function decodeId3Text(data, encodingByte) {
+        if (!data || !data.length) return "";
+
+        let decoder;
+        if (encodingByte === 1 || encodingByte === 2) {
+            decoder = new TextDecoder("utf-16");
+        } else if (encodingByte === 3) {
+            decoder = new TextDecoder("utf-8");
+        } else {
+            decoder = new TextDecoder("iso-8859-1");
+        }
+
+        return decoder.decode(data).replace(/\u0000/g, "").trim();
+    }
+
+    function readApicFrame(frameData) {
+        if (!frameData || frameData.length < 8) return null;
+
+        const encoding = frameData[0];
+        let cursor = 1;
+
+        const mimeEnd = frameData.indexOf(0x00, cursor);
+        if (mimeEnd === -1) return null;
+
+        const mime = new TextDecoder("iso-8859-1").decode(frameData.slice(cursor, mimeEnd)).trim();
+        cursor = mimeEnd + 1;
+        if (cursor >= frameData.length) return null;
+
+        cursor += 1; // picture type
+
+        if (encoding === 1 || encoding === 2) {
+            while (cursor + 1 < frameData.length) {
+                if (frameData[cursor] === 0x00 && frameData[cursor + 1] === 0x00) {
+                    cursor += 2;
+                    break;
+                }
+                cursor += 2;
+            }
+        } else {
+            const descEnd = frameData.indexOf(0x00, cursor);
+            cursor = descEnd === -1 ? frameData.length : descEnd + 1;
+        }
+
+        if (cursor >= frameData.length) return null;
+        const imageBytes = frameData.slice(cursor);
+        const safeMime = mime.startsWith("image/") ? mime : "image/jpeg";
+        return new Blob([imageBytes], { type: safeMime });
+    }
+
+    async function extractId3Metadata(file) {
+        const fallbackTitle = file.name.replace(/\.[^.]+$/, "");
+        const metadata = {
+            title: fallbackTitle,
+            artist: "Artista desconocido",
+            album: "Album desconocido",
+            coverBlob: null,
+        };
+
+        try {
+            const probe = await file.slice(0, 512 * 1024).arrayBuffer();
+            const bytes = new Uint8Array(probe);
+            if (bytes.length < 10) return metadata;
+
+            if (String.fromCharCode(bytes[0], bytes[1], bytes[2]) !== "ID3") {
+                return metadata;
+            }
+
+            const version = bytes[3];
+            const tagSize = decodeId3SyncSafeInt(bytes, 6);
+            const tagEnd = Math.min(bytes.length, 10 + tagSize);
+            let offset = 10;
+
+            while (offset + 10 <= tagEnd) {
+                const frameId = String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+                if (!frameId.trim()) break;
+
+                const frameSize = version === 4
+                    ? decodeId3SyncSafeInt(bytes, offset + 4)
+                    : ((bytes[offset + 4] << 24) | (bytes[offset + 5] << 16) | (bytes[offset + 6] << 8) | bytes[offset + 7]);
+
+                if (!frameSize || frameSize < 0) break;
+
+                const frameStart = offset + 10;
+                const frameEnd = Math.min(frameStart + frameSize, tagEnd);
+                if (frameEnd <= frameStart) break;
+
+                const frameData = bytes.slice(frameStart, frameEnd);
+                if (frameId === "TIT2" && frameData.length > 1) {
+                    metadata.title = decodeId3Text(frameData.slice(1), frameData[0]) || metadata.title;
+                } else if (frameId === "TPE1" && frameData.length > 1) {
+                    metadata.artist = decodeId3Text(frameData.slice(1), frameData[0]) || metadata.artist;
+                } else if (frameId === "TALB" && frameData.length > 1) {
+                    metadata.album = decodeId3Text(frameData.slice(1), frameData[0]) || metadata.album;
+                } else if (frameId === "APIC" && !metadata.coverBlob) {
+                    metadata.coverBlob = readApicFrame(frameData);
+                }
+
+                offset = frameEnd;
+            }
+        } catch (_) {
+            return metadata;
+        }
+
+        return metadata;
+    }
+
+    function clearCurrentMusicObjectUrl() {
+        if (musicObjectUrl) {
+            URL.revokeObjectURL(musicObjectUrl);
+            musicObjectUrl = null;
+        }
+    }
+
+    function clearCurrentMusicCoverObjectUrl() {
+        if (musicCoverObjectUrl) {
+            URL.revokeObjectURL(musicCoverObjectUrl);
+            musicCoverObjectUrl = null;
+        }
+    }
+
+    function setMusicCover(coverBlob, trackTitle) {
+        if (!musicCoverImage || !musicCoverFallback) return;
+
+        clearCurrentMusicCoverObjectUrl();
+
+        if (coverBlob) {
+            musicCoverObjectUrl = URL.createObjectURL(coverBlob);
+            musicCoverImage.src = musicCoverObjectUrl;
+            musicCoverImage.hidden = false;
+            musicCoverFallback.hidden = true;
+            return;
+        }
+
+        const initial = (trackTitle || "").trim().charAt(0).toUpperCase() || "♪";
+        musicCoverFallback.textContent = initial;
+        musicCoverFallback.hidden = false;
+        musicCoverImage.hidden = true;
+        musicCoverImage.removeAttribute("src");
+    }
+
+    function setMusicTrack(index, autoPlay = true) {
+        if (!musicAudio || !musicTrackName || !musicTimeCurrent || !musicTimeTotal || !musicSeek) return;
+        if (!musicTracks.length || index < 0 || index >= musicTracks.length) return;
+
+        musicTrackIndex = index;
+        const track = musicTracks[musicTrackIndex];
+        clearCurrentMusicObjectUrl();
+        musicObjectUrl = URL.createObjectURL(track.file);
+        musicAudio.src = musicObjectUrl;
+        musicAudio.load();
+
+        const trackTitle = track.title || track.name;
+        musicTrackName.textContent = trackTitle;
+        if (musicTrackArtist) {
+            musicTrackArtist.textContent = track.artist || "Artista desconocido";
+        }
+        if (musicTrackAlbum) {
+            musicTrackAlbum.textContent = track.album || "Album desconocido";
+        }
+        setMusicCover(track.coverBlob || null, trackTitle);
+        renderMusicPlaylist();
+        musicTimeCurrent.textContent = "00:00";
+        musicTimeTotal.textContent = "00:00";
+        musicSeek.value = "0";
+
+        if (autoPlay) {
+            musicAudio.play().catch(() => {
+                syncMusicUiState();
+            });
+        }
+
+        syncMusicUiState();
+    }
+
+    function selectNextTrackIndex(direction = 1) {
+        if (!musicTracks.length) return -1;
+        if (musicShuffleEnabled && musicTracks.length > 1) {
+            let next = musicTrackIndex;
+            while (next === musicTrackIndex) {
+                next = Math.floor(Math.random() * musicTracks.length);
+            }
+            return next;
+        }
+
+        if (direction < 0) {
+            return (musicTrackIndex - 1 + musicTracks.length) % musicTracks.length;
+        }
+
+        return (musicTrackIndex + 1) % musicTracks.length;
+    }
+
+    function playNextTrack(direction = 1, autoPlay = true) {
+        if (!musicTracks.length) return;
+        const nextIndex = selectNextTrackIndex(direction);
+        if (nextIndex >= 0) {
+            setMusicTrack(nextIndex, autoPlay);
+        }
+    }
+
+    function toggleMusicPlayer() {
+        if (!musicPlayer) return;
+        const willOpen = musicPlayer.hidden;
+        musicPlayer.hidden = !willOpen;
+        if (willOpen) {
+            musicPlayer.style.removeProperty("right");
+            musicPlayer.style.removeProperty("bottom");
+        }
+        syncMusicUiState();
+    }
+
+    function clampMusicPosition(left, top) {
+        if (!musicPlayer || !appContainer) return { left, top };
+        const playerRect = musicPlayer.getBoundingClientRect();
+        const containerRect = appContainer.getBoundingClientRect();
+        const maxLeft = containerRect.width - playerRect.width - 4;
+        const maxTop = containerRect.height - playerRect.height - 4;
+        return {
+            left: Math.min(Math.max(4, left), Math.max(4, maxLeft)),
+            top: Math.min(Math.max(4, top), Math.max(4, maxTop)),
+        };
+    }
+
+    function beginMusicDrag(pointerEvent) {
+        if (!musicPlayer || !appContainer) return;
+
+        const containerRect = appContainer.getBoundingClientRect();
+        const playerRect = musicPlayer.getBoundingClientRect();
+        musicDragOffsetX = pointerEvent.clientX - playerRect.left;
+        musicDragOffsetY = pointerEvent.clientY - playerRect.top;
+        musicDragging = true;
+        musicPlayer.classList.add("dragging");
+        musicPlayer.style.left = `${playerRect.left - containerRect.left}px`;
+        musicPlayer.style.top = `${playerRect.top - containerRect.top}px`;
+        musicPlayer.style.right = "auto";
+        musicPlayer.style.bottom = "auto";
+    }
+
+    function endMusicDrag() {
+        if (!musicPlayer) return;
+        musicDragging = false;
+        musicPlayer.classList.remove("dragging");
+        if (musicHoldTimer) {
+            clearTimeout(musicHoldTimer);
+            musicHoldTimer = null;
+        }
+        musicDragPointerId = null;
+    }
+
+    function updateMusicProgress() {
+        if (!musicAudio || !musicSeek || !musicTimeCurrent || !musicTimeTotal) return;
+        const duration = Number.isFinite(musicAudio.duration) ? musicAudio.duration : 0;
+        const current = Number.isFinite(musicAudio.currentTime) ? musicAudio.currentTime : 0;
+        musicTimeCurrent.textContent = formatMediaTime(current);
+        musicTimeTotal.textContent = formatMediaTime(duration);
+        musicSeek.value = duration > 0 ? String((current / duration) * 100) : "0";
+    }
+
+    function keepMusicPlayerInBounds() {
+        if (!musicPlayer || musicPlayer.hidden || !appContainer) return;
+        if (!musicPlayer.style.left || !musicPlayer.style.top) return;
+        const currentLeft = Number.parseFloat(musicPlayer.style.left) || 0;
+        const currentTop = Number.parseFloat(musicPlayer.style.top) || 0;
+        const clamped = clampMusicPosition(currentLeft, currentTop);
+        musicPlayer.style.left = `${clamped.left}px`;
+        musicPlayer.style.top = `${clamped.top}px`;
+    }
+
     function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
         const toRadians = (deg) => (deg * Math.PI) / 180;
         const earthRadius = 6371000;
@@ -1353,7 +1764,259 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (floatingBtn) {
-        floatingBtn.addEventListener("click", toggleFloatingWindow);
+        floatingBtn.addEventListener("click", toggleMusicPlayer);
+    }
+
+    if (musicCloseBtn && musicPlayer) {
+        musicCloseBtn.addEventListener("click", () => {
+            musicPlayer.hidden = true;
+            syncMusicUiState();
+        });
+    }
+
+    if (musicLoadBtn && musicFileInput) {
+        musicLoadBtn.addEventListener("click", () => {
+            musicFileInput.click();
+        });
+
+        musicFileInput.addEventListener("change", async (event) => {
+            const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("audio/"));
+            if (!files.length) return;
+
+            if (musicTrackName) {
+                musicTrackName.textContent = "Leyendo metadata...";
+            }
+
+            const parsed = await Promise.all(files.map(async (file, index) => {
+                const metadata = await extractId3Metadata(file);
+                return {
+                    id: `${file.name}-${file.size}-${index}`,
+                    name: file.name.replace(/\.[^.]+$/, ""),
+                    title: metadata.title,
+                    artist: metadata.artist,
+                    album: metadata.album,
+                    coverBlob: metadata.coverBlob,
+                    file,
+                };
+            }));
+
+            musicTracks = parsed;
+            musicTrackIndex = -1;
+            renderMusicPlaylist();
+
+            setMusicTrack(0, true);
+            if (musicPlayer) {
+                musicPlayer.hidden = false;
+            }
+            syncMusicUiState();
+            musicFileInput.value = "";
+        });
+    }
+
+    if (musicPlayBtn && musicAudio) {
+        musicPlayBtn.addEventListener("click", () => {
+            if (!musicTracks.length) {
+                if (musicTrackName) {
+                    musicTrackName.textContent = "Carga musica del dispositivo";
+                }
+                if (musicTrackArtist) musicTrackArtist.textContent = "Artista desconocido";
+                if (musicTrackAlbum) musicTrackAlbum.textContent = "Album desconocido";
+                setMusicCover(null, "");
+                return;
+            }
+
+            if (musicAudio.paused) {
+                musicAudio.play().catch(() => {
+                    if (musicTrackName) {
+                        musicTrackName.textContent = "Toca Play de nuevo para iniciar";
+                    }
+                });
+            } else {
+                musicAudio.pause();
+            }
+            syncMusicUiState();
+        });
+    }
+
+    if (musicPrevBtn) {
+        musicPrevBtn.addEventListener("click", () => {
+            if (!musicTracks.length) return;
+            playNextTrack(-1, true);
+        });
+    }
+
+    if (musicNextBtn) {
+        musicNextBtn.addEventListener("click", () => {
+            if (!musicTracks.length) return;
+            playNextTrack(1, true);
+        });
+    }
+
+    if (musicShuffleBtn) {
+        musicShuffleBtn.addEventListener("click", () => {
+            musicShuffleEnabled = !musicShuffleEnabled;
+            syncMusicOptionButtons();
+        });
+    }
+
+    if (musicRepeatBtn) {
+        musicRepeatBtn.addEventListener("click", () => {
+            musicRepeatMode = musicRepeatMode === "all" ? "one" : "all";
+            syncMusicOptionButtons();
+        });
+    }
+
+    if (musicSeek && musicAudio) {
+        musicSeek.addEventListener("input", () => {
+            const duration = Number.isFinite(musicAudio.duration) ? musicAudio.duration : 0;
+            if (!duration) return;
+            const target = (Number(musicSeek.value) / 100) * duration;
+            musicAudio.currentTime = target;
+            updateMusicProgress();
+        });
+    }
+
+    if (musicAudio) {
+        musicAudio.addEventListener("timeupdate", updateMusicProgress);
+        musicAudio.addEventListener("loadedmetadata", updateMusicProgress);
+        musicAudio.addEventListener("play", syncMusicUiState);
+        musicAudio.addEventListener("pause", syncMusicUiState);
+        musicAudio.addEventListener("ended", () => {
+            if (!musicTracks.length) return;
+
+            if (musicRepeatMode === "one") {
+                musicAudio.currentTime = 0;
+                musicAudio.play().catch(() => {
+                    syncMusicUiState();
+                });
+                return;
+            }
+
+            playNextTrack(1, true);
+        });
+    }
+
+    if (musicPlayerHead && musicPlayer) {
+        musicPlayerHead.addEventListener("pointerdown", (event) => {
+            if (event.target.closest("#music-close-btn")) return;
+            if (musicPlayer.hidden) return;
+
+            musicDragPointerId = event.pointerId;
+            try { musicPlayerHead.setPointerCapture(event.pointerId); } catch (_) { /* no-op */ }
+
+            if (musicHoldTimer) clearTimeout(musicHoldTimer);
+            musicHoldTimer = setTimeout(() => {
+                beginMusicDrag(event);
+            }, 210);
+        });
+
+        musicPlayerHead.addEventListener("pointermove", (event) => {
+            if (musicDragPointerId !== event.pointerId || !musicDragging || !appContainer) return;
+            const containerRect = appContainer.getBoundingClientRect();
+            const left = event.clientX - containerRect.left - musicDragOffsetX;
+            const top = event.clientY - containerRect.top - musicDragOffsetY;
+            const clamped = clampMusicPosition(left, top);
+            musicPlayer.style.left = `${clamped.left}px`;
+            musicPlayer.style.top = `${clamped.top}px`;
+        });
+
+        const stopDrag = (event) => {
+            if (musicDragPointerId !== null && event.pointerId !== musicDragPointerId) return;
+            endMusicDrag();
+        };
+
+        musicPlayerHead.addEventListener("pointerup", stopDrag);
+        musicPlayerHead.addEventListener("pointercancel", stopDrag);
+        musicPlayerHead.addEventListener("pointerleave", (event) => {
+            if (!musicDragging) {
+                stopDrag(event);
+            }
+        });
+    }
+
+    if (musicPlaylist) {
+        const resetPlaylistReorder = () => {
+            if (playlistReorderHoldTimer) {
+                clearTimeout(playlistReorderHoldTimer);
+                playlistReorderHoldTimer = null;
+            }
+            playlistReorderActive = false;
+            playlistReorderPointerId = null;
+            playlistReorderFromIndex = -1;
+            playlistReorderToIndex = -1;
+            playlistReorderStartY = 0;
+            musicPlaylist.classList.remove("reordering");
+            clearPlaylistDropMarkers();
+        };
+
+        musicPlaylist.addEventListener("pointerdown", (event) => {
+            const item = event.target.closest(".music-playlist-item[data-index]");
+            if (!item) return;
+
+            playlistReorderPointerId = event.pointerId;
+            playlistReorderFromIndex = Number.parseInt(item.dataset.index || "-1", 10);
+            playlistReorderToIndex = playlistReorderFromIndex;
+            playlistReorderStartY = event.clientY;
+
+            if (playlistReorderFromIndex < 0) {
+                resetPlaylistReorder();
+                return;
+            }
+
+            if (playlistReorderHoldTimer) clearTimeout(playlistReorderHoldTimer);
+            playlistReorderHoldTimer = setTimeout(() => {
+                playlistReorderActive = true;
+                musicPlaylist.classList.add("reordering");
+                setPlaylistDropTarget(playlistReorderFromIndex);
+            }, 180);
+        });
+
+        musicPlaylist.addEventListener("pointermove", (event) => {
+            if (playlistReorderPointerId !== event.pointerId) return;
+
+            if (!playlistReorderActive) {
+                const delta = Math.abs(event.clientY - playlistReorderStartY);
+                if (delta > 10 && playlistReorderHoldTimer) {
+                    clearTimeout(playlistReorderHoldTimer);
+                    playlistReorderHoldTimer = null;
+                    playlistReorderPointerId = null;
+                }
+                return;
+            }
+
+            event.preventDefault();
+            const hoveredItem = document.elementFromPoint(event.clientX, event.clientY)?.closest(".music-playlist-item[data-index]");
+            if (!hoveredItem) return;
+
+            const hoveredIndex = Number.parseInt(hoveredItem.dataset.index || "-1", 10);
+            if (hoveredIndex < 0 || hoveredIndex === playlistReorderToIndex) return;
+
+            playlistReorderToIndex = hoveredIndex;
+            setPlaylistDropTarget(hoveredIndex);
+        });
+
+        const handlePlaylistDrop = (event) => {
+            if (playlistReorderPointerId !== null && event.pointerId !== playlistReorderPointerId) return;
+            const shouldReorder = playlistReorderActive
+                && playlistReorderFromIndex >= 0
+                && playlistReorderToIndex >= 0
+                && playlistReorderFromIndex !== playlistReorderToIndex;
+
+            if (shouldReorder) {
+                reorderMusicTracks(playlistReorderFromIndex, playlistReorderToIndex);
+                suppressPlaylistClickUntil = Date.now() + 260;
+            }
+
+            resetPlaylistReorder();
+        };
+
+        musicPlaylist.addEventListener("pointerup", handlePlaylistDrop);
+        musicPlaylist.addEventListener("pointercancel", handlePlaylistDrop);
+        musicPlaylist.addEventListener("pointerleave", (event) => {
+            if (!playlistReorderActive) {
+                handlePlaylistDrop(event);
+            }
+        });
     }
 
     if (orientationBtn) {
@@ -1430,7 +2093,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }, { passive: true });
     }
 
-    window.addEventListener("resize", syncPanelMode);
+    window.addEventListener("resize", () => {
+        syncPanelMode();
+        keepMusicPlayerInBounds();
+    });
 
     window.addEventListener("beforeinstallprompt", (event) => {
         event.preventDefault();
@@ -1515,6 +2181,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     window.addEventListener("online", updateConnectivityState);
     window.addEventListener("offline", updateConnectivityState);
+    window.addEventListener("beforeunload", () => {
+        clearCurrentMusicObjectUrl();
+        clearCurrentMusicCoverObjectUrl();
+    });
+    renderMusicPlaylist();
+    syncMusicOptionButtons();
+    syncMusicUiState();
     setInterval(updateClock, 1000);
     setInterval(updateRefreshAgeLabel, 1000);
     updateClock();

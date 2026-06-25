@@ -154,10 +154,55 @@
             </div>
 
             <div class="action-row">
-                <button type="button" class="floating-btn" id="floating-btn">Ventana flotante</button>
+                <button type="button" class="floating-btn" id="floating-btn">Musica</button>
                 <button class="btn-start" id="btn-action">INICIAR</button>
             </div>
         </footer>
+
+        <section class="music-player" id="music-player" aria-label="Reproductor de musica offline" hidden>
+            <div class="music-player-head" id="music-player-head">
+                <span class="music-player-title">Reproductor Offline</span>
+                <button type="button" class="music-close-btn" id="music-close-btn" aria-label="Cerrar reproductor">Cerrar</button>
+            </div>
+
+            <div class="music-track-wrap">
+                <div class="music-track-main">
+                    <div class="music-cover" id="music-cover" aria-label="Caratula de la cancion">
+                        <span class="music-cover-fallback" id="music-cover-fallback">♪</span>
+                        <img id="music-cover-image" alt="Caratula de la cancion" hidden>
+                    </div>
+                    <div class="music-meta">
+                        <div class="music-track-name" id="music-track-name">Sin canciones cargadas</div>
+                        <div class="music-track-artist" id="music-track-artist">Artista desconocido</div>
+                        <div class="music-track-album" id="music-track-album">Album desconocido</div>
+                    </div>
+                </div>
+                <div class="music-time-row">
+                    <span id="music-time-current">00:00</span>
+                    <span id="music-time-total">00:00</span>
+                </div>
+                <input type="range" id="music-seek" class="music-seek" min="0" max="100" value="0" step="0.1" aria-label="Barra de progreso">
+            </div>
+
+            <div class="music-controls">
+                <button type="button" id="music-prev" aria-label="Anterior">Anterior</button>
+                <button type="button" id="music-play" aria-label="Reproducir o pausar">Play</button>
+                <button type="button" id="music-next" aria-label="Siguiente">Siguiente</button>
+            </div>
+
+            <div class="music-options">
+                <button type="button" id="music-shuffle" aria-label="Aleatorio">Aleatorio: Off</button>
+                <button type="button" id="music-repeat" aria-label="Repeticion">Repetir: Lista</button>
+                <button type="button" id="music-load" aria-label="Cargar musica del dispositivo">Cargar musica</button>
+            </div>
+
+            <div class="music-playlist" id="music-playlist" aria-label="Lista de canciones cargadas">
+                <button type="button" class="music-playlist-item empty" disabled>No hay canciones cargadas</button>
+            </div>
+
+            <input type="file" id="music-file-input" accept="audio/*" multiple hidden>
+            <audio id="music-audio" preload="metadata"></audio>
+        </section>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
