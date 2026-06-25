@@ -2477,6 +2477,12 @@ html {
     }
 }
 
+@media (orientation: landscape) and (pointer: coarse) and (min-height: 420px) and (max-height: 450px) {
+    .gauge-container {
+        margin-top: 7px;
+    }
+}
+
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 400px) {
     .app-container {
         grid-template-columns: minmax(154px, 36.4vw) minmax(0, 1fr);
