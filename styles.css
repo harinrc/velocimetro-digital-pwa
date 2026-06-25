@@ -1779,6 +1779,7 @@ html {
     color: var(--text-muted);
     font-size: 10px;
     line-height: 1.3;
+    display: none;
 }
 
 .music-time-row {
@@ -1806,7 +1807,7 @@ html {
 }
 
 .music-options {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .music-controls button,
