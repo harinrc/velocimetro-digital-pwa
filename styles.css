@@ -1984,7 +1984,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
     .app-container {
-        grid-template-columns: minmax(154px, 36vw) minmax(0, 1fr);
+        grid-template-columns: minmax(182px, 42vw) minmax(0, 1fr);
         gap: 4px 7px;
         padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
     }
@@ -2011,7 +2011,7 @@ html {
     }
 
     .gauge {
-        width: min(36dvh, 24vw, 156px);
+        width: min(46dvh, 31vw, 214px);
     }
 
     .digital-display {
@@ -2020,11 +2020,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(26px, 6vw, 40px);
+        font-size: clamp(31px, 6.9vw, 48px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(21px, 4.9vw, 31px);
+        font-size: clamp(24px, 5.5vw, 36px);
     }
 
     .limit-indicator {
@@ -2457,7 +2457,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 400px) {
     .app-container {
-        grid-template-columns: minmax(150px, 35.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(170px, 40.5vw) minmax(0, 1fr);
         gap: 3px 6px;
         padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
     }
@@ -2484,7 +2484,7 @@ html {
     }
 
     .gauge {
-        width: min(34dvh, 24.5vw, 148px);
+        width: min(41dvh, 29.5vw, 182px);
     }
 
     .digital-display {
@@ -2493,11 +2493,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(25px, 5.8vw, 38px);
+        font-size: clamp(28px, 6.3vw, 42px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(20px, 4.8vw, 30px);
+        font-size: clamp(22px, 5.1vw, 33px);
     }
 
     .unit {
@@ -2607,6 +2607,42 @@ html {
 
     .action-row {
         gap: 2px;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 350px) {
+    .app-container {
+        grid-template-columns: minmax(160px, 39vw) minmax(0, 1fr);
+    }
+
+    .gauge {
+        width: min(39dvh, 28.5vw, 168px);
+    }
+
+    .current-speed {
+        font-size: clamp(26px, 6vw, 39px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(20px, 4.9vw, 30px);
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 320px) {
+    .app-container {
+        grid-template-columns: minmax(150px, 37.5vw) minmax(0, 1fr);
+    }
+
+    .gauge {
+        width: min(37dvh, 27vw, 154px);
+    }
+
+    .current-speed {
+        font-size: clamp(24px, 5.6vw, 36px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(19px, 4.6vw, 28px);
     }
 }
 
