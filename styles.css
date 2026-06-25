@@ -1764,6 +1764,29 @@ html {
     .mode-label {
         font-size: 12px;
     }
+
+    .status-right {
+        gap: 3px;
+    }
+
+    .time {
+        font-size: clamp(14px, 4.8vw, 18px);
+        padding: 3px 5px;
+    }
+
+    .reload-btn,
+    .install-btn,
+    .orientation-btn {
+        padding: 4px 5px;
+        font-size: 9px;
+    }
+
+    .orientation-btn {
+        max-width: 58px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 @media (max-width: 480px) and (orientation: portrait) {
@@ -1956,6 +1979,157 @@ html {
 
     .panel-handle {
         display: none !important;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
+    .app-container {
+        grid-template-columns: minmax(154px, 36vw) minmax(0, 1fr);
+        gap: 4px 7px;
+        padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
+    }
+
+    .status-bar {
+        margin-bottom: 0;
+        padding-bottom: 3px;
+    }
+
+    .status-right {
+        gap: 4px;
+    }
+
+    .time {
+        font-size: clamp(13px, 3.2vw, 17px);
+        padding: 3px 5px;
+    }
+
+    .reload-btn,
+    .install-btn,
+    .orientation-btn {
+        font-size: 8px;
+        padding: 3px 5px;
+    }
+
+    .gauge {
+        width: min(36dvh, 24vw, 156px);
+    }
+
+    .digital-display {
+        top: 53.1%;
+        gap: 3px;
+    }
+
+    .current-speed {
+        font-size: clamp(26px, 6vw, 40px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(21px, 4.9vw, 31px);
+    }
+
+    .limit-indicator {
+        min-width: 39px;
+        padding: 2px 4px;
+    }
+
+    .limit-label {
+        font-size: 7px;
+    }
+
+    .limit-value {
+        font-size: 20px;
+    }
+
+    .controls-panel {
+        padding: 3px;
+        gap: 2px;
+        border-radius: 9px;
+        max-height: calc(100dvh - 35px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .weather-location-strip {
+        min-height: 22px;
+        padding: 2px 3px;
+        gap: 3px;
+    }
+
+    .weather-icon {
+        font-size: 10px;
+    }
+
+    .weather-temp,
+    .location-text,
+    .refresh-age {
+        font-size: 7px;
+    }
+
+    .stats-grid {
+        gap: 2px;
+        padding-bottom: 2px;
+    }
+
+    .stat-item {
+        min-width: 50px;
+        padding: 3px 4px;
+    }
+
+    .stat-label,
+    .stat-value {
+        font-size: 8px;
+    }
+
+    .map-card {
+        padding: 5px;
+        gap: 4px;
+    }
+
+    .map-head {
+        gap: 3px;
+    }
+
+    .map-title {
+        font-size: 8px;
+        letter-spacing: 0.1px;
+    }
+
+    .map-location-tag {
+        font-size: 7px;
+        max-width: 90px;
+    }
+
+    .map-center-btn {
+        font-size: 8px;
+        padding: 3px 5px;
+        border-radius: 6px;
+    }
+
+    .mini-map {
+        height: 36px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(46px, 1fr) minmax(0, 1fr);
+        gap: 2px;
+        font-size: 7px;
+    }
+
+    .mode-btn,
+    .max-speed-btn,
+    .floating-btn,
+    .btn-start {
+        font-size: 7px;
+        padding: 3px 3px;
+    }
+
+    .max-scale-value {
+        min-width: 34px;
+        font-size: 7px;
+        padding: 2px 3px;
+    }
+
+    .action-row {
+        gap: 2px;
     }
 }
 

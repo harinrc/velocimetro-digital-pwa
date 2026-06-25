@@ -738,6 +738,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function syncPanelMode() {
+        const isLandscapePhoneMode = window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+        if (isLandscapePhoneMode) {
+            if (panelHandle) {
+                panelHandle.style.display = "none";
+            }
+            // En horizontal móvil mostramos siempre el panel completo para evitar que se oculten secciones.
+            applyPanelState(false, false);
+            return;
+        }
+
         if (isCompactPanelModeNow()) {
             if (panelHandle) {
                 panelHandle.style.display = "flex";
