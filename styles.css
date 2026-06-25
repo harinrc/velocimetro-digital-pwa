@@ -1650,8 +1650,11 @@ html {
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.2px;
-    padding: 7px 10px;
+    padding: 7px 11px;
     box-shadow: 0 0 14px var(--mode-button-active-glow);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .music-fab.active {
@@ -1701,7 +1704,7 @@ html {
     background: var(--mode-button-surface);
     color: var(--mode-button-text);
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0;
     font-weight: 700;
     line-height: 1;
     width: 28px;
@@ -1776,7 +1779,6 @@ html {
     color: var(--text-muted);
     font-size: 10px;
     line-height: 1.3;
-    display: none;
 }
 
 .music-time-row {
@@ -1795,9 +1797,16 @@ html {
 .music-controls,
 .music-options {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
     margin-top: 8px;
+}
+
+.music-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.music-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .music-controls button,
@@ -1806,7 +1815,7 @@ html {
     background: var(--mode-button-surface);
     color: var(--mode-button-text);
     border-radius: 10px;
-    font-size: 18px;
+    font-size: 0;
     line-height: 1;
     padding: 8px 6px;
     font-weight: 700;
@@ -1905,6 +1914,35 @@ html {
 .music-options button:active,
 .music-close-btn:active {
     transform: scale(0.97);
+}
+
+.music-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+    fill: currentColor;
+    flex: none;
+}
+
+.music-fab .music-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.music-fab span {
+    line-height: 1;
+}
+
+.music-play-btn .music-icon-pause {
+    display: none;
+}
+
+.music-player.playing .music-play-btn .music-icon-play {
+    display: none;
+}
+
+.music-player.playing .music-play-btn .music-icon-pause {
+    display: block;
 }
 
 .music-options button.active {
