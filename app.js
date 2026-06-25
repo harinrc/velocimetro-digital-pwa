@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const installBtn = document.getElementById("install-btn");
     const gpsStatus = document.getElementById("gps-status");
     const netStatus = document.getElementById("net-status");
+    const refreshAgeText = document.getElementById("refresh-age");
     const modeButtons = document.querySelectorAll(".mode-btn");
     const panelHandle = document.getElementById("panel-handle");
     
@@ -505,6 +506,25 @@ document.addEventListener("DOMContentLoaded", () => {
         installBtn.hidden = !visible;
     }
 
+    function formatElapsedAge(timestamp) {
+        if (!timestamp || timestamp <= 0) return "--";
+        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+        if (elapsedSeconds < 60) return `${elapsedSeconds}s`;
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+        if (minutes < 60) return `${minutes}m ${seconds}s`;
+        const hours = Math.floor(minutes / 60);
+        const remMinutes = minutes % 60;
+        return `${hours}h ${remMinutes}m`;
+    }
+
+    function updateRefreshAgeLabel() {
+        if (!refreshAgeText) return;
+        const weatherAge = formatElapsedAge(lastWeatherTime);
+        const locationAge = formatElapsedAge(lastGeocodeTime);
+        refreshAgeText.textContent = `Clima ${weatherAge} · Ubicación ${locationAge}`;
+    }
+
     // ---- WAKE LOCK: mantener pantalla encendida mientras se rastrea ----
     async function requestWakeLock() {
         if (!('wakeLock' in navigator)) return;
@@ -522,12 +542,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ---- ICONOS + DESCRIPCION WMO (Open-Meteo) ----
-    function getWmoWeatherInfo(code, isDay = true) {
+    function getWmoWeatherInfo(code, isDay = true, cloudCover = null) {
         // Iconos base para distinguir claramente dia y noche en estados despejados/parcialmente nublados.
         const clearIcon = isDay ? "\u2600\ufe0f" : "\uD83C\uDF19";
         const mostlyClearIcon = isDay ? "\uD83C\uDF24\uFE0F" : "\uD83C\uDF19";
         const partlyCloudyIcon = isDay ? "\u26C5" : "\u2601\ufe0f";
         const rainIcon = "\uD83C\uDF27\uFE0F";
+        const cloud = Number.isFinite(Number(cloudCover)) ? Number(cloudCover) : null;
+
+        // Afinar condiciones despejadas/parcialmente nubladas con nubosidad real para evitar nube fija durante dias soleados.
+        if ((code === 1 || code === 2) && isDay && cloud !== null) {
+            if (cloud <= 18) return { icon: "\u2600\ufe0f", label: "Soleado" };
+            if (cloud <= 45) return { icon: "\uD83C\uDF24\uFE0F", label: "Mayormente soleado" };
+            if (cloud <= 70) return { icon: "\u26C5", label: "Parcialmente nublado" };
+        }
 
         const definitions = {
             0: { icon: clearIcon, label: isDay ? "Despejado" : "Despejado (noche)" },
@@ -569,31 +597,40 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = Date.now();
         if (lastWeatherLatLng) {
             const dist = calculateDistanceMeters(lastWeatherLatLng[0], lastWeatherLatLng[1], lat, lon);
-            if (dist < 1000 && (now - lastWeatherTime) < 90 * 1000) return;
+            if (dist < 250 && (now - lastWeatherTime) < 35 * 1000) return;
         }
         try {
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,weather_code,is_day&timezone=auto&forecast_days=1`;
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(5)}&longitude=${lon.toFixed(5)}&current=temperature_2m,apparent_temperature,weather_code,is_day,cloud_cover,precipitation&timezone=auto&forecast_days=1`;
             const res = await fetch(url);
             if (!res.ok) return;
             const data = await res.json();
             const temp = data.current?.temperature_2m;
+            const apparentTemp = data.current?.apparent_temperature;
             const code = data.current?.weather_code;
             const isDayValue = data.current?.is_day;
+            const cloudCover = data.current?.cloud_cover;
+            const precipitation = data.current?.precipitation;
             const isDay = typeof isDayValue === "number"
                 ? isDayValue === 1
                 : (new Date().getHours() >= 6 && new Date().getHours() < 18);
             if (temp !== undefined && code !== undefined) {
                 const iconEl = document.getElementById('weather-icon');
                 const tempEl = document.getElementById('weather-temp');
-                const weatherInfo = getWmoWeatherInfo(code, isDay);
+                const weatherInfo = getWmoWeatherInfo(code, isDay, cloudCover);
                 if (iconEl) {
                     iconEl.textContent = weatherInfo.icon;
                     iconEl.title = weatherInfo.label;
                 }
                 if (tempEl) tempEl.textContent = `${Math.round(temp)}\u00b0C`;
-                if (tempEl) tempEl.title = weatherInfo.label;
+                if (tempEl) {
+                    const cloudText = Number.isFinite(Number(cloudCover)) ? `, nubosidad ${Math.round(Number(cloudCover))}%` : "";
+                    const rainText = Number.isFinite(Number(precipitation)) ? `, lluvia ${Number(precipitation).toFixed(1)} mm` : "";
+                    const feelText = Number.isFinite(Number(apparentTemp)) ? `, sensacion ${Math.round(Number(apparentTemp))}\u00b0C` : "";
+                    tempEl.title = `${weatherInfo.label}${feelText}${cloudText}${rainText}`;
+                }
                 lastWeatherLatLng = [lat, lon];
                 lastWeatherTime = now;
+                updateRefreshAgeLabel();
             }
         } catch (_) { /* sin conexi\u00f3n */ }
     }
@@ -604,15 +641,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const now = Date.now();
         if (lastGeocodedLatLng) {
             const dist = calculateDistanceMeters(lastGeocodedLatLng[0], lastGeocodedLatLng[1], lat, lon);
-            if (dist < 150 && (now - lastGeocodeTime) < 20 * 1000) return;
+            if (dist < 45 && (now - lastGeocodeTime) < 10 * 1000) return;
         }
         try {
-            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=14&accept-language=es`;
+            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&format=jsonv2&zoom=18&addressdetails=1&accept-language=es`;
             const res = await fetch(url, { headers: { 'User-Agent': 'VelocimetroPWA/1.0' } });
             if (!res.ok) return;
             const data = await res.json();
             const a = data.address || {};
-            const name = a.suburb ?? a.neighbourhood ?? a.village ?? a.town ?? a.city ?? a.county ?? data.display_name?.split(',')[0] ?? '';
+            const roadName = [a.road, a.house_number].filter(Boolean).join(" ").trim();
+            const locality = a.neighbourhood ?? a.suburb ?? a.city_district ?? a.village ?? a.town ?? a.city ?? a.county;
+            const poi = data.name ?? a.amenity ?? a.building ?? a.shop ?? a.tourism;
+            const name = roadName
+                ? (locality ? `${roadName}, ${locality}` : roadName)
+                : (poi ?? locality ?? data.display_name?.split(',').slice(0, 2).join(',') ?? '');
             const trimmed = name.trim();
             const locationTextEl = document.getElementById('location-text');
             const mapLocationTag = document.getElementById('map-location-tag');
@@ -620,6 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (mapLocationTag && trimmed) mapLocationTag.textContent = trimmed;
             lastGeocodedLatLng = [lat, lon];
             lastGeocodeTime = now;
+            updateRefreshAgeLabel();
         } catch (_) { /* sin conexi\u00f3n */ }
     }
 
@@ -913,7 +956,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             fetchLocationName(latestLatLng[0], latestLatLng[1]);
             fetchWeather(latestLatLng[0], latestLatLng[1]);
-        }, 30000);
+        }, 15000);
     }
 
     async function toggleFloatingWindow() {
@@ -1449,5 +1492,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("online", updateConnectivityState);
     window.addEventListener("offline", updateConnectivityState);
     setInterval(updateClock, 1000);
+    setInterval(updateRefreshAgeLabel, 1000);
     updateClock();
+    updateRefreshAgeLabel();
 });
