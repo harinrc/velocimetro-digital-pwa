@@ -2157,7 +2157,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 450px) {
     .app-container {
-        grid-template-columns: minmax(174px, 38.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(168px, 37.5vw) minmax(0, 1fr);
         gap: 6px 9px;
         padding: calc(6px + env(safe-area-inset-top)) 8px calc(6px + env(safe-area-inset-bottom));
     }
@@ -2177,7 +2177,7 @@ html {
     }
 
     .gauge {
-        width: min(42dvh, 31.5vw, 188px);
+        width: min(39dvh, 29.5vw, 176px);
     }
 
     .digital-display {
@@ -2186,11 +2186,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(32px, 7.2vw, 48px);
+        font-size: clamp(30px, 6.8vw, 44px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(25px, 5.9vw, 38px);
+        font-size: clamp(23px, 5.3vw, 34px);
     }
 
     .limit-indicator {
@@ -2255,7 +2255,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 430px) {
     .app-container {
-        grid-template-columns: minmax(170px, 37.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(166px, 36.8vw) minmax(0, 1fr);
         gap: 5px 8px;
         padding: calc(5px + env(safe-area-inset-top)) 7px calc(5px + env(safe-area-inset-bottom));
     }
@@ -2265,7 +2265,7 @@ html {
     }
 
     .gauge {
-        width: min(40dvh, 29vw, 170px);
+        width: min(38dvh, 28vw, 162px);
     }
 
     .digital-display {
@@ -2278,11 +2278,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(30px, 6.8vw, 45px);
+        font-size: clamp(29px, 6.4vw, 42px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(23px, 5.5vw, 35px);
+        font-size: clamp(22px, 5vw, 33px);
     }
 
     .controls-panel {
@@ -2350,9 +2350,9 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 420px) {
     .app-container {
-        grid-template-columns: minmax(158px, 37vw) minmax(0, 1fr);
-        gap: 4px 7px;
-        padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
+        grid-template-columns: minmax(160px, 37.6vw) minmax(0, 1fr);
+        gap: 3px 6px;
+        padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
     }
 
     .status-right {
@@ -2371,7 +2371,7 @@ html {
     }
 
     .gauge {
-        width: min(45dvh, 32vw, 190px);
+        width: min(47dvh, 33.5vw, 198px);
     }
 
     .digital-display {
@@ -2380,11 +2380,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(30px, 6.9vw, 46px);
+        font-size: clamp(31px, 7.1vw, 47px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(23px, 5.4vw, 35px);
+        font-size: clamp(24px, 5.7vw, 36px);
     }
 
     .unit {
@@ -2406,8 +2406,8 @@ html {
     }
 
     .controls-panel {
-        padding: 4px;
-        gap: 3px;
+        padding: 5px;
+        gap: 4px;
         border-radius: 10px;
         max-height: calc(100dvh - 39px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
@@ -2425,12 +2425,12 @@ html {
     .weather-temp,
     .location-text,
     .refresh-age {
-        font-size: 8px;
+        font-size: 9px;
     }
 
     .stats-grid {
-        gap: 2px;
-        padding-bottom: 3px;
+        gap: 3px;
+        padding-bottom: 4px;
     }
 
     .stat-item {
@@ -2446,8 +2446,8 @@ html {
     .setup-row,
     .mode-row {
         grid-template-columns: minmax(52px, 1fr) minmax(0, 1fr);
-        gap: 2px;
-        font-size: 8px;
+        gap: 3px;
+        font-size: 9px;
     }
 
     .max-speed-actions {
@@ -2458,18 +2458,18 @@ html {
     .max-speed-btn,
     .floating-btn,
     .btn-start {
-        font-size: 8px;
-        padding: 4px 4px;
+        font-size: 9px;
+        padding: 5px 5px;
     }
 
     .max-scale-value {
-        min-width: 40px;
-        font-size: 8px;
-        padding: 3px 4px;
+        min-width: 42px;
+        font-size: 9px;
+        padding: 4px 5px;
     }
 
     .mini-map {
-        height: 44px;
+        height: 50px;
     }
 
     .action-row {
@@ -2479,7 +2479,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 400px) {
     .app-container {
-        grid-template-columns: minmax(152px, 36vw) minmax(0, 1fr);
+        grid-template-columns: minmax(154px, 36.4vw) minmax(0, 1fr);
         gap: 3px 6px;
         padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
     }
@@ -2506,7 +2506,7 @@ html {
     }
 
     .gauge {
-        width: min(50dvh, 34vw, 196px);
+        width: min(52dvh, 35.5vw, 202px);
     }
 
     .digital-display {
@@ -2515,11 +2515,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(28px, 6.4vw, 42px);
+        font-size: clamp(29px, 6.7vw, 44px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(22px, 5.2vw, 33px);
+        font-size: clamp(23px, 5.5vw, 35px);
     }
 
     .unit {
@@ -2541,8 +2541,8 @@ html {
     }
 
     .controls-panel {
-        padding: 3px;
-        gap: 2px;
+        padding: 4px;
+        gap: 3px;
         border-radius: 9px;
         max-height: calc(100dvh - 34px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
@@ -2560,12 +2560,12 @@ html {
     .weather-temp,
     .location-text,
     .refresh-age {
-        font-size: 7px;
+        font-size: 8px;
     }
 
     .stats-grid {
-        gap: 2px;
-        padding-bottom: 2px;
+        gap: 3px;
+        padding-bottom: 3px;
     }
 
     .stat-item {
@@ -2575,7 +2575,7 @@ html {
 
     .stat-label,
     .stat-value {
-        font-size: 8px;
+        font-size: 9px;
     }
 
     .map-card {
@@ -2599,14 +2599,14 @@ html {
     }
 
     .mini-map {
-        height: 38px;
+        height: 44px;
     }
 
     .setup-row,
     .mode-row {
         grid-template-columns: minmax(48px, 1fr) minmax(0, 1fr);
-        gap: 2px;
-        font-size: 7px;
+        gap: 3px;
+        font-size: 8px;
     }
 
     .max-speed-actions {
@@ -2617,14 +2617,14 @@ html {
     .max-speed-btn,
     .floating-btn,
     .btn-start {
-        font-size: 7px;
-        padding: 3px 3px;
+        font-size: 8px;
+        padding: 4px 4px;
     }
 
     .max-scale-value {
-        min-width: 36px;
-        font-size: 7px;
-        padding: 2px 3px;
+        min-width: 38px;
+        font-size: 8px;
+        padding: 3px 4px;
     }
 
     .action-row {
@@ -2634,37 +2634,55 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 350px) {
     .app-container {
-        grid-template-columns: minmax(146px, 35.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(148px, 36vw) minmax(0, 1fr);
     }
 
     .gauge {
-        width: min(54dvh, 37vw, 186px);
+        width: min(56dvh, 38vw, 192px);
     }
 
     .current-speed {
-        font-size: clamp(29px, 6.8vw, 44px);
+        font-size: clamp(30px, 7vw, 45px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(22px, 5.5vw, 34px);
+        font-size: clamp(23px, 5.7vw, 35px);
+    }
+
+    .controls-panel {
+        padding: 4px;
+        gap: 3px;
+    }
+
+    .mini-map {
+        height: 42px;
     }
 }
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 320px) {
     .app-container {
-        grid-template-columns: minmax(142px, 34.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(144px, 35vw) minmax(0, 1fr);
     }
 
     .gauge {
-        width: min(56dvh, 38vw, 178px);
+        width: min(58dvh, 39vw, 184px);
     }
 
     .current-speed {
-        font-size: clamp(27px, 6.4vw, 40px);
+        font-size: clamp(28px, 6.6vw, 41px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(21px, 5.2vw, 32px);
+        font-size: clamp(22px, 5.4vw, 33px);
+    }
+
+    .controls-panel {
+        padding: 4px;
+        gap: 3px;
+    }
+
+    .mini-map {
+        height: 40px;
     }
 }
 
