@@ -639,7 +639,10 @@ document.addEventListener("DOMContentLoaded", () => {
     async function fetchLocationName(lat, lon) {
         const locationTextEl = document.getElementById('location-text');
         const mapLocationTag = document.getElementById('map-location-tag');
-        const fallbackLocation = `Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`;
+        const existingLocation = (locationTextEl?.textContent || "").trim();
+        const fallbackLocation = existingLocation && existingLocation !== "Buscando ubicación..."
+            ? existingLocation
+            : "Ubicación no disponible";
 
         if (!navigator.onLine) {
             if (locationTextEl) locationTextEl.textContent = fallbackLocation;
@@ -659,11 +662,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
             const a = data.address || {};
             const roadName = [a.road, a.house_number].filter(Boolean).join(" ").trim();
-            const locality = a.neighbourhood ?? a.suburb ?? a.city_district ?? a.village ?? a.town ?? a.city ?? a.county;
-            const poi = data.name ?? a.amenity ?? a.building ?? a.shop ?? a.tourism;
-            const name = roadName
-                ? (locality ? `${roadName}, ${locality}` : roadName)
-                : (poi ?? locality ?? data.display_name?.split(',').slice(0, 2).join(',') ?? fallbackLocation);
+            const barrio = a.neighbourhood ?? a.suburb ?? a.quarter;
+            const zona = a.city_district ?? a.borough ?? a.county ?? a.state_district;
+            const lugar = roadName || data.name || a.amenity || a.building || a.shop || a.tourism || a.hamlet || a.village;
+            const ciudad = a.city ?? a.town ?? a.municipality;
+
+            const parts = [barrio, zona, lugar, ciudad]
+                .filter(Boolean)
+                .map((part) => String(part).trim())
+                .filter((part, index, arr) => part.length > 0 && arr.indexOf(part) === index);
+
+            const name = parts.length
+                ? parts.slice(0, 3).join(", ")
+                : (data.display_name?.split(',').slice(0, 3).join(',').trim() || fallbackLocation);
+
             const trimmed = name.trim() || fallbackLocation;
             if (locationTextEl) locationTextEl.textContent = trimmed;
             if (mapLocationTag) mapLocationTag.textContent = trimmed;
