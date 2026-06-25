@@ -637,15 +637,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---- GEOCODING: Nominatim (OpenStreetMap, sin API key) ----
     async function fetchLocationName(lat, lon) {
-        if (!navigator.onLine) return;
+        const locationTextEl = document.getElementById('location-text');
+        const mapLocationTag = document.getElementById('map-location-tag');
+        const fallbackLocation = `Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`;
+
+        if (!navigator.onLine) {
+            if (locationTextEl) locationTextEl.textContent = fallbackLocation;
+            if (mapLocationTag) mapLocationTag.textContent = fallbackLocation;
+            return;
+        }
+
         const now = Date.now();
         if (lastGeocodedLatLng) {
             const dist = calculateDistanceMeters(lastGeocodedLatLng[0], lastGeocodedLatLng[1], lat, lon);
             if (dist < 45 && (now - lastGeocodeTime) < 10 * 1000) return;
         }
         try {
-            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&format=jsonv2&zoom=18&addressdetails=1&accept-language=es`;
-            const res = await fetch(url, { headers: { 'User-Agent': 'VelocimetroPWA/1.0' } });
+            const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&format=jsonv2&zoom=17&addressdetails=1&namedetails=1&accept-language=es`;
+            const res = await fetch(url);
             if (!res.ok) return;
             const data = await res.json();
             const a = data.address || {};
@@ -654,16 +663,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const poi = data.name ?? a.amenity ?? a.building ?? a.shop ?? a.tourism;
             const name = roadName
                 ? (locality ? `${roadName}, ${locality}` : roadName)
-                : (poi ?? locality ?? data.display_name?.split(',').slice(0, 2).join(',') ?? '');
-            const trimmed = name.trim();
-            const locationTextEl = document.getElementById('location-text');
-            const mapLocationTag = document.getElementById('map-location-tag');
-            if (locationTextEl && trimmed) locationTextEl.textContent = trimmed;
-            if (mapLocationTag && trimmed) mapLocationTag.textContent = trimmed;
+                : (poi ?? locality ?? data.display_name?.split(',').slice(0, 2).join(',') ?? fallbackLocation);
+            const trimmed = name.trim() || fallbackLocation;
+            if (locationTextEl) locationTextEl.textContent = trimmed;
+            if (mapLocationTag) mapLocationTag.textContent = trimmed;
             lastGeocodedLatLng = [lat, lon];
             lastGeocodeTime = now;
             updateRefreshAgeLabel();
-        } catch (_) { /* sin conexi\u00f3n */ }
+        } catch (_) {
+            if (locationTextEl) locationTextEl.textContent = fallbackLocation;
+            if (mapLocationTag) mapLocationTag.textContent = fallbackLocation;
+        }
     }
 
     function applyPanelState(collapsed, persist = true) {
