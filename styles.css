@@ -458,12 +458,6 @@ html {
     color: #ffffff;
 }
 
-@media (pointer: coarse), (max-width: 899px) {
-    .orientation-btn {
-        display: none;
-    }
-}
-
 .gps-status {
     display: flex;
     align-items: center;

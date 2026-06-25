@@ -106,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
         : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
-    const isPhoneLike = window.matchMedia("(pointer: coarse), (max-width: 899px)").matches;
     const normalSystemColor = "#050608";
     const warningSystemColor = "#050608";
 
@@ -755,10 +754,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function toggleOrientationMode() {
-        if (isPhoneLike) {
-            return;
-        }
-
         const isLandscapeNow = screen.orientation && typeof screen.orientation.type === "string"
             ? screen.orientation.type.startsWith("landscape")
             : false;
@@ -1353,9 +1348,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (orientationBtn) {
         orientationBtn.addEventListener("click", toggleOrientationMode);
-        if (isPhoneLike) {
-            orientationBtn.style.display = "none";
-        }
     }
 
     if (mapCenterBtn) {
