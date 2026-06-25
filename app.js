@@ -1427,6 +1427,91 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function getTrackFileKey(file) {
+        return `${file.name}__${file.size}__${file.lastModified || 0}`;
+    }
+
+    function isLikelyAudioFile(fileOrName) {
+        const fileName = typeof fileOrName === "string" ? fileOrName : (fileOrName?.name || "");
+        const fileType = typeof fileOrName === "string" ? "" : (fileOrName?.type || "");
+        if (fileType.startsWith("audio/")) return true;
+        return /\.(mp3|m4a|aac|flac|wav|ogg|opus|webm)$/i.test(fileName);
+    }
+
+    async function collectAudioFilesFromDirectory(directoryHandle) {
+        const discovered = [];
+
+        async function walk(handle) {
+            for await (const entry of handle.values()) {
+                if (entry.kind === "directory") {
+                    await walk(entry);
+                    continue;
+                }
+
+                if (entry.kind === "file" && isLikelyAudioFile(entry.name)) {
+                    const file = await entry.getFile();
+                    if (isLikelyAudioFile(file)) {
+                        discovered.push(file);
+                    }
+                }
+            }
+        }
+
+        await walk(directoryHandle);
+        return discovered;
+    }
+
+    async function appendMusicFiles(files) {
+        const sourceFiles = Array.from(files || []).filter((file) => isLikelyAudioFile(file));
+        if (!sourceFiles.length) {
+            if (musicTrackName) {
+                musicTrackName.textContent = "No se encontraron archivos de audio";
+            }
+            return;
+        }
+
+        const existingKeys = new Set(musicTracks.map((track) => getTrackFileKey(track.file)));
+        const uniqueFiles = sourceFiles.filter((file) => !existingKeys.has(getTrackFileKey(file)));
+
+        if (!uniqueFiles.length) {
+            if (musicTrackName) {
+                musicTrackName.textContent = "Esas canciones ya estaban cargadas";
+            }
+            return;
+        }
+
+        if (musicTrackName) {
+            musicTrackName.textContent = `Cargando ${uniqueFiles.length} canciones...`;
+        }
+
+        const parsed = await Promise.all(uniqueFiles.map(async (file, index) => {
+            const metadata = await extractId3Metadata(file);
+            return {
+                id: `${file.name}-${file.size}-${file.lastModified || Date.now()}-${index}`,
+                name: file.name.replace(/\.[^.]+$/, ""),
+                title: metadata.title,
+                artist: metadata.artist,
+                album: metadata.album,
+                coverBlob: metadata.coverBlob,
+                file,
+            };
+        }));
+
+        const hadTracks = musicTracks.length > 0;
+        musicTracks = [...musicTracks, ...parsed];
+
+        if (!hadTracks) {
+            setMusicTrack(0, true);
+        } else {
+            renderMusicPlaylist();
+            syncMusicUiState();
+        }
+
+        if (musicPlayer) {
+            musicPlayer.hidden = false;
+        }
+    }
+
     function setMusicCover(coverBlob, trackTitle) {
         if (!musicCoverImage || !musicCoverFallback) return;
 
@@ -1844,40 +1929,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (musicLoadBtn && musicFileInput) {
-        musicLoadBtn.addEventListener("click", () => {
+        musicLoadBtn.addEventListener("click", async () => {
+            // En navegadores compatibles, permitimos seleccionar carpeta para importar toda la musica de una vez.
+            if (typeof window.showDirectoryPicker === "function") {
+                try {
+                    const directoryHandle = await window.showDirectoryPicker({ mode: "read" });
+                    const discoveredFiles = await collectAudioFilesFromDirectory(directoryHandle);
+                    await appendMusicFiles(discoveredFiles);
+                    return;
+                } catch (error) {
+                    if (error?.name !== "AbortError") {
+                        console.warn("No se pudo leer la carpeta completa", error);
+                    }
+                }
+            }
+
             musicFileInput.click();
         });
 
         musicFileInput.addEventListener("change", async (event) => {
-            const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("audio/"));
-            if (!files.length) return;
-
-            if (musicTrackName) {
-                musicTrackName.textContent = "Leyendo metadata...";
-            }
-
-            const parsed = await Promise.all(files.map(async (file, index) => {
-                const metadata = await extractId3Metadata(file);
-                return {
-                    id: `${file.name}-${file.size}-${index}`,
-                    name: file.name.replace(/\.[^.]+$/, ""),
-                    title: metadata.title,
-                    artist: metadata.artist,
-                    album: metadata.album,
-                    coverBlob: metadata.coverBlob,
-                    file,
-                };
-            }));
-
-            musicTracks = parsed;
-            musicTrackIndex = -1;
-            renderMusicPlaylist();
-
-            setMusicTrack(0, true);
-            if (musicPlayer) {
-                musicPlayer.hidden = false;
-            }
-            syncMusicUiState();
+            const files = Array.from(event.target.files || []);
+            await appendMusicFiles(files);
             musicFileInput.value = "";
         });
     }
