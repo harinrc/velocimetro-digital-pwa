@@ -2350,7 +2350,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 420px) {
     .app-container {
-        grid-template-columns: minmax(176px, 41.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(164px, 38.5vw) minmax(0, 1fr);
         gap: 4px 7px;
         padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
     }
@@ -2479,7 +2479,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 400px) {
     .app-container {
-        grid-template-columns: minmax(182px, 43.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(162px, 38.5vw) minmax(0, 1fr);
         gap: 3px 6px;
         padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
     }
@@ -2634,7 +2634,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 350px) {
     .app-container {
-        grid-template-columns: minmax(172px, 42vw) minmax(0, 1fr);
+        grid-template-columns: minmax(154px, 37.5vw) minmax(0, 1fr);
     }
 
     .gauge {
@@ -2652,7 +2652,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 320px) {
     .app-container {
-        grid-template-columns: minmax(164px, 41vw) minmax(0, 1fr);
+        grid-template-columns: minmax(148px, 36.5vw) minmax(0, 1fr);
     }
 
     .gauge {
