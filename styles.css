@@ -35,6 +35,8 @@
     --mode-alert-border: rgba(255, 42, 42, 0.58);
     --mode-alert-shadow: rgba(255, 42, 42, 0.16);
     --mode-alert-title: rgba(255, 42, 42, 0.96);
+    --warning-accent: rgba(255, 42, 42, 0.96);
+    --warning-accent-glow: rgba(255, 42, 42, 0.28);
     --mode-section-title: #cfd5e4;
     --mode-gps-text: #cfd5e4;
 }
@@ -142,6 +144,8 @@ html {
     --mode-alert-border: rgba(34, 242, 211, 0.42);
     --mode-alert-shadow: rgba(42, 183, 255, 0.18);
     --mode-alert-title: rgba(34, 242, 211, 0.95);
+    --warning-accent: rgba(34, 242, 211, 0.95);
+    --warning-accent-glow: rgba(42, 183, 255, 0.28);
     --mode-section-title: #33e8d4;
     --mode-gps-text: #7af5e8;
     --gauge-motion-duration: 0.25s;
@@ -173,6 +177,8 @@ html {
     --mode-alert-border: rgba(255, 42, 42, 0.58);
     --mode-alert-shadow: rgba(255, 42, 42, 0.16);
     --mode-alert-title: rgba(255, 42, 42, 0.96);
+    --warning-accent: rgba(255, 42, 42, 0.96);
+    --warning-accent-glow: rgba(255, 42, 42, 0.28);
     --mode-section-title: #ff6f6f;
     --mode-gps-text: #ff8a8a;
     --gauge-motion-duration: 0.19s;
@@ -204,6 +210,8 @@ html {
     --mode-alert-border: rgba(217, 75, 255, 0.5);
     --mode-alert-shadow: rgba(255, 123, 211, 0.2);
     --mode-alert-title: rgba(217, 75, 255, 0.96);
+    --warning-accent: rgba(217, 75, 255, 0.96);
+    --warning-accent-glow: rgba(255, 123, 211, 0.3);
     --mode-section-title: #d15cff;
     --mode-gps-text: #ef9dff;
     --gauge-motion-duration: 0.12s;
@@ -569,14 +577,14 @@ html {
 
 .speed-warning .gauge-labels text.active-label,
 .speed-warning .gauge-labels text.over-limit-label {
-    fill: color-mix(in srgb, var(--text-main) 68%, var(--accent-red) 32%);
-    text-shadow: 0 0 10px var(--accent-red-glow);
+    fill: color-mix(in srgb, var(--text-main) 65%, var(--warning-accent) 35%);
+    text-shadow: 0 0 10px var(--warning-accent-glow);
 }
 
 .app-container.speed-warning-startup .gauge-labels text.active-label,
 .app-container.speed-warning-startup .gauge-labels text.over-limit-label {
-    fill: color-mix(in srgb, var(--text-main) 68%, var(--accent-red) 32%);
-    text-shadow: 0 0 10px var(--accent-red-glow);
+    fill: color-mix(in srgb, var(--text-main) 65%, var(--warning-accent) 35%);
+    text-shadow: 0 0 10px var(--warning-accent-glow);
 }
 
 /* La Aguja */
@@ -608,7 +616,7 @@ html {
 
 .app-container.speed-warning-startup .needle,
 .app-container.speed-warning-startup .gauge-progress {
-    filter: drop-shadow(0 0 10px var(--accent-red-glow));
+    filter: drop-shadow(0 0 10px var(--warning-accent-glow));
 }
 
 .app-container.speed-warning-aggressive-startup .needle,
@@ -718,14 +726,14 @@ html {
 }
 
 .speed-warning .current-speed {
-    color: var(--accent-red);
-    text-shadow: 0 0 24px var(--mode-button-active-glow);
+    color: var(--warning-accent);
+    text-shadow: 0 0 24px var(--warning-accent-glow);
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
 .app-container.speed-warning-startup .current-speed {
-    color: var(--accent-red);
-    text-shadow: 0 0 24px var(--mode-button-active-glow);
+    color: var(--warning-accent);
+    text-shadow: 0 0 24px var(--warning-accent-glow);
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
@@ -1983,6 +1991,20 @@ html {
 }
 
 @media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
+    .app-container.speed-warning .current-speed,
+    .app-container.speed-warning-startup .current-speed {
+        color: var(--warning-accent);
+        text-shadow: 0 0 22px var(--warning-accent-glow);
+    }
+
+    .app-container.speed-warning .gauge-labels text.active-label,
+    .app-container.speed-warning .gauge-labels text.over-limit-label,
+    .app-container.speed-warning-startup .gauge-labels text.active-label,
+    .app-container.speed-warning-startup .gauge-labels text.over-limit-label {
+        fill: color-mix(in srgb, var(--text-main) 63%, var(--warning-accent) 37%);
+        text-shadow: 0 0 9px var(--warning-accent-glow);
+    }
+
     .app-container {
         grid-template-columns: minmax(182px, 42vw) minmax(0, 1fr);
         gap: 4px 7px;
