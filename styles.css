@@ -918,8 +918,7 @@ html {
 
 .app-container.panel-collapsed .stats-grid,
 .app-container.panel-collapsed .setup-row,
-.app-container.panel-collapsed .mode-row,
-.app-container.panel-collapsed .action-row {
+.app-container.panel-collapsed .mode-row {
     max-height: 0;
     margin: 0;
     padding: 0;
@@ -927,6 +926,14 @@ html {
     overflow: hidden;
     pointer-events: none;
     transform: translateY(10px);
+}
+
+.app-container.panel-collapsed .action-row {
+    max-height: none;
+    margin-top: 6px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
 .app-container.panel-collapsed .map-card {
