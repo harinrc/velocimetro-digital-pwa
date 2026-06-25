@@ -1532,37 +1532,6 @@ document.addEventListener("DOMContentLoaded", () => {
         musicCoverImage.removeAttribute("src");
     }
 
-    function syncMusicOptionButtons() {
-        if (musicShuffleBtn) {
-            musicShuffleBtn.classList.toggle("active", musicShuffleEnabled);
-        }
-
-        if (musicRepeatBtn) {
-            const repeatOne = musicRepeatMode === "one";
-            musicRepeatBtn.classList.toggle("active", repeatOne);
-            musicRepeatBtn.title = repeatOne ? "Repetir una canción" : "Repetir";
-        }
-    }
-
-    function syncMusicUiState() {
-        const hasTracks = musicTracks.length > 0;
-        const isPlaying = Boolean(musicAudio && !musicAudio.paused && !musicAudio.ended);
-
-        if (musicPlayer) {
-            musicPlayer.classList.toggle("playing", isPlaying);
-        }
-
-        if (musicFab) {
-            musicFab.classList.toggle("active", musicPlayer ? !musicPlayer.hidden : false);
-        }
-
-        if (musicPrevBtn) musicPrevBtn.disabled = !hasTracks;
-        if (musicNextBtn) musicNextBtn.disabled = !hasTracks;
-        if (musicShuffleBtn) musicShuffleBtn.disabled = !hasTracks;
-        if (musicRepeatBtn) musicRepeatBtn.disabled = !hasTracks;
-        if (musicResetBtn) musicResetBtn.disabled = !hasTracks;
-    }
-
     function setMusicTrack(index, autoPlay = true) {
         if (!musicAudio || !musicTrackName || !musicTimeCurrent || !musicTimeTotal || !musicSeek) return;
         if (!musicTracks.length || index < 0 || index >= musicTracks.length) return;
