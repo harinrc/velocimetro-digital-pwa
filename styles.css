@@ -1779,7 +1779,6 @@ html {
     color: var(--text-muted);
     font-size: 10px;
     line-height: 1.3;
-    display: none;
 }
 
 .music-time-row {

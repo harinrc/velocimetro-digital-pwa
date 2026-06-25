@@ -1265,7 +1265,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.classList.add("active");
             }
             item.innerHTML = `
-                <strong>${track.name}</strong>
+                <strong>${track.title || track.name}</strong>
+                <span>${track.artist || "Artista desconocido"}</span>
             `;
             item.addEventListener("click", () => {
                 if (Date.now() < suppressPlaylistClickUntil) return;
@@ -1483,10 +1484,17 @@ document.addEventListener("DOMContentLoaded", () => {
             musicTrackName.textContent = `Cargando ${uniqueFiles.length} canciones...`;
         }
 
-        const parsed = uniqueFiles.map((file, index) => ({
-            id: `${file.name}-${file.size}-${file.lastModified || Date.now()}-${index}`,
-            name: file.name.replace(/\.[^.]+$/, ""),
-            file,
+        const parsed = await Promise.all(uniqueFiles.map(async (file, index) => {
+            const metadata = await extractId3Metadata(file);
+            return {
+                id: `${file.name}-${file.size}-${file.lastModified || Date.now()}-${index}`,
+                name: file.name.replace(/\.[^.]+$/, ""),
+                title: metadata.title,
+                artist: metadata.artist,
+                album: metadata.album,
+                coverBlob: metadata.coverBlob,
+                file,
+            };
         }));
 
         const hadTracks = musicTracks.length > 0;
@@ -1566,15 +1574,15 @@ document.addEventListener("DOMContentLoaded", () => {
         musicAudio.src = musicObjectUrl;
         musicAudio.load();
 
-        const trackTitle = track.name;
+        const trackTitle = track.title || track.name;
         musicTrackName.textContent = trackTitle;
         if (musicTrackArtist) {
-            musicTrackArtist.textContent = "";
+            musicTrackArtist.textContent = track.artist || "Artista desconocido";
         }
         if (musicTrackAlbum) {
-            musicTrackAlbum.textContent = "";
+            musicTrackAlbum.textContent = track.album || "Album desconocido";
         }
-        setMusicCover(null, trackTitle);
+        setMusicCover(track.coverBlob || null, trackTitle);
         renderMusicPlaylist();
         musicTimeCurrent.textContent = "00:00";
         musicTimeTotal.textContent = "00:00";
