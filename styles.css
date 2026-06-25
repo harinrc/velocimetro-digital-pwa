@@ -1215,6 +1215,9 @@ html {
     font-weight: 700;
     letter-spacing: 0.4px;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .map-center-btn {
@@ -2275,6 +2278,161 @@ html {
 
     .action-row {
         gap: 3px;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 400px) {
+    .app-container {
+        grid-template-columns: minmax(150px, 35.5vw) minmax(0, 1fr);
+        gap: 3px 6px;
+        padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
+    }
+
+    .status-bar {
+        padding-bottom: 2px;
+        margin-bottom: 0;
+    }
+
+    .status-right {
+        gap: 3px;
+    }
+
+    .time {
+        font-size: clamp(12px, 2.9vw, 16px);
+        padding: 2px 4px;
+    }
+
+    .reload-btn,
+    .install-btn,
+    .orientation-btn {
+        font-size: 8px;
+        padding: 3px 5px;
+    }
+
+    .gauge {
+        width: min(34dvh, 24.5vw, 148px);
+    }
+
+    .digital-display {
+        top: 52.9%;
+        gap: 3px;
+    }
+
+    .current-speed {
+        font-size: clamp(25px, 5.8vw, 38px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(20px, 4.8vw, 30px);
+    }
+
+    .unit {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .limit-indicator {
+        min-width: 38px;
+        padding: 2px 4px;
+    }
+
+    .limit-label {
+        font-size: 7px;
+    }
+
+    .limit-value {
+        font-size: 20px;
+    }
+
+    .controls-panel {
+        padding: 3px;
+        gap: 2px;
+        border-radius: 9px;
+        max-height: calc(100dvh - 34px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .weather-location-strip {
+        min-height: 22px;
+        padding: 2px 3px;
+        gap: 3px;
+    }
+
+    .weather-icon {
+        font-size: 10px;
+    }
+
+    .weather-temp,
+    .location-text,
+    .refresh-age {
+        font-size: 7px;
+    }
+
+    .stats-grid {
+        gap: 2px;
+        padding-bottom: 2px;
+    }
+
+    .stat-item {
+        min-width: 52px;
+        padding: 3px 4px;
+    }
+
+    .stat-label,
+    .stat-value {
+        font-size: 8px;
+    }
+
+    .map-card {
+        padding: 5px;
+        gap: 4px;
+    }
+
+    .map-head {
+        gap: 4px;
+    }
+
+    .map-title {
+        font-size: 8px;
+        letter-spacing: 0.1px;
+    }
+
+    .map-center-btn {
+        font-size: 8px;
+        padding: 3px 5px;
+        border-radius: 6px;
+    }
+
+    .mini-map {
+        height: 38px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(48px, 1fr) minmax(0, 1fr);
+        gap: 2px;
+        font-size: 7px;
+    }
+
+    .max-speed-actions {
+        gap: 2px;
+    }
+
+    .mode-btn,
+    .max-speed-btn,
+    .floating-btn,
+    .btn-start {
+        font-size: 7px;
+        padding: 3px 3px;
+    }
+
+    .max-scale-value {
+        min-width: 36px;
+        font-size: 7px;
+        padding: 2px 3px;
+    }
+
+    .action-row {
+        gap: 2px;
     }
 }
 
