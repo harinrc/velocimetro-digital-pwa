@@ -1764,6 +1764,43 @@ html {
 }
 
 @media (max-width: 480px) and (orientation: portrait) {
+    .status-bar {
+        gap: 6px;
+    }
+
+    .gps-status {
+        font-size: 12px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .status-right {
+        gap: 4px;
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
+    .time {
+        font-size: clamp(15px, 5.2vw, 20px);
+        padding: 4px 6px;
+        letter-spacing: 0.7px;
+    }
+
+    .reload-btn,
+    .install-btn,
+    .orientation-btn {
+        padding: 5px 6px;
+        font-size: 10px;
+        letter-spacing: 0.2px;
+    }
+
+    .orientation-btn {
+        max-width: 72px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     .gauge {
         width: min(82vw, 320px);
     }
@@ -1830,7 +1867,7 @@ html {
     }
 
     .gauge {
-        width: min(40vw, 262px);
+        width: min(48dvh, 40vw, 248px);
     }
 
     .digital-display {
@@ -1941,7 +1978,7 @@ html {
     }
 
     .gauge {
-        width: min(36vw, 228px);
+        width: min(45dvh, 34vw, 204px);
     }
 
     .digital-display {
@@ -2029,7 +2066,7 @@ html {
     }
 
     .gauge {
-        width: min(34.5vw, 214px);
+        width: min(42dvh, 31vw, 184px);
     }
 
     .digital-display {
@@ -2135,7 +2172,7 @@ html {
     }
 
     .gauge {
-        width: min(33vw, 198px);
+        width: min(39dvh, 28.5vw, 168px);
     }
 
     .digital-display {
