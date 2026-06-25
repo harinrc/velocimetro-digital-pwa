@@ -2157,7 +2157,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 450px) {
     .app-container {
-        grid-template-columns: minmax(186px, 41.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(174px, 38.5vw) minmax(0, 1fr);
         gap: 6px 9px;
         padding: calc(6px + env(safe-area-inset-top)) 8px calc(6px + env(safe-area-inset-bottom));
     }
@@ -2177,7 +2177,7 @@ html {
     }
 
     .gauge {
-        width: min(45dvh, 34vw, 204px);
+        width: min(42dvh, 31.5vw, 188px);
     }
 
     .digital-display {
@@ -2186,11 +2186,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(34px, 7.9vw, 52px);
+        font-size: clamp(32px, 7.2vw, 48px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(28px, 6.5vw, 42px);
+        font-size: clamp(25px, 5.9vw, 38px);
     }
 
     .limit-indicator {
@@ -2255,7 +2255,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 430px) {
     .app-container {
-        grid-template-columns: minmax(180px, 40vw) minmax(0, 1fr);
+        grid-template-columns: minmax(170px, 37.5vw) minmax(0, 1fr);
         gap: 5px 8px;
         padding: calc(5px + env(safe-area-inset-top)) 7px calc(5px + env(safe-area-inset-bottom));
     }
@@ -2265,7 +2265,7 @@ html {
     }
 
     .gauge {
-        width: min(42dvh, 31vw, 184px);
+        width: min(40dvh, 29vw, 170px);
     }
 
     .digital-display {
@@ -2278,11 +2278,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(32px, 7.4vw, 48px);
+        font-size: clamp(30px, 6.8vw, 45px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(26px, 6.2vw, 39px);
+        font-size: clamp(23px, 5.5vw, 35px);
     }
 
     .controls-panel {
@@ -2350,7 +2350,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 420px) {
     .app-container {
-        grid-template-columns: minmax(164px, 38.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(158px, 37vw) minmax(0, 1fr);
         gap: 4px 7px;
         padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
     }
@@ -2371,7 +2371,7 @@ html {
     }
 
     .gauge {
-        width: min(49dvh, 35.5vw, 214px);
+        width: min(45dvh, 32vw, 190px);
     }
 
     .digital-display {
@@ -2380,11 +2380,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(32px, 7.4vw, 50px);
+        font-size: clamp(30px, 6.9vw, 46px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(25px, 5.9vw, 38px);
+        font-size: clamp(23px, 5.4vw, 35px);
     }
 
     .unit {
@@ -2479,7 +2479,7 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 400px) {
     .app-container {
-        grid-template-columns: minmax(162px, 38.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(152px, 36vw) minmax(0, 1fr);
         gap: 3px 6px;
         padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
     }
@@ -2506,7 +2506,7 @@ html {
     }
 
     .gauge {
-        width: min(56dvh, 39vw, 224px);
+        width: min(50dvh, 34vw, 196px);
     }
 
     .digital-display {
@@ -2515,11 +2515,11 @@ html {
     }
 
     .current-speed {
-        font-size: clamp(31px, 7.1vw, 48px);
+        font-size: clamp(28px, 6.4vw, 42px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(24px, 5.8vw, 36px);
+        font-size: clamp(22px, 5.2vw, 33px);
     }
 
     .unit {
@@ -2634,11 +2634,11 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 350px) {
     .app-container {
-        grid-template-columns: minmax(154px, 37.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(146px, 35.5vw) minmax(0, 1fr);
     }
 
     .gauge {
-        width: min(59dvh, 41vw, 214px);
+        width: min(54dvh, 37vw, 186px);
     }
 
     .current-speed {
@@ -2652,11 +2652,11 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 320px) {
     .app-container {
-        grid-template-columns: minmax(148px, 36.5vw) minmax(0, 1fr);
+        grid-template-columns: minmax(142px, 34.5vw) minmax(0, 1fr);
     }
 
     .gauge {
-        width: min(61dvh, 42vw, 206px);
+        width: min(56dvh, 38vw, 178px);
     }
 
     .current-speed {
