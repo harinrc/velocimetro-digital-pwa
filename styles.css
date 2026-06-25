@@ -1925,69 +1925,87 @@ html {
     }
 }
 
-@media (orientation: landscape) and (pointer: coarse) and (max-height: 430px) {
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 450px) {
     .app-container {
-        grid-template-columns: minmax(200px, 44vw) minmax(0, 1fr);
-        gap: 6px 10px;
+        grid-template-columns: minmax(186px, 41.5vw) minmax(0, 1fr);
+        gap: 6px 9px;
         padding: calc(6px + env(safe-area-inset-top)) 8px calc(6px + env(safe-area-inset-bottom));
     }
 
     .status-bar {
         margin-bottom: 0;
+        padding-bottom: 4px;
+    }
+
+    .status-right {
+        gap: 6px;
+    }
+
+    .time {
+        font-size: clamp(15px, 3.7vw, 20px);
+        padding: 4px 7px;
     }
 
     .gauge {
-        width: min(38vw, 242px);
+        width: min(36vw, 228px);
     }
 
     .digital-display {
-        top: 53.6%;
+        top: 53.8%;
         gap: 6px;
-    }
-
-    .unit {
-        font-size: 10px;
     }
 
     .current-speed {
-        font-size: clamp(38px, 8.7vw, 58px);
+        font-size: clamp(34px, 7.9vw, 52px);
     }
 
     .current-speed.triple-digits {
-        font-size: clamp(30px, 7.2vw, 46px);
+        font-size: clamp(28px, 6.5vw, 42px);
+    }
+
+    .limit-indicator {
+        min-width: 50px;
+        padding: 4px 6px;
     }
 
     .controls-panel {
-        padding: 7px;
-        gap: 6px;
-        border-radius: 14px;
-        max-height: calc(100dvh - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        padding: 6px;
+        gap: 5px;
+        border-radius: 13px;
+        max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
 
     .weather-location-strip {
-        min-height: 30px;
-        padding: 5px 7px;
+        min-height: 28px;
+        padding: 4px 6px;
+        gap: 6px;
     }
 
     .weather-temp,
-    .location-text {
+    .location-text,
+    .refresh-age {
         font-size: 10px;
     }
 
     .stats-grid {
-        gap: 5px;
-        padding-bottom: 6px;
+        gap: 4px;
+        padding-bottom: 5px;
     }
 
+    .stat-label,
     .stat-value {
-        font-size: 12px;
+        font-size: 11px;
+    }
+
+    .mini-map {
+        height: 58px;
     }
 
     .setup-row,
     .mode-row {
-        grid-template-columns: minmax(62px, 1fr) minmax(0, 1fr);
-        gap: 5px;
-        font-size: 11px;
+        grid-template-columns: minmax(58px, 1fr) minmax(0, 1fr);
+        gap: 4px;
+        font-size: 10px;
     }
 
     .mode-btn,
@@ -1995,17 +2013,98 @@ html {
     .floating-btn,
     .btn-start {
         font-size: 9px;
-        padding: 6px 7px;
+        padding: 6px 6px;
     }
 
     .max-scale-value {
-        min-width: 52px;
+        min-width: 48px;
         font-size: 10px;
         padding: 4px 5px;
     }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 430px) {
+    .app-container {
+        grid-template-columns: minmax(180px, 40vw) minmax(0, 1fr);
+        gap: 5px 8px;
+        padding: calc(5px + env(safe-area-inset-top)) 7px calc(5px + env(safe-area-inset-bottom));
+    }
+
+    .status-bar {
+        margin-bottom: 0;
+    }
+
+    .gauge {
+        width: min(34.5vw, 214px);
+    }
+
+    .digital-display {
+        top: 53.4%;
+        gap: 5px;
+    }
+
+    .unit {
+        font-size: 10px;
+    }
+
+    .current-speed {
+        font-size: clamp(32px, 7.4vw, 48px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(26px, 6.2vw, 39px);
+    }
+
+    .controls-panel {
+        padding: 5px;
+        gap: 4px;
+        border-radius: 12px;
+        max-height: calc(100dvh - 43px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .weather-location-strip {
+        min-height: 26px;
+        padding: 4px 5px;
+    }
+
+    .weather-temp,
+    .location-text,
+    .refresh-age {
+        font-size: 9px;
+    }
+
+    .stats-grid {
+        gap: 3px;
+        padding-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 10px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(56px, 1fr) minmax(0, 1fr);
+        gap: 3px;
+        font-size: 9px;
+    }
+
+    .mode-btn,
+    .max-speed-btn,
+    .floating-btn,
+    .btn-start {
+        font-size: 8px;
+        padding: 5px 5px;
+    }
+
+    .max-scale-value {
+        min-width: 44px;
+        font-size: 9px;
+        padding: 3px 4px;
+    }
 
     .mini-map {
-        height: 64px;
+        height: 50px;
     }
 
     .map-title,
@@ -2015,7 +2114,136 @@ html {
 
     .action-row {
         grid-template-columns: 1fr;
-        gap: 5px;
+        gap: 4px;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 420px) {
+    .app-container {
+        grid-template-columns: minmax(166px, 38.5vw) minmax(0, 1fr);
+        gap: 4px 7px;
+        padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
+    }
+
+    .status-right {
+        gap: 4px;
+    }
+
+    .time {
+        font-size: clamp(13px, 3.1vw, 17px);
+        padding: 3px 5px;
+    }
+
+    .reload-btn,
+    .install-btn {
+        font-size: 9px;
+        padding: 4px 6px;
+    }
+
+    .gauge {
+        width: min(33vw, 198px);
+    }
+
+    .digital-display {
+        top: 53.1%;
+        gap: 4px;
+    }
+
+    .current-speed {
+        font-size: clamp(29px, 6.7vw, 44px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(23px, 5.5vw, 34px);
+    }
+
+    .unit {
+        font-size: 9px;
+        letter-spacing: 1.2px;
+    }
+
+    .limit-indicator {
+        min-width: 42px;
+        padding: 3px 5px;
+    }
+
+    .limit-label {
+        font-size: 8px;
+    }
+
+    .limit-value {
+        font-size: 23px;
+    }
+
+    .controls-panel {
+        padding: 4px;
+        gap: 3px;
+        border-radius: 10px;
+        max-height: calc(100dvh - 39px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .weather-location-strip {
+        min-height: 24px;
+        padding: 3px 4px;
+        gap: 4px;
+    }
+
+    .weather-icon {
+        font-size: 11px;
+    }
+
+    .weather-temp,
+    .location-text,
+    .refresh-age {
+        font-size: 8px;
+    }
+
+    .stats-grid {
+        gap: 2px;
+        padding-bottom: 3px;
+    }
+
+    .stat-item {
+        min-width: 58px;
+        padding: 4px 5px;
+    }
+
+    .stat-label,
+    .stat-value {
+        font-size: 9px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(52px, 1fr) minmax(0, 1fr);
+        gap: 2px;
+        font-size: 8px;
+    }
+
+    .max-speed-actions {
+        gap: 3px;
+    }
+
+    .mode-btn,
+    .max-speed-btn,
+    .floating-btn,
+    .btn-start {
+        font-size: 8px;
+        padding: 4px 4px;
+    }
+
+    .max-scale-value {
+        min-width: 40px;
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+
+    .mini-map {
+        height: 44px;
+    }
+
+    .action-row {
+        gap: 3px;
     }
 }
 
