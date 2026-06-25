@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const musicShuffleBtn = document.getElementById("music-shuffle");
     const musicRepeatBtn = document.getElementById("music-repeat");
     const musicPlaylist = document.getElementById("music-playlist");
+    const musicFab = document.getElementById("music-fab");
     
     // Elementos de Estadísticas secundarios
     const maxSpeedText = document.getElementById("max-speed");
@@ -1153,6 +1154,10 @@ document.addEventListener("DOMContentLoaded", () => {
         musicPlayer.classList.toggle("playing", isPlaying);
         floatingBtn.classList.toggle("active", isOpen || isPlaying);
         floatingBtn.textContent = isOpen ? "Cerrar musica" : "Musica";
+        if (musicFab) {
+            musicFab.classList.toggle("active", isOpen || isPlaying);
+            musicFab.textContent = isOpen ? "Cerrar" : "♪ Musica";
+        }
         if (musicPlayBtn) {
             musicPlayBtn.textContent = isPlaying ? "Pausa" : "Play";
         }
@@ -1765,6 +1770,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (floatingBtn) {
         floatingBtn.addEventListener("click", toggleMusicPlayer);
+    }
+
+    if (musicFab) {
+        musicFab.addEventListener("click", toggleMusicPlayer);
     }
 
     if (musicCloseBtn && musicPlayer) {
