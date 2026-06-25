@@ -1159,21 +1159,92 @@ document.addEventListener("DOMContentLoaded", () => {
             musicFab.textContent = isOpen ? "Cerrar" : "♪ Musica";
         }
         if (musicPlayBtn) {
-            musicPlayBtn.textContent = isPlaying ? "Pausa" : "Play";
+            musicPlayBtn.textContent = isPlaying ? "⏸" : "⏵";
+            musicPlayBtn.title = isPlaying ? "Pausar" : "Reproducir";
         }
     }
 
     function syncMusicOptionButtons() {
         if (musicShuffleBtn) {
             musicShuffleBtn.classList.toggle("active", musicShuffleEnabled);
-            musicShuffleBtn.textContent = `Aleatorio: ${musicShuffleEnabled ? "On" : "Off"}`;
+            musicShuffleBtn.textContent = "🔀";
+            musicShuffleBtn.title = `Aleatorio: ${musicShuffleEnabled ? "On" : "Off"}`;
         }
 
         if (musicRepeatBtn) {
             const label = musicRepeatMode === "one" ? "Una" : "Lista";
             musicRepeatBtn.classList.toggle("active", musicRepeatMode === "one");
-            musicRepeatBtn.textContent = `Repetir: ${label}`;
+            musicRepeatBtn.textContent = musicRepeatMode === "one" ? "🔂" : "🔁";
+            musicRepeatBtn.title = `Repetir: ${label}`;
         }
+    }
+
+    function normalizeMetadataText(text) {
+        return String(text || "")
+            .replace(/\u0000/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function metadataTextScore(text) {
+        if (!text) return -999;
+        let score = 0;
+
+        for (const char of text) {
+            const code = char.charCodeAt(0);
+
+            if (char === "\ufffd") score -= 6;
+            if (/[_\-\sA-Za-z0-9]/.test(char)) score += 2;
+            if (/[ -]/.test(char)) score += 1;
+            if (/[ -]/.test(char)) score -= 5;
+            if (/[ -\u007F]/.test(char)) score -= 3;
+            if (/[ -]/.test(char) === false) score += 0.2;
+
+            if (code >= 0x4e00 && code <= 0x9fff) score -= 1.8;
+            if ("ÃÂÐÑ".includes(char)) score -= 2;
+        }
+
+        if (text.length <= 2) score -= 2;
+        return score;
+    }
+
+    function decodeMetadataBestEffort(data, encodingByte, fallback = "") {
+        if (!data || !data.length) return fallback;
+
+        const decoderSet = [];
+        if (encodingByte === 1 || encodingByte === 2) {
+            decoderSet.push("utf-16", "utf-16le", "utf-8", "windows-1252");
+        } else if (encodingByte === 3) {
+            decoderSet.push("utf-8", "utf-16", "windows-1252");
+        } else {
+            decoderSet.push("iso-8859-1", "windows-1252", "utf-8", "utf-16");
+        }
+
+        let best = "";
+        let bestScore = -Infinity;
+
+        for (const enc of decoderSet) {
+            try {
+                const candidate = normalizeMetadataText(new TextDecoder(enc).decode(data));
+                const score = metadataTextScore(candidate);
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = candidate;
+                }
+            } catch (_) {
+                // ignore unsupported decoders
+            }
+        }
+
+        const cleanedFallback = normalizeMetadataText(fallback);
+        if (!best) return cleanedFallback;
+
+        // Si la cadena se ve claramente corrupta, volvemos al nombre de archivo.
+        if (metadataTextScore(best) < 0 && cleanedFallback) {
+            return cleanedFallback;
+        }
+
+        return best;
     }
 
     function renderMusicPlaylist() {
@@ -1247,19 +1318,8 @@ document.addEventListener("DOMContentLoaded", () => {
             | (bytes[start + 3] & 0x7f);
     }
 
-    function decodeId3Text(data, encodingByte) {
-        if (!data || !data.length) return "";
-
-        let decoder;
-        if (encodingByte === 1 || encodingByte === 2) {
-            decoder = new TextDecoder("utf-16");
-        } else if (encodingByte === 3) {
-            decoder = new TextDecoder("utf-8");
-        } else {
-            decoder = new TextDecoder("iso-8859-1");
-        }
-
-        return decoder.decode(data).replace(/\u0000/g, "").trim();
+    function decodeId3Text(data, encodingByte, fallback = "") {
+        return decodeMetadataBestEffort(data, encodingByte, fallback);
     }
 
     function readApicFrame(frameData) {
@@ -1335,11 +1395,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const frameData = bytes.slice(frameStart, frameEnd);
                 if (frameId === "TIT2" && frameData.length > 1) {
-                    metadata.title = decodeId3Text(frameData.slice(1), frameData[0]) || metadata.title;
+                    metadata.title = decodeId3Text(frameData.slice(1), frameData[0], fallbackTitle) || metadata.title;
                 } else if (frameId === "TPE1" && frameData.length > 1) {
-                    metadata.artist = decodeId3Text(frameData.slice(1), frameData[0]) || metadata.artist;
+                    metadata.artist = decodeId3Text(frameData.slice(1), frameData[0], "Artista desconocido") || metadata.artist;
                 } else if (frameId === "TALB" && frameData.length > 1) {
-                    metadata.album = decodeId3Text(frameData.slice(1), frameData[0]) || metadata.album;
+                    metadata.album = decodeId3Text(frameData.slice(1), frameData[0], "Album desconocido") || metadata.album;
                 } else if (frameId === "APIC" && !metadata.coverBlob) {
                     metadata.coverBlob = readApicFrame(frameData);
                 }
