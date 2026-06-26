@@ -1005,22 +1005,22 @@ html {
 .app-container.force-landscape .status-bar {
     grid-column: 1 / 3;
     margin-bottom: 0;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
 }
 
 .app-container.force-landscape .gauge-container {
     margin: 0;
-    margin-top: 3px;
+    margin-top: -5px;
     align-self: start;
     min-height: 0;
 }
 
 .app-container.force-landscape .gauge {
-    width: min(43.5dvh, 33vw, 214px);
+    width: min(36vw, 198px);
 }
 
 .app-container.force-landscape .digital-display {
-    top: 53.5%;
+    top: 53.2%;
     gap: 5px;
 }
 
