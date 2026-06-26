@@ -1350,13 +1350,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const restoredTracks = await loadTracksFromMusicLibrary();
         if (!restoredTracks.length) return;
 
-        musicTracks = restoredTracks;
+        musicTracks = await Promise.all(restoredTracks.map(async (track) => {
+            if (!shouldRefreshTrackMetadata(track)) {
+                return sanitizeTrackMetadata(track);
+            }
+
+            const metadata = await extractId3Metadata(track.file);
+            return sanitizeTrackMetadata({
+                ...track,
+                title: metadata.title,
+                artist: metadata.artist,
+                album: metadata.album,
+                coverBlob: metadata.coverBlob || track.coverBlob || null,
+            });
+        }));
+
+        await saveTracksToMusicLibrary(musicTracks);
         setMusicTrack(0, false);
     }
 
     function normalizeMetadataText(text) {
         return String(text || "")
+            .replace(/^\uFEFF+/u, "")
             .replace(/\u0000/g, "")
+            .replace(/[\u200B-\u200D\u2060]/g, "")
             .replace(/\s+/g, " ")
             .trim();
     }
@@ -1381,6 +1398,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (text.length <= 2) score -= 2;
         return score;
+    }
+
+    function sanitizeMetadataValue(text, fallback = "") {
+        const normalized = normalizeMetadataText(text)
+            .replace(/^(?:ï»¿|Ã¯Â»Â¿)+/i, "")
+            .replace(/^[\ufffd]+/u, "")
+            .replace(/^[\s\-_.:|]+/, "")
+            .trim();
+
+        return normalized || normalizeMetadataText(fallback);
+    }
+
+    function hasSuspiciousMetadataPrefix(text) {
+        const normalized = normalizeMetadataText(text);
+        if (!normalized) return true;
+        if (/^(?:ï»¿|Ã¯Â»Â¿|\ufffd+)/iu.test(normalized)) return true;
+        if (/^[ÃÂÐÑÏïþÿ]/u.test(normalized) && metadataTextScore(normalized.slice(0, 2)) < 0) return true;
+        return false;
+    }
+
+    function sanitizeTrackMetadata(track) {
+        const fallbackTitle = track?.name || track?.file?.name?.replace(/\.[^.]+$/, "") || "Cancion";
+        return {
+            ...track,
+            title: sanitizeMetadataValue(track?.title, fallbackTitle) || fallbackTitle,
+            artist: sanitizeMetadataValue(track?.artist, "Artista desconocido") || "Artista desconocido",
+            album: sanitizeMetadataValue(track?.album, "Album desconocido") || "Album desconocido",
+        };
+    }
+
+    function shouldRefreshTrackMetadata(track) {
+        return hasSuspiciousMetadataPrefix(track?.title)
+            || hasSuspiciousMetadataPrefix(track?.artist)
+            || hasSuspiciousMetadataPrefix(track?.album);
     }
 
     function decodeMetadataBestEffort(data, encodingByte, fallback = "") {
@@ -1411,8 +1462,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        const cleanedFallback = normalizeMetadataText(fallback);
+        const cleanedFallback = sanitizeMetadataValue(fallback);
         if (!best) return cleanedFallback;
+
+        best = sanitizeMetadataValue(best, cleanedFallback);
 
         // Si la cadena se ve claramente corrupta, volvemos al nombre de archivo.
         if (metadataTextScore(best) < 0 && cleanedFallback) {
@@ -1773,10 +1826,39 @@ document.addEventListener("DOMContentLoaded", () => {
         const willOpen = musicPlayer.hidden;
         musicPlayer.hidden = !willOpen;
         if (willOpen) {
+            musicPlayer.style.removeProperty("left");
+            musicPlayer.style.removeProperty("top");
             musicPlayer.style.removeProperty("right");
             musicPlayer.style.removeProperty("bottom");
+            requestAnimationFrame(() => {
+                resetMusicPlayerPosition();
+                keepMusicPlayerInBounds();
+            });
         }
         syncMusicUiState();
+    }
+
+    function isLandscapePlayerMode() {
+        return window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches
+            || appContainer?.classList.contains("force-landscape");
+    }
+
+    function resetMusicPlayerPosition() {
+        if (!musicPlayer) return;
+
+        musicPlayer.style.removeProperty("left");
+        musicPlayer.style.removeProperty("top");
+
+        if (isLandscapePlayerMode()) {
+            musicPlayer.style.right = "8px";
+            musicPlayer.style.top = "calc(46px + env(safe-area-inset-top))";
+            musicPlayer.style.bottom = "auto";
+            return;
+        }
+
+        musicPlayer.style.removeProperty("top");
+        musicPlayer.style.right = "14px";
+        musicPlayer.style.bottom = "calc(14px + env(safe-area-inset-bottom))";
     }
 
     function clampMusicPosition(left, top) {
@@ -2428,6 +2510,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", () => {
         syncPanelMode();
+        if (musicPlayer && !musicPlayer.hidden) {
+            resetMusicPlayerPosition();
+        }
         keepMusicPlayerInBounds();
     });
 

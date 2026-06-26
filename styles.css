@@ -2391,9 +2391,9 @@ html {
     }
 
     .app-container {
-        grid-template-columns: minmax(182px, 42vw) minmax(0, 1fr);
-        gap: 4px 7px;
-        padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
+        grid-template-columns: minmax(194px, 44vw) minmax(0, 1fr);
+        gap: 5px 9px;
+        padding: calc(5px + env(safe-area-inset-top)) 7px calc(5px + env(safe-area-inset-bottom));
     }
 
     .status-bar {
@@ -2418,7 +2418,7 @@ html {
     }
 
     .gauge {
-        width: min(46dvh, 31vw, 214px);
+        width: min(49dvh, 35vw, 228px);
     }
 
     .digital-display {
@@ -2448,10 +2448,10 @@ html {
     }
 
     .controls-panel {
-        padding: 3px;
-        gap: 2px;
-        border-radius: 9px;
-        max-height: calc(100dvh - 35px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        padding: 5px;
+        gap: 4px;
+        border-radius: 11px;
+        max-height: calc(100dvh - 39px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
 
     .weather-location-strip {
@@ -2467,7 +2467,7 @@ html {
     .weather-temp,
     .location-text,
     .refresh-age {
-        font-size: 7px;
+        font-size: 8px;
     }
 
     .stats-grid {
@@ -2516,27 +2516,61 @@ html {
 
     .setup-row,
     .mode-row {
-        grid-template-columns: minmax(46px, 1fr) minmax(0, 1fr);
-        gap: 2px;
-        font-size: 7px;
+        grid-template-columns: minmax(54px, 1fr) minmax(0, 1fr);
+        gap: 3px;
+        font-size: 8px;
     }
 
     .mode-btn,
     .max-speed-btn,
     .floating-btn,
     .btn-start {
-        font-size: 7px;
-        padding: 3px 3px;
+        font-size: 8px;
+        padding: 5px 5px;
     }
 
     .max-scale-value {
-        min-width: 34px;
-        font-size: 7px;
-        padding: 2px 3px;
+        min-width: 40px;
+        font-size: 8px;
+        padding: 3px 4px;
     }
 
     .action-row {
-        gap: 2px;
+        gap: 4px;
+    }
+
+    .music-player {
+        width: min(300px, calc(100% - 14px));
+        max-height: min(78dvh, 324px);
+        overflow-y: auto;
+        right: 7px;
+        top: calc(40px + env(safe-area-inset-top));
+        bottom: auto;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (min-height: 421px) and (max-height: 560px) {
+    .app-container {
+        grid-template-columns: minmax(206px, 41vw) minmax(0, 1fr);
+    }
+
+    .gauge {
+        width: min(44dvh, 33vw, 216px);
+    }
+
+    .digital-display {
+        top: 53.6%;
+    }
+
+    .controls-panel {
+        max-height: calc(100dvh - 52px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .music-player {
+        width: min(320px, calc(100% - 18px));
+        max-height: min(80dvh, 344px);
+        right: 9px;
+        top: calc(44px + env(safe-area-inset-top));
     }
 }
 
