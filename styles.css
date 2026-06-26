@@ -2630,16 +2630,16 @@ html {
     }
 
     .gauge-container {
-        margin-top: 3px;
+        margin-top: -8px;
         align-self: start;
     }
 
     .gauge {
-        width: min(43.5dvh, 33vw, 214px);
+        width: min(36vw, 198px);
     }
 
     .digital-display {
-        top: 53.5%;
+        top: 53%;
     }
 
     .controls-panel {
