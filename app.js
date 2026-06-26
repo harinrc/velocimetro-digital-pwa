@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let smoothedMapPoint = null;
     let lastMapCenterAt = 0;
     let followMap = true;
-    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 430px), (orientation: landscape) and (pointer: coarse) and (max-height: 560px)").matches;
+    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 430px)").matches;
 
     let panelCollapsed = isCompactPanelModeNow()
         ? true
@@ -158,6 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
+    }
+
+    if (orientationBtn) {
+        orientationBtn.hidden = true;
+        orientationBtn.setAttribute("aria-hidden", "true");
     }
 
     // Mantener en sincronía CSS (arco/aguja/animaciones) y JS (cálculo de ángulos).
@@ -535,12 +540,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applySimulatedLandscape(enabled) {
-        simulatedLandscape = enabled;
-        appContainer.classList.toggle("force-landscape", enabled);
-        if (orientationBtn) {
-            orientationBtn.classList.toggle("active", enabled);
-            orientationBtn.textContent = enabled ? "Vertical" : "Horizontal";
-        }
+        simulatedLandscape = false;
+        appContainer.classList.remove("force-landscape");
         syncPanelMode();
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
@@ -790,16 +791,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function syncPanelMode() {
-        const isLandscapePhoneMode = window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches || simulatedLandscape;
-        if (isLandscapePhoneMode) {
-            if (panelHandle) {
-                panelHandle.style.display = "none";
-            }
-            // En horizontal móvil mostramos siempre el panel completo para evitar que se oculten secciones.
-            applyPanelState(false, false);
-            return;
-        }
-
         if (isCompactPanelModeNow()) {
             if (panelHandle) {
                 panelHandle.style.display = "flex";
@@ -816,36 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function toggleOrientationMode() {
-        const isLandscapeNow = screen.orientation && typeof screen.orientation.type === "string"
-            ? screen.orientation.type.startsWith("landscape")
-            : false;
-
-        const wantsLandscape = simulatedLandscape ? false : !isLandscapeNow;
-
-        if (screen.orientation && typeof screen.orientation.lock === "function") {
-            try {
-                if (wantsLandscape && !document.fullscreenElement && document.documentElement.requestFullscreen) {
-                    await document.documentElement.requestFullscreen();
-                }
-
-                await screen.orientation.lock(wantsLandscape ? "landscape" : "portrait");
-
-                if (!wantsLandscape && document.fullscreenElement && document.exitFullscreen) {
-                    await document.exitFullscreen();
-                }
-
-                applySimulatedLandscape(false);
-                if (orientationBtn) {
-                    orientationBtn.classList.toggle("active", wantsLandscape);
-                    orientationBtn.textContent = wantsLandscape ? "Vertical" : "Horizontal";
-                }
-                return;
-            } catch (error) {
-                console.warn("No se pudo bloquear orientación nativa", error);
-            }
-        }
-
-        applySimulatedLandscape(!simulatedLandscape);
+        applySimulatedLandscape(false);
     }
 
     function updateFloatingHud(currentSpeed, isOverLimit) {
@@ -1406,13 +1368,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function sanitizeMetadataValue(text, fallback = "") {
+        const fallbackClean = normalizeMetadataText(fallback);
         const normalized = normalizeMetadataText(text)
             .replace(/^(?:ï»¿|Ã¯Â»Â¿)+/i, "")
             .replace(/^[\ufffd]+/u, "")
             .replace(/^[\s\-_.:|]+/, "")
+            .replace(/^[^\p{L}\p{N}]+/u, "")
             .trim();
 
-        return normalized || normalizeMetadataText(fallback);
+        if (!normalized) return fallbackClean;
+
+        const looksMojibake = /(Ã.|Â.|Ð.|Ñ.|þ|ÿ|\ufffd)/u.test(normalized);
+        if (looksMojibake && metadataTextScore(normalized) < 6 && fallbackClean && normalized !== fallbackClean) {
+            return fallbackClean;
+        }
+
+        return normalized;
     }
 
     function hasSuspiciousMetadataPrefix(text) {
@@ -1436,7 +1407,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function shouldRefreshTrackMetadata(track) {
         return hasSuspiciousMetadataPrefix(track?.title)
             || hasSuspiciousMetadataPrefix(track?.artist)
-            || hasSuspiciousMetadataPrefix(track?.album);
+            || hasSuspiciousMetadataPrefix(track?.album)
+            || /(Ã.|Â.|Ð.|Ñ.|þ|ÿ|\ufffd)/u.test(normalizeMetadataText(track?.title || ""))
+            || /(Ã.|Â.|Ð.|Ñ.|þ|ÿ|\ufffd)/u.test(normalizeMetadataText(track?.artist || ""))
+            || /(Ã.|Â.|Ð.|Ñ.|þ|ÿ|\ufffd)/u.test(normalizeMetadataText(track?.album || ""));
     }
 
     function decodeMetadataBestEffort(data, encodingByte, fallback = "") {
@@ -1490,6 +1464,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         musicTracks.forEach((track, index) => {
+            const safeTitle = sanitizeMetadataValue(track.title, track.name) || track.name;
+            const safeArtist = sanitizeMetadataValue(track.artist, "Artista desconocido") || "Artista desconocido";
             const item = document.createElement("button");
             item.type = "button";
             item.className = "music-playlist-item";
@@ -1498,8 +1474,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.classList.add("active");
             }
             item.innerHTML = `
-                <strong>${track.title || track.name}</strong>
-                <span>${track.artist || "Artista desconocido"}</span>
+                <strong>${safeTitle}</strong>
+                <span>${safeArtist}</span>
             `;
             item.addEventListener("click", () => {
                 if (Date.now() < suppressPlaylistClickUntil) return;
@@ -1720,7 +1696,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const parsed = await Promise.all(uniqueFiles.map(async (file, index) => {
             const metadata = await extractId3Metadata(file);
             const fileKey = getTrackFileKey(file);
-            return {
+            return sanitizeTrackMetadata({
                 id: `${fileKey}-${index}`,
                 name: file.name.replace(/\.[^.]+$/, ""),
                 title: metadata.title,
@@ -1728,7 +1704,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 album: metadata.album,
                 coverBlob: metadata.coverBlob,
                 file,
-            };
+            });
         }));
 
         const hadTracks = musicTracks.length > 0;
@@ -1772,7 +1748,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!musicTracks.length || index < 0 || index >= musicTracks.length) return;
 
         musicTrackIndex = index;
-        const track = musicTracks[musicTrackIndex];
+        const track = sanitizeTrackMetadata(musicTracks[musicTrackIndex]);
+        musicTracks[musicTrackIndex] = track;
         clearCurrentMusicObjectUrl();
         musicObjectUrl = URL.createObjectURL(track.file);
         musicAudio.src = musicObjectUrl;
@@ -2440,7 +2417,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (orientationBtn) {
-        orientationBtn.addEventListener("click", toggleOrientationMode);
+        orientationBtn.style.display = "none";
     }
 
     if (mapCenterBtn) {

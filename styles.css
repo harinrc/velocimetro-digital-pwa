@@ -1065,6 +1065,10 @@ html {
     display: none !important;
 }
 
+.orientation-btn {
+    display: none !important;
+}
+
 .app-container.panel-collapsed .controls-panel {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -3188,6 +3192,49 @@ html {
 
     .mini-map {
         height: 40px;
+    }
+}
+
+@media (orientation: landscape) {
+    .app-container {
+        max-width: min(460px, 100%) !important;
+        min-height: 100dvh !important;
+        height: 100dvh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        gap: 0 !important;
+        padding: calc(14px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom)) !important;
+        align-content: normal !important;
+    }
+
+    .status-bar {
+        grid-column: auto !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .gauge-container {
+        margin: 10px 0 !important;
+        align-self: auto !important;
+    }
+
+    .gauge {
+        width: min(88vw, clamp(230px, 72vw, 360px)) !important;
+    }
+
+    .digital-display {
+        top: 54.2% !important;
+    }
+
+    .controls-panel {
+        margin-top: 8px !important;
+        max-height: none !important;
+        overflow: visible !important;
+        align-self: auto !important;
+        padding: 14px 12px !important;
+        gap: 10px !important;
+        border-radius: 16px !important;
     }
 }
 
