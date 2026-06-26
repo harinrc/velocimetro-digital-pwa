@@ -541,6 +541,11 @@ document.addEventListener("DOMContentLoaded", () => {
             orientationBtn.classList.toggle("active", enabled);
             orientationBtn.textContent = enabled ? "Vertical" : "Horizontal";
         }
+        syncPanelMode();
+        if (musicPlayer && !musicPlayer.hidden) {
+            resetMusicPlayerPosition();
+            keepMusicPlayerInBounds();
+        }
     }
 
     function isStandaloneMode() {
@@ -785,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function syncPanelMode() {
-        const isLandscapePhoneMode = window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+        const isLandscapePhoneMode = window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches || simulatedLandscape;
         if (isLandscapePhoneMode) {
             if (panelHandle) {
                 panelHandle.style.display = "none";
