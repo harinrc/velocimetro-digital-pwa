@@ -2551,15 +2551,20 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (min-height: 421px) and (max-height: 560px) {
     .app-container {
-        grid-template-columns: minmax(206px, 41vw) minmax(0, 1fr);
+        grid-template-columns: minmax(204px, 40.5vw) minmax(0, 1fr);
+    }
+
+    .gauge-container {
+        margin-top: 14px;
+        align-self: start;
     }
 
     .gauge {
-        width: min(44dvh, 33vw, 216px);
+        width: min(43dvh, 32.5vw, 212px);
     }
 
     .digital-display {
-        top: 53.6%;
+        top: 54.2%;
     }
 
     .controls-panel {
@@ -2769,9 +2774,9 @@ html {
 
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 420px) {
     .app-container {
-        grid-template-columns: minmax(160px, 37.6vw) minmax(0, 1fr);
-        gap: 3px 6px;
-        padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
+        grid-template-columns: minmax(168px, 39.2vw) minmax(190px, 1fr);
+        gap: 3px 4px;
+        padding: calc(3px + env(safe-area-inset-top)) 4px calc(3px + env(safe-area-inset-bottom));
     }
 
     .status-right {
@@ -2790,7 +2795,7 @@ html {
     }
 
     .gauge {
-        width: min(47dvh, 33.5vw, 198px);
+        width: min(50dvh, 35.5vw, 212px);
     }
 
     .digital-display {
@@ -2825,7 +2830,7 @@ html {
     }
 
     .controls-panel {
-        padding: 5px;
+        padding: 5px 6px;
         gap: 4px;
         border-radius: 10px;
         max-height: calc(100dvh - 39px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
@@ -2864,7 +2869,7 @@ html {
 
     .setup-row,
     .mode-row {
-        grid-template-columns: minmax(52px, 1fr) minmax(0, 1fr);
+        grid-template-columns: minmax(56px, 1fr) minmax(0, 1fr);
         gap: 3px;
         font-size: 9px;
     }
@@ -2882,7 +2887,7 @@ html {
     }
 
     .max-scale-value {
-        min-width: 42px;
+        min-width: 46px;
         font-size: 9px;
         padding: 4px 5px;
     }
