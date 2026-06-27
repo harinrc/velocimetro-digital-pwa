@@ -223,7 +223,7 @@ html {
 
 /* --- Alerta visual cuando se supera el límite --- */
 .app-container.speed-warning {
-    background-color: #000000;
+    background-color: var(--bg-color);
     animation: none;
 }
 
@@ -850,6 +850,8 @@ html {
     line-height: 0.85;
     letter-spacing: -1.5px;
     min-width: 3ch;
+    color: color-mix(in srgb, var(--text-main) 76%, var(--accent-red) 24%);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--accent-red-glow) 62%, transparent);
     text-align: center;
     transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -1038,6 +1040,13 @@ html {
     font-size: clamp(18px, 4.8vw, 22px);
     font-weight: 700;
     line-height: 1;
+    color: color-mix(in srgb, var(--text-main) 74%, var(--accent-red) 26%);
+}
+
+.app-container.theme-light .current-speed,
+.app-container.theme-light .limit-value {
+    color: #1a2334;
+    text-shadow: none;
 }
 
 /* ==========================================================================
@@ -1326,8 +1335,8 @@ html {
 }
 
 .speed-warning .controls-panel {
-    border-color: color-mix(in srgb, var(--mode-alert-border) 18%, transparent);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+    border-color: var(--mode-alert-border);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35), 0 0 14px color-mix(in srgb, var(--mode-alert-shadow) 88%, transparent);
     animation: none;
 }
 
@@ -1343,8 +1352,8 @@ html {
 }
 
 .app-container.speed-warning-aggressive .controls-panel {
-    border-color: color-mix(in srgb, var(--mode-button-active-border) 24%, transparent);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.42);
+    border-color: var(--mode-button-active-border);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.38), 0 0 20px color-mix(in srgb, var(--mode-button-active-glow) 94%, transparent);
     animation: none;
 }
 
