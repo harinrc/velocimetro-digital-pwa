@@ -117,12 +117,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let gpsRetryTimer = null;
     let gpsRefreshTimer = null;
     let mapInstance = null;
+    let mapBaseLayer = null;
     let mapMarker = null;
     let mapAccuracyCircle = null;
     let latestLatLng = null;
     let smoothedMapPoint = null;
     let lastMapCenterAt = 0;
     let followMap = true;
+    let mapThemeVariant = "dark";
     const isCompactPanelModeNow = () => window.matchMedia("(max-width: 430px)").matches;
 
     let panelCollapsed = isCompactPanelModeNow()
@@ -605,6 +607,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
         updateThemeButtonState();
         updateSystemBarColors(lastSystemWarningState);
+        syncMapTheme();
+    }
+
+    function getMapTileConfig(theme) {
+        if (theme === "light") {
+            return {
+                variant: "light",
+                url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+            };
+        }
+
+        return {
+            variant: "dark",
+            url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        };
+    }
+
+    function syncMapTheme() {
+        if (!mapInstance || typeof L === "undefined") return;
+
+        const nextTheme = activeTheme === "light" ? "light" : "dark";
+        if (mapThemeVariant === nextTheme && mapBaseLayer) return;
+
+        const tileConfig = getMapTileConfig(nextTheme);
+
+        if (mapBaseLayer) {
+            mapInstance.removeLayer(mapBaseLayer);
+        }
+
+        mapBaseLayer = L.tileLayer(tileConfig.url, {
+            maxZoom: 20,
+            attribution: "&copy; OpenStreetMap &copy; CARTO"
+        }).addTo(mapInstance);
+
+        mapThemeVariant = tileConfig.variant;
     }
 
     function applyThemePreference(preference, persist = true) {
@@ -911,10 +948,7 @@ document.addEventListener("DOMContentLoaded", () => {
             tap: true
         }).setView([13.7, -89.2], 14);
 
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-            maxZoom: 20,
-            attribution: "&copy; OpenStreetMap &copy; CARTO"
-        }).addTo(mapInstance);
+        syncMapTheme();
     }
 
     function updateMapPosition(lat, lon, accuracy = 0) {
