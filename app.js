@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gaugePathLength = 500; // Path SVG normalizado (pathLength="500").
     const arcLeadFactor = 1.001; // Ajuste mínimo: arco y aguja van parejos.
     const arcLeadOffset = 0;     // Sin offset: sincronización perfecta desde el inicio.
+    const AUTO_TRACK_THRESHOLD = 85;
 
     // Variables de control de datos
     let speedLimit = parseInt(limitInput.value) || 40;
@@ -94,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let previousSpeed = 0;
     const arcLength = gaugePathLength;
     let visualMode = "sport";
+    let preferredVisualMode = "sport";
+    let autoTrackModeActive = false;
     let pipWindow = null;
     let pipSpeedText = null;
     let pipLimitText = null;
@@ -359,10 +362,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function setVisualMode(mode) {
+    function setVisualMode(mode, options = {}) {
+        const { persist = true, rememberPreference = true } = options;
         const modes = ["street", "sport", "track"];
         if (!modes.includes(mode)) {
             mode = "sport";
+        }
+
+        if (rememberPreference) {
+            preferredVisualMode = mode;
+            autoTrackModeActive = false;
         }
 
         visualMode = mode;
@@ -373,12 +382,44 @@ document.addEventListener("DOMContentLoaded", () => {
             button.classList.toggle("active", button.dataset.mode === mode);
         });
 
-        localStorage.setItem("speedometer_visual_mode", mode);
+        if (persist) {
+            localStorage.setItem("speedometer_visual_mode", mode);
+        }
 
         applyMapThemeStyles();
 
         if (pipWindow && !pipWindow.closed) {
             pipWindow.document.body.className = `mode-${mode}`;
+        }
+    }
+
+    function syncAutoTrackMode(currentSpeed) {
+        if (preferredVisualMode === "track") {
+            autoTrackModeActive = false;
+            return;
+        }
+
+        const allowAutoTrack = isTracking && sequenceMode === "none";
+
+        if (!allowAutoTrack) {
+            if (autoTrackModeActive) {
+                autoTrackModeActive = false;
+                setVisualMode(preferredVisualMode, { persist: false, rememberPreference: false });
+            }
+            return;
+        }
+
+        if (currentSpeed > AUTO_TRACK_THRESHOLD) {
+            if (!autoTrackModeActive || visualMode !== "track") {
+                autoTrackModeActive = true;
+                setVisualMode("track", { persist: false, rememberPreference: false });
+            }
+            return;
+        }
+
+        if (autoTrackModeActive) {
+            autoTrackModeActive = false;
+            setVisualMode(preferredVisualMode, { persist: false, rememberPreference: false });
         }
     }
 
@@ -2090,6 +2131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         previousSpeed = displaySpeed;
+        syncAutoTrackMode(displaySpeed);
         markActiveLabel(displaySpeed);
 
         // COMPROBACIÓN DEL LÍMITE: alerta normal y alerta agresiva deportiva.
@@ -2203,7 +2245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modeButtons.forEach((button) => {
         button.addEventListener("click", () => {
             const nextMode = button.dataset.mode;
-            if (nextMode && nextMode !== visualMode) {
+            if (nextMode && nextMode !== preferredVisualMode) {
                 setVisualMode(nextMode);
             }
         });
@@ -2697,7 +2739,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Aplicar estado del panel ANTES de la animación para evitar salto visual al recargar
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
-    setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
+    setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport", {
+        persist: false,
+        rememberPreference: true,
+    });
     applyThemePreference(themePreference, false);
     runStartupAnimation();
     limitValue.textContent = speedLimit;
