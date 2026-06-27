@@ -585,6 +585,31 @@ html {
     box-shadow: 0 12px 28px rgba(38, 66, 114, 0.2), 0 0 16px color-mix(in srgb, var(--mode-button-active-glow) 72%, transparent);
 }
 
+/* Fine-tuned readability for dark themes */
+.app-container:not(.theme-light) {
+    --text-muted: #aeb8cc;
+    --mode-section-title: #d6deee;
+    --mode-gps-text: #d6deee;
+}
+
+.app-container:not(.theme-light) .location-text,
+.app-container:not(.theme-light) .map-title,
+.app-container:not(.theme-light) .mini-map-fallback,
+.app-container:not(.theme-light) .leaflet-control-attribution,
+.app-container:not(.theme-light) .music-track-artist,
+.app-container:not(.theme-light) .music-track-album,
+.app-container:not(.theme-light) .music-time-row,
+.app-container:not(.theme-light) .music-playlist-item span,
+.app-container:not(.theme-light) .refresh-age,
+.app-container:not(.theme-light) .map-location-tag,
+.app-container:not(.theme-light) .unit {
+    color: var(--text-muted);
+}
+
+.app-container:not(.theme-light) .gauge-labels text {
+    fill: var(--text-muted);
+}
+
 /* ==========================================================================
    ZONA CENTRAL: VELOCÍMETRO (SVG)
    ========================================================================== */
