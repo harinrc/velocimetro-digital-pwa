@@ -3397,7 +3397,7 @@ html {
     }
 }
 
-@media (orientation: landscape) and (pointer: coarse) {
+@media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
     .app-container {
         max-width: min(460px, 100%) !important;
         min-height: 100dvh !important;
@@ -3440,7 +3440,7 @@ html {
     }
 }
 
-@media (min-width: 900px) and (pointer: fine) {
+@media (min-width: 760px) {
     body {
         padding: 16px;
     }
@@ -3500,7 +3500,7 @@ html {
     }
 }
 
-@media (min-width: 1280px) and (pointer: fine) {
+@media (min-width: 1280px) {
     .app-container {
         width: min(1280px, 94vw);
         max-width: min(1280px, 94vw);
