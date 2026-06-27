@@ -727,12 +727,23 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshAgeText.textContent = `Clima ${weatherAge} · Ubicación ${locationAge}`;
     }
 
-    // ---- WAKE LOCK: mantener pantalla encendida mientras se rastrea ----
+    // ---- WAKE LOCK: mantener pantalla encendida mientras la app esta visible ----
+    function shouldHoldWakeLock() {
+        return document.visibilityState === "visible";
+    }
+
     async function requestWakeLock() {
-        if (!('wakeLock' in navigator)) return;
+        if (!("wakeLock" in navigator) || !shouldHoldWakeLock() || wakeLock) return;
         try {
-            wakeLock = await navigator.wakeLock.request('screen');
-            wakeLock.addEventListener('release', () => { wakeLock = null; });
+            wakeLock = await navigator.wakeLock.request("screen");
+            wakeLock.addEventListener("release", () => {
+                wakeLock = null;
+                if (shouldHoldWakeLock()) {
+                    setTimeout(() => {
+                        requestWakeLock();
+                    }, 180);
+                }
+            }, { once: true });
         } catch (_) { /* Ignorar si el navegador lo rechaza */ }
     }
 
@@ -740,6 +751,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (wakeLock) {
             wakeLock.release();
             wakeLock = null;
+        }
+    }
+
+    function syncWakeLockState() {
+        if (shouldHoldWakeLock()) {
+            requestWakeLock();
+            return;
+        }
+
+        releaseWakeLock();
+    }
+
+    function handleWakeLockUserActivation() {
+        if (!wakeLock && shouldHoldWakeLock()) {
+            requestWakeLock();
         }
     }
 
@@ -2183,7 +2209,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lastPositionAt = 0;
         attachGeolocationWatch();
         startGpsHealthMonitor();
-        requestWakeLock();
+        syncWakeLockState();
         btnAction.textContent = "DETENER";
         btnAction.classList.add("is-tracking");
     }
@@ -2205,7 +2231,7 @@ document.addEventListener("DOMContentLoaded", () => {
         smoothedMapPoint = null;
         lastMapCenterAt = 0;
         setGpsState("off", "GPS: Detenido");
-        releaseWakeLock();
+        syncWakeLockState();
         updateInterface(0);
         btnAction.textContent = "INICIAR";
         btnAction.classList.remove("is-tracking");
@@ -2676,12 +2702,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("visibilitychange", () => {
-        if (!isTracking) return;
-        if (document.visibilityState === "visible") {
-            if (watchId === null) attachGeolocationWatch();
-            requestWakeLock();
+        if (isTracking && document.visibilityState === "visible" && watchId === null) {
+            attachGeolocationWatch();
         }
+        syncWakeLockState();
     });
+
+    window.addEventListener("focus", syncWakeLockState);
+    window.addEventListener("pageshow", syncWakeLockState);
+    window.addEventListener("pagehide", releaseWakeLock);
+    document.addEventListener("pointerdown", handleWakeLockUserActivation, { passive: true });
+    document.addEventListener("keydown", handleWakeLockUserActivation);
 
     // Reloj interno de la esquina superior derecha
     function updateClock() {
@@ -2750,6 +2781,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setGpsState("ready", "GPS: Listo");
     updateSystemBarColors(false);
     updateConnectivityState();
+    syncWakeLockState();
     setInstallButtonVisibility(false);
     if (!isStandaloneMode()) {
         // Si el navegador no emite beforeinstallprompt, dejamos el botón visible como ayuda.
@@ -2758,6 +2790,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("online", updateConnectivityState);
     window.addEventListener("offline", updateConnectivityState);
     window.addEventListener("beforeunload", () => {
+        releaseWakeLock();
         clearCurrentMusicObjectUrl();
         clearCurrentMusicCoverObjectUrl();
     });
