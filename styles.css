@@ -632,6 +632,14 @@ html {
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(237, 244, 255, 0.92));
 }
 
+.app-container.theme-light .stat-label {
+    color: #415a79;
+}
+
+.app-container.theme-light .stat-value {
+    color: #1d2f47;
+}
+
 .app-container.theme-light .mini-map {
     border-color: #c7d4e8;
 }
@@ -1680,6 +1688,7 @@ html {
 .stat-value {
     font-size: 18px;
     font-weight: 600;
+    color: var(--text-main);
 }
 
 /* Selector del límite */

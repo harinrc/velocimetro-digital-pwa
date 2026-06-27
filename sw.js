@@ -1,5 +1,5 @@
-const APP_CACHE = 'velocimetro-app-v38';
-const RUNTIME_CACHE = 'velocimetro-runtime-v38';
+const APP_CACHE = 'velocimetro-app-v39';
+const RUNTIME_CACHE = 'velocimetro-runtime-v39';
 const ASSETS = [
   './',
   './index.html',
