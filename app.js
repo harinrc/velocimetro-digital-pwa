@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appContainer = document.querySelector(".app-container");
     const btnAction = document.getElementById("btn-action");
     const floatingBtn = document.getElementById("floating-btn");
+    const themeBtn = document.getElementById("theme-btn");
     const orientationBtn = document.getElementById("orientation-btn");
     const reloadBtn = document.getElementById("reload-btn");
     const installBtn = document.getElementById("install-btn");
@@ -129,8 +130,13 @@ document.addEventListener("DOMContentLoaded", () => {
         : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
-    const normalSystemColor = "#050608";
-    const warningSystemColor = "#050608";
+    const THEME_PREF_KEY = "speedometer_theme_preference";
+    const systemThemeQuery = typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-color-scheme: dark)")
+        : null;
+    let activeTheme = "dark";
+    let themePreference = localStorage.getItem(THEME_PREF_KEY) || "auto";
+    let lastSystemWarningState = false;
 
     let musicTracks = [];
     let musicTrackIndex = -1;
@@ -549,6 +555,73 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function getTimeBasedTheme() {
+        const hour = new Date().getHours();
+        return (hour >= 6 && hour < 18) ? "light" : "dark";
+    }
+
+    function getAutoTheme() {
+        if (systemThemeQuery && typeof systemThemeQuery.matches === "boolean") {
+            return systemThemeQuery.matches ? "dark" : "light";
+        }
+        return getTimeBasedTheme();
+    }
+
+    function resolveTheme() {
+        if (themePreference === "light" || themePreference === "dark") {
+            return themePreference;
+        }
+        return getAutoTheme();
+    }
+
+    function updateThemeButtonState() {
+        if (!themeBtn) return;
+
+        const labels = {
+            auto: "Tema: Auto",
+            light: "Tema: Claro",
+            dark: "Tema: Oscuro",
+        };
+
+        const effectiveLabel = activeTheme === "light" ? "Claro" : "Oscuro";
+        themeBtn.textContent = labels[themePreference] || labels.auto;
+        themeBtn.title = `Tema ${effectiveLabel} (toque para cambiar)`;
+    }
+
+    function getSystemBarColor(isWarning) {
+        if (isWarning) {
+            return activeTheme === "light" ? "#ffe2e2" : "#050608";
+        }
+        return activeTheme === "light" ? "#f7f9ff" : "#050608";
+    }
+
+    function applyResolvedTheme(theme) {
+        activeTheme = theme === "light" ? "light" : "dark";
+        appContainer.classList.toggle("theme-light", activeTheme === "light");
+        appContainer.classList.toggle("theme-dark", activeTheme === "dark");
+
+        document.documentElement.style.colorScheme = activeTheme;
+        document.body.style.colorScheme = activeTheme;
+
+        updateThemeButtonState();
+        updateSystemBarColors(lastSystemWarningState);
+    }
+
+    function applyThemePreference(preference, persist = true) {
+        const safePreference = ["auto", "light", "dark"].includes(preference) ? preference : "auto";
+        themePreference = safePreference;
+        if (persist) {
+            localStorage.setItem(THEME_PREF_KEY, safePreference);
+        }
+        applyResolvedTheme(resolveTheme());
+    }
+
+    function cycleThemePreference() {
+        if (themePreference === "auto") return "light";
+        if (themePreference === "light") return "dark";
+        return "auto";
+    }
+
     function isStandaloneMode() {
         return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     }
@@ -904,7 +977,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateSystemBarColors(isWarning) {
-        const color = isWarning ? warningSystemColor : normalSystemColor;
+        lastSystemWarningState = Boolean(isWarning);
+        const color = getSystemBarColor(lastSystemWarningState);
         if (themeMeta) {
             themeMeta.setAttribute("content", color);
         }
@@ -1379,7 +1453,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!normalized) return fallbackClean;
 
         const looksMojibake = /(Ã.|Â.|Ð.|Ñ.|þ|ÿ|\ufffd)/u.test(normalized);
-        if (looksMojibake && metadataTextScore(normalized) < 6 && fallbackClean && normalized !== fallbackClean) {
+        const hasBrokenPrefix = /^[ÃÂÐÑþÿ\ufffd]/u.test(normalized);
+        if ((looksMojibake || hasBrokenPrefix) && metadataTextScore(normalized) < 12 && fallbackClean && normalized !== fallbackClean) {
             return fallbackClean;
         }
 
@@ -2420,6 +2495,20 @@ document.addEventListener("DOMContentLoaded", () => {
         orientationBtn.style.display = "none";
     }
 
+    if (themeBtn) {
+        themeBtn.addEventListener("click", () => {
+            applyThemePreference(cycleThemePreference(), true);
+        });
+    }
+
+    if (systemThemeQuery && typeof systemThemeQuery.addEventListener === "function") {
+        systemThemeQuery.addEventListener("change", () => {
+            if (themePreference === "auto") {
+                applyResolvedTheme(resolveTheme());
+            }
+        });
+    }
+
     if (mapCenterBtn) {
         mapCenterBtn.addEventListener("click", () => {
             followMap = true;
@@ -2521,6 +2610,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Reloj interno de la esquina superior derecha
     function updateClock() {
+        if (!clockText) return;
         const now = new Date();
         const parts = {
             hours: String(now.getHours()).padStart(2, "0"),
@@ -2550,6 +2640,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         previousClockParts = parts;
+
+        if (themePreference === "auto") {
+            const nextTheme = resolveTheme();
+            if (nextTheme !== activeTheme) {
+                applyResolvedTheme(nextTheme);
+            }
+        }
     }
 
     function updateConnectivityState() {
@@ -2567,6 +2664,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport");
+    applyThemePreference(themePreference, false);
     runStartupAnimation();
     limitValue.textContent = speedLimit;
     updateInterface(0);
