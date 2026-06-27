@@ -436,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         appContainer.classList.remove("app-demoing");
         sequenceMode = "startup";
-        appContainer.classList.add("sequence-synced");
+        appContainer.classList.remove("sequence-synced");
         appContainer.classList.add("app-booting");
         previousSpeed = 0;
 
@@ -502,8 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function runDemoSequence() {
         if (isTracking) {
-            alert("Detén el rastreo para ejecutar la demo visual.");
-            return;
+            stopTracking();
         }
 
         if (startupTimer) {
@@ -517,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         sequenceMode = "demo";
-        appContainer.classList.add("sequence-synced");
+        appContainer.classList.remove("sequence-synced");
         appContainer.classList.remove("app-booting");
         appContainer.classList.add("app-demoing");
         previousSpeed = 0;
