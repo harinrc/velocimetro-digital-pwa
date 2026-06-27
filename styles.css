@@ -523,9 +523,6 @@ html {
     --bg-color: #f6f8ff;
     --surface-color: #ffffff;
     --surface-color-2: #edf2ff;
-    --accent-red: #d63131;
-    --accent-red-2: #e86e2f;
-    --accent-red-glow: rgba(214, 49, 49, 0.28);
     --text-main: #1a2334;
     --text-muted: #4f5f78;
     --gauge-track: #c3cfdf;
@@ -545,6 +542,57 @@ html {
     --warning-accent-glow: rgba(200, 47, 47, 0.24);
     --mode-section-title: #253754;
     --mode-gps-text: #2e4f73;
+}
+
+.app-container.theme-light.mode-street {
+    --accent-red: #1cbca7;
+    --accent-red-2: #2b8ee6;
+    --accent-red-glow: rgba(28, 188, 167, 0.26);
+    --mode-button-active-border: rgba(28, 188, 167, 0.58);
+    --mode-button-active-glow: rgba(43, 142, 230, 0.24);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(28, 188, 167, 0.14), rgba(43, 142, 230, 0.14));
+    --mode-button-active-text: #0f4f6a;
+    --mode-alert-border: rgba(28, 188, 167, 0.34);
+    --mode-alert-shadow: rgba(43, 142, 230, 0.15);
+    --mode-alert-title: #12728f;
+    --warning-accent: #1484a3;
+    --warning-accent-glow: rgba(20, 132, 163, 0.2);
+    --mode-section-title: #1f5f78;
+    --mode-gps-text: #1b6f7f;
+}
+
+.app-container.theme-light.mode-sport {
+    --accent-red: #d63131;
+    --accent-red-2: #e86e2f;
+    --accent-red-glow: rgba(214, 49, 49, 0.28);
+    --mode-button-active-border: rgba(214, 49, 49, 0.58);
+    --mode-button-active-glow: rgba(214, 49, 49, 0.2);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(214, 49, 49, 0.16), rgba(232, 110, 47, 0.14));
+    --mode-button-active-text: #7b1818;
+    --mode-alert-border: rgba(214, 49, 49, 0.36);
+    --mode-alert-shadow: rgba(214, 49, 49, 0.14);
+    --mode-alert-title: #be2222;
+    --warning-accent: #c82f2f;
+    --warning-accent-glow: rgba(200, 47, 47, 0.24);
+    --mode-section-title: #253754;
+    --mode-gps-text: #2e4f73;
+}
+
+.app-container.theme-light.mode-track {
+    --accent-red: #9a39ce;
+    --accent-red-2: #d15cad;
+    --accent-red-glow: rgba(154, 57, 206, 0.28);
+    --mode-button-active-border: rgba(154, 57, 206, 0.58);
+    --mode-button-active-glow: rgba(209, 92, 173, 0.24);
+    --mode-button-active-bg: linear-gradient(165deg, rgba(154, 57, 206, 0.14), rgba(209, 92, 173, 0.14));
+    --mode-button-active-text: #5a237e;
+    --mode-alert-border: rgba(154, 57, 206, 0.36);
+    --mode-alert-shadow: rgba(209, 92, 173, 0.16);
+    --mode-alert-title: #7a2dab;
+    --warning-accent: #8a36bb;
+    --warning-accent-glow: rgba(138, 54, 187, 0.22);
+    --mode-section-title: #4a2f6a;
+    --mode-gps-text: #5e3f84;
 }
 
 .app-container.theme-light::before {
@@ -568,6 +616,14 @@ html {
     border-color: #c7d4e7;
 }
 
+.app-container.theme-light .weather-temp {
+    color: #213754;
+}
+
+.app-container.theme-light .location-text {
+    color: #344a67;
+}
+
 .app-container.theme-light .weather-info,
 .app-container.theme-light .location-info,
 .app-container.theme-light .stat-item,
@@ -580,6 +636,29 @@ html {
     border-color: #c7d4e8;
 }
 
+.app-container.theme-light .map-title {
+    color: #3a4f6d;
+}
+
+.app-container.theme-light .mini-map-fallback {
+    color: #405670;
+}
+
+.app-container.theme-light .setup-row {
+    color: #24334a;
+}
+
+.app-container.theme-light .setup-row input {
+    background-color: #ffffff;
+    border-color: #aebed8;
+    color: #1d2b3f;
+}
+
+.app-container.theme-light .map-location-tag,
+.app-container.theme-light .refresh-age {
+    color: #4b5f7d;
+}
+
 .app-container.theme-light .music-player {
     border-color: color-mix(in srgb, var(--mode-button-border) 72%, transparent);
     box-shadow: 0 12px 28px rgba(38, 66, 114, 0.2), 0 0 16px color-mix(in srgb, var(--mode-button-active-glow) 72%, transparent);
@@ -588,8 +667,6 @@ html {
 /* Fine-tuned readability for dark themes */
 .app-container:not(.theme-light) {
     --text-muted: #aeb8cc;
-    --mode-section-title: #d6deee;
-    --mode-gps-text: #d6deee;
 }
 
 .app-container:not(.theme-light) .location-text,
