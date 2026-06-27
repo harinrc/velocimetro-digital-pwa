@@ -926,6 +926,12 @@ html {
     animation: red-number-flash 0.7s ease-in-out infinite alternate;
 }
 
+.speed-warning .limit-value,
+.app-container.speed-warning-startup .limit-value {
+    color: var(--warning-accent);
+    text-shadow: 0 0 12px var(--warning-accent-glow);
+}
+
 @keyframes red-number-flash {
     0% {
         transform: translateY(0) scale(1);
@@ -1043,8 +1049,8 @@ html {
     color: color-mix(in srgb, var(--text-main) 74%, var(--accent-red) 26%);
 }
 
-.app-container.theme-light .current-speed,
-.app-container.theme-light .limit-value {
+.app-container.theme-light:not(.speed-warning):not(.speed-warning-startup) .current-speed,
+.app-container.theme-light:not(.speed-warning):not(.speed-warning-startup) .limit-value {
     color: #1a2334;
     text-shadow: none;
 }
