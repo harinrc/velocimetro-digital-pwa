@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://harinrc.github.io/velocimetro-digital-pwa/sitemap.xml
