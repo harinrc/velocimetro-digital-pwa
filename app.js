@@ -1544,7 +1544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function sanitizeMetadataValue(text, fallback = "") {
         const fallbackClean = normalizeMetadataText(fallback);
         const normalized = normalizeMetadataText(text)
-            .replace(/^(?:ï»¿|Ã¯Â»Â¿)+/i, "")
+            .replace(/^(?:ï»¿|Ã¯Â»Â¿|þÿ|ÿþ|þ|ÿ)+/iu, "")
             .replace(/^[\ufffd]+/u, "")
             .replace(/^[\s\-_.:|]+/, "")
             .replace(/^[^\p{L}\p{N}]+/u, "")
@@ -1564,7 +1564,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function hasSuspiciousMetadataPrefix(text) {
         const normalized = normalizeMetadataText(text);
         if (!normalized) return true;
-        if (/^(?:ï»¿|Ã¯Â»Â¿|\ufffd+)/iu.test(normalized)) return true;
+        if (/^(?:ï»¿|Ã¯Â»Â¿|þÿ|ÿþ|þ|ÿ|\ufffd+)/iu.test(normalized)) return true;
         if (/^[ÃÂÐÑÏïþÿ]/u.test(normalized) && metadataTextScore(normalized.slice(0, 2)) < 0) return true;
         return false;
     }
@@ -1593,7 +1593,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const decoderSet = [];
         if (encodingByte === 1 || encodingByte === 2) {
-            decoderSet.push("utf-16", "utf-16le", "utf-8", "windows-1252");
+            decoderSet.push("utf-16", "utf-16be", "utf-16le", "utf-8", "windows-1252");
         } else if (encodingByte === 3) {
             decoderSet.push("utf-8", "utf-16", "windows-1252");
         } else {
