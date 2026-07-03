@@ -820,47 +820,128 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ---- CLIMA: Open-Meteo (sin API key) ----
+    function setWeatherUnavailable(message = "Clima no disponible") {
+        const iconEl = document.getElementById("weather-icon");
+        const tempEl = document.getElementById("weather-temp");
+        if (iconEl) {
+            iconEl.textContent = "\uD83C\uDF21\uFE0F";
+            iconEl.title = message;
+        }
+        if (tempEl) {
+            tempEl.textContent = "--\u00b0C";
+            tempEl.title = message;
+        }
+    }
+
+    function parseWeatherPayload(data) {
+        if (!data || typeof data !== "object") return null;
+
+        const current = data.current || {};
+        const currentWeather = data.current_weather || {};
+
+        const temp = Number.isFinite(Number(current.temperature_2m))
+            ? Number(current.temperature_2m)
+            : (Number.isFinite(Number(currentWeather.temperature)) ? Number(currentWeather.temperature) : null);
+
+        const code = Number.isFinite(Number(current.weather_code))
+            ? Number(current.weather_code)
+            : (Number.isFinite(Number(currentWeather.weathercode)) ? Number(currentWeather.weathercode) : null);
+
+        const isDayValue = Number.isFinite(Number(current.is_day))
+            ? Number(current.is_day)
+            : (Number.isFinite(Number(currentWeather.is_day)) ? Number(currentWeather.is_day) : null);
+
+        const apparentTemp = Number.isFinite(Number(current.apparent_temperature))
+            ? Number(current.apparent_temperature)
+            : null;
+
+        const cloudCover = Number.isFinite(Number(current.cloud_cover))
+            ? Number(current.cloud_cover)
+            : null;
+
+        const precipitation = Number.isFinite(Number(current.precipitation))
+            ? Number(current.precipitation)
+            : null;
+
+        if (!Number.isFinite(temp) || !Number.isFinite(code)) return null;
+
+        const isDay = isDayValue === null
+            ? (new Date().getHours() >= 6 && new Date().getHours() < 18)
+            : isDayValue === 1;
+
+        return {
+            temp,
+            code,
+            isDay,
+            apparentTemp,
+            cloudCover,
+            precipitation,
+        };
+    }
+
     async function fetchWeather(lat, lon) {
-        if (!navigator.onLine) return;
+        if (!navigator.onLine) {
+            setWeatherUnavailable("Sin conexion a internet");
+            return;
+        }
+
         const now = Date.now();
         if (lastWeatherLatLng) {
             const dist = calculateDistanceMeters(lastWeatherLatLng[0], lastWeatherLatLng[1], lat, lon);
             if (dist < 250 && (now - lastWeatherTime) < 35 * 1000) return;
         }
-        try {
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(5)}&longitude=${lon.toFixed(5)}&current=temperature_2m,apparent_temperature,weather_code,is_day,cloud_cover,precipitation&timezone=auto&forecast_days=1`;
-            const res = await fetch(url);
-            if (!res.ok) return;
-            const data = await res.json();
-            const temp = data.current?.temperature_2m;
-            const apparentTemp = data.current?.apparent_temperature;
-            const code = data.current?.weather_code;
-            const isDayValue = data.current?.is_day;
-            const cloudCover = data.current?.cloud_cover;
-            const precipitation = data.current?.precipitation;
-            const isDay = typeof isDayValue === "number"
-                ? isDayValue === 1
-                : (new Date().getHours() >= 6 && new Date().getHours() < 18);
-            if (temp !== undefined && code !== undefined) {
-                const iconEl = document.getElementById('weather-icon');
-                const tempEl = document.getElementById('weather-temp');
-                const weatherInfo = getWmoWeatherInfo(code, isDay, cloudCover);
-                if (iconEl) {
-                    iconEl.textContent = weatherInfo.icon;
-                    iconEl.title = weatherInfo.label;
+
+        const urls = [
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(5)}&longitude=${lon.toFixed(5)}&current=temperature_2m,apparent_temperature,weather_code,is_day,cloud_cover,precipitation&timezone=auto&forecast_days=1`,
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(5)}&longitude=${lon.toFixed(5)}&current_weather=true&timezone=auto&forecast_days=1`
+        ];
+
+        let parsed = null;
+        let failedMessage = "Servicio de clima temporalmente no disponible";
+
+        for (const url of urls) {
+            try {
+                const res = await fetch(url, { cache: "no-store" });
+                if (!res.ok) {
+                    failedMessage = `Servicio de clima no disponible (${res.status})`;
+                    continue;
                 }
-                if (tempEl) tempEl.textContent = `${Math.round(temp)}\u00b0C`;
-                if (tempEl) {
-                    const cloudText = Number.isFinite(Number(cloudCover)) ? `, nubosidad ${Math.round(Number(cloudCover))}%` : "";
-                    const rainText = Number.isFinite(Number(precipitation)) ? `, lluvia ${Number(precipitation).toFixed(1)} mm` : "";
-                    const feelText = Number.isFinite(Number(apparentTemp)) ? `, sensacion ${Math.round(Number(apparentTemp))}\u00b0C` : "";
-                    tempEl.title = `${weatherInfo.label}${feelText}${cloudText}${rainText}`;
-                }
-                lastWeatherLatLng = [lat, lon];
-                lastWeatherTime = now;
-                updateRefreshAgeLabel();
+
+                const data = await res.json();
+                parsed = parseWeatherPayload(data);
+                if (parsed) break;
+
+                failedMessage = "Respuesta de clima sin datos utiles";
+            } catch (_) {
+                failedMessage = "Error consultando servicio de clima";
             }
-        } catch (_) { /* sin conexi\u00f3n */ }
+        }
+
+        if (!parsed) {
+            setWeatherUnavailable(failedMessage);
+            return;
+        }
+
+        const iconEl = document.getElementById("weather-icon");
+        const tempEl = document.getElementById("weather-temp");
+        const weatherInfo = getWmoWeatherInfo(parsed.code, parsed.isDay, parsed.cloudCover);
+
+        if (iconEl) {
+            iconEl.textContent = weatherInfo.icon;
+            iconEl.title = weatherInfo.label;
+        }
+
+        if (tempEl) {
+            tempEl.textContent = `${Math.round(parsed.temp)}\u00b0C`;
+            const cloudText = Number.isFinite(parsed.cloudCover) ? `, nubosidad ${Math.round(parsed.cloudCover)}%` : "";
+            const rainText = Number.isFinite(parsed.precipitation) ? `, lluvia ${parsed.precipitation.toFixed(1)} mm` : "";
+            const feelText = Number.isFinite(parsed.apparentTemp) ? `, sensacion ${Math.round(parsed.apparentTemp)}\u00b0C` : "";
+            tempEl.title = `${weatherInfo.label}${feelText}${cloudText}${rainText}`;
+        }
+
+        lastWeatherLatLng = [lat, lon];
+        lastWeatherTime = now;
+        updateRefreshAgeLabel();
     }
 
     // ---- GEOCODING: Nominatim (OpenStreetMap, sin API key) ----

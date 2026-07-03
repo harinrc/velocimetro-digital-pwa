@@ -1569,12 +1569,13 @@ html {
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
+    row-gap: 4px;
     padding: 8px 10px;
     background: linear-gradient(90deg, #0c0e14, #0d1018);
     border: 1px solid #1e2330;
     border-radius: 14px;
     min-height: 40px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .weather-info {
@@ -3775,6 +3776,28 @@ html {
     .weather-location-strip {
         min-height: 34px;
         padding: 6px 8px;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .weather-info {
+        flex: 0 0 auto;
+    }
+
+    .location-info {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .refresh-age {
+        flex: 0 1 42%;
+        min-width: 0;
+        padding-right: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: right;
     }
 
     .stats-grid {
