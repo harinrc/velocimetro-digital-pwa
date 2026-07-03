@@ -107,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastGeocodedLatLng = null;
     let lastWeatherLatLng = null;
     let lastWeatherTime = 0;
+    let lastWeatherStatus = "--";
     let lastGeocodeTime = 0;
     let simulatedLandscape = false;
     let gaugeStep = 15;
@@ -722,7 +723,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateRefreshAgeLabel() {
         if (!refreshAgeText) return;
-        const weatherAge = formatElapsedAge(lastWeatherTime);
+        const weatherAge = lastWeatherStatus !== "ok"
+            ? lastWeatherStatus
+            : formatElapsedAge(lastWeatherTime);
         const locationAge = formatElapsedAge(lastGeocodeTime);
         refreshAgeText.textContent = `Clima ${weatherAge} · Ubicación ${locationAge}`;
     }
@@ -823,6 +826,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function setWeatherUnavailable(message = "Clima no disponible") {
         const iconEl = document.getElementById("weather-icon");
         const tempEl = document.getElementById("weather-temp");
+        lastWeatherStatus = "error";
         if (iconEl) {
             iconEl.textContent = "\uD83C\uDF21\uFE0F";
             iconEl.title = message;
@@ -831,6 +835,7 @@ document.addEventListener("DOMContentLoaded", () => {
             tempEl.textContent = "--\u00b0C";
             tempEl.title = message;
         }
+        updateRefreshAgeLabel();
     }
 
     function parseWeatherPayload(data) {
@@ -869,6 +874,85 @@ document.addEventListener("DOMContentLoaded", () => {
             ? (new Date().getHours() >= 6 && new Date().getHours() < 18)
             : isDayValue === 1;
 
+        return {
+            temp,
+            code,
+            isDay,
+            apparentTemp,
+            cloudCover,
+            precipitation,
+        };
+    }
+
+    function parseWttrPayload(data) {
+        const current = Array.isArray(data?.current_condition) ? data.current_condition[0] : null;
+        if (!current) return null;
+
+        const temp = Number.isFinite(Number(current.temp_C)) ? Number(current.temp_C) : null;
+        const apparentTemp = Number.isFinite(Number(current.FeelsLikeC)) ? Number(current.FeelsLikeC) : null;
+        const cloudCover = Number.isFinite(Number(current.cloudcover)) ? Number(current.cloudcover) : null;
+        const precipitation = Number.isFinite(Number(current.precipMM)) ? Number(current.precipMM) : null;
+
+        // Mapping aproximado de wttr code -> WMO para reutilizar iconografia existente.
+        const weatherCode = Number(current.weatherCode);
+        const wttrToWmo = {
+            113: 0,
+            116: 2,
+            119: 3,
+            122: 3,
+            143: 45,
+            176: 51,
+            179: 71,
+            182: 56,
+            185: 57,
+            200: 95,
+            227: 71,
+            230: 75,
+            248: 45,
+            260: 48,
+            263: 51,
+            266: 53,
+            281: 56,
+            284: 57,
+            293: 61,
+            296: 63,
+            299: 65,
+            302: 65,
+            305: 63,
+            308: 65,
+            311: 66,
+            314: 67,
+            317: 66,
+            320: 71,
+            323: 71,
+            326: 73,
+            329: 75,
+            332: 75,
+            335: 75,
+            338: 75,
+            350: 77,
+            353: 80,
+            356: 81,
+            359: 82,
+            362: 85,
+            365: 86,
+            368: 85,
+            371: 86,
+            374: 77,
+            377: 77,
+            386: 95,
+            389: 96,
+            392: 95,
+            395: 99
+        };
+
+        const code = Number.isFinite(weatherCode)
+            ? (wttrToWmo[weatherCode] ?? 0)
+            : 0;
+
+        if (!Number.isFinite(temp)) return null;
+
+        const isDay = new Date().getHours() >= 6 && new Date().getHours() < 18;
         return {
             temp,
             code,
@@ -918,6 +1002,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!parsed) {
+            try {
+                const wttrRes = await fetch(`https://wttr.in/${lat.toFixed(4)},${lon.toFixed(4)}?format=j1`, { cache: "no-store" });
+                if (wttrRes.ok) {
+                    const wttrData = await wttrRes.json();
+                    parsed = parseWttrPayload(wttrData);
+                } else {
+                    failedMessage = `Servicio de clima no disponible (${wttrRes.status})`;
+                }
+            } catch (_) {
+                failedMessage = "No se pudo consultar proveedores de clima";
+            }
+        }
+
+        if (!parsed) {
             setWeatherUnavailable(failedMessage);
             return;
         }
@@ -941,6 +1039,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         lastWeatherLatLng = [lat, lon];
         lastWeatherTime = now;
+        lastWeatherStatus = "ok";
         updateRefreshAgeLabel();
     }
 
