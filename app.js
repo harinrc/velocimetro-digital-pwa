@@ -965,8 +965,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchWeather(lat, lon) {
         if (!navigator.onLine) {
+            lastWeatherStatus = "sin-red";
+            updateRefreshAgeLabel();
             setWeatherUnavailable("Sin conexion a internet");
             return;
+        }
+
+        // Estado visible para confirmar que el sistema sí está consultando clima.
+        if (lastWeatherStatus !== "ok") {
+            lastWeatherStatus = "buscando";
+            updateRefreshAgeLabel();
         }
 
         const now = Date.now();
@@ -2386,6 +2394,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         isTracking = true;
+        lastWeatherStatus = "buscando";
+        updateRefreshAgeLabel();
         lastPositionAt = 0;
         attachGeolocationWatch();
         startGpsHealthMonitor();
@@ -2405,6 +2415,8 @@ document.addEventListener("DOMContentLoaded", () => {
         sequenceMode = "none";
         appContainer.classList.remove("app-booting", "app-demoing", "sequence-synced");
         lastPositionAt = 0;
+        lastWeatherStatus = "--";
+        updateRefreshAgeLabel();
         smoothedSpeed = 0;
         lastCoords = null;
         previousSpeed = 0;
