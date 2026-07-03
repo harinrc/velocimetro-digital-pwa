@@ -3585,49 +3585,6 @@ html {
     }
 }
 
-@media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
-    .app-container {
-        max-width: min(460px, 100%) !important;
-        min-height: 100dvh !important;
-        height: 100dvh !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: space-between !important;
-        gap: 0 !important;
-        padding: calc(14px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom)) !important;
-        align-content: normal !important;
-    }
-
-    .status-bar {
-        grid-column: auto !important;
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }
-
-    .gauge-container {
-        margin: 10px 0 !important;
-        align-self: auto !important;
-    }
-
-    .gauge {
-        width: min(88vw, clamp(230px, 72vw, 360px)) !important;
-    }
-
-    .digital-display {
-        top: 54.2% !important;
-    }
-
-    .controls-panel {
-        margin-top: 8px !important;
-        max-height: none !important;
-        overflow: visible !important;
-        align-self: auto !important;
-        padding: 14px 12px !important;
-        gap: 10px !important;
-        border-radius: 16px !important;
-    }
-}
-
 @media (min-width: 760px) {
     body {
         padding: 16px;
@@ -3707,6 +3664,57 @@ html {
 
     .mini-map {
         height: 210px;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
+    body {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .app-container {
+        width: 100vw;
+        max-width: 100vw;
+        min-height: 100dvh;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        grid-template-columns: minmax(194px, 44vw) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        gap: 5px 9px;
+        padding: calc(5px + env(safe-area-inset-top)) 7px calc(5px + env(safe-area-inset-bottom));
+        overflow: hidden;
+        align-content: start;
+    }
+
+    .status-bar {
+        grid-column: 1 / 3;
+        margin-bottom: 0;
+        padding-bottom: 3px;
+    }
+
+    .gauge-container {
+        margin: 0;
+        align-self: center;
+        min-height: 0;
+    }
+
+    .controls-panel {
+        margin-top: 0;
+        align-self: stretch;
+        min-height: 0;
+        max-height: calc(100dvh - 52px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 6px;
+        gap: 5px;
+        border-radius: 13px;
+    }
+
+    .panel-handle {
+        display: none !important;
     }
 }
 
