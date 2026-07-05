@@ -160,11 +160,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let gaugeAdjustStartY = 0;
     let gaugeAdjustStartScale = 1;
     let gaugeAdjustStartOffsetY = 0;
+    let gaugeAdjustLayoutMode = "portrait";
     let gaugeUserScale = 1;
     let gaugeUserOffsetY = 0;
     const THEME_PREF_KEY = "speedometer_theme_preference";
     const LANDSCAPE_SPLIT_KEY = "speedometer_landscape_split_ratio";
-    const GAUGE_ADJUST_KEY = "speedometer_gauge_adjust";
+    const GAUGE_ADJUST_KEY_PORTRAIT = "speedometer_gauge_adjust_portrait";
+    const GAUGE_ADJUST_KEY_LANDSCAPE = "speedometer_gauge_adjust_landscape";
     const systemThemeQuery = typeof window.matchMedia === "function"
         ? window.matchMedia("(prefers-color-scheme: dark)")
         : null;
@@ -1133,7 +1135,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isLandscapeSplitModeNow() {
-        return window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+        if (!window.matchMedia("(orientation: landscape)").matches) return false;
+        return window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(any-pointer: coarse)").matches;
+    }
+
+    function getGaugeAdjustLayoutMode() {
+        return window.matchMedia("(orientation: landscape)").matches ? "landscape" : "portrait";
+    }
+
+    function getGaugeAdjustStorageKey() {
+        return gaugeAdjustLayoutMode === "landscape"
+            ? GAUGE_ADJUST_KEY_LANDSCAPE
+            : GAUGE_ADJUST_KEY_PORTRAIT;
     }
 
     function getLandscapeSplitBounds() {
@@ -1244,14 +1257,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isGaugeAdjustModeNow() {
-        return window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+        return window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(any-pointer: coarse)").matches;
     }
 
     function applyGaugeAdjustmentStyles() {
         if (!appContainer) return;
 
         if (!isGaugeAdjustModeNow()) {
-            // In portrait/default mode the gauge must render at its baseline size and position.
             appContainer.style.removeProperty("--gauge-user-scale");
             appContainer.style.removeProperty("--gauge-user-offset-y");
             return;
@@ -1271,7 +1283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         applyGaugeAdjustmentStyles();
 
         if (persist) {
-            localStorage.setItem(GAUGE_ADJUST_KEY, JSON.stringify({
+            localStorage.setItem(getGaugeAdjustStorageKey(), JSON.stringify({
                 scale: Number(gaugeUserScale.toFixed(3)),
                 offsetY: Math.round(gaugeUserOffsetY),
             }));
@@ -1283,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let parsed = null;
         try {
-            parsed = JSON.parse(localStorage.getItem(GAUGE_ADJUST_KEY) || "null");
+            parsed = JSON.parse(localStorage.getItem(getGaugeAdjustStorageKey()) || "null");
         } catch (_) {
             parsed = null;
         }
@@ -1296,6 +1308,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         setGaugeAdjustment(parsed.scale, parsed.offsetY, false);
+    }
+
+    function syncGaugeAdjustmentMode(force = false) {
+        const nextMode = getGaugeAdjustLayoutMode();
+        if (!force && nextMode === gaugeAdjustLayoutMode) {
+            applyGaugeAdjustmentStyles();
+            return;
+        }
+
+        gaugeAdjustLayoutMode = nextMode;
+        restoreGaugeAdjustment();
     }
 
     function applyPanelState(collapsed, persist = true) {
@@ -3149,7 +3172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         gaugeAdjustHandle.addEventListener("dblclick", () => {
-            localStorage.removeItem(GAUGE_ADJUST_KEY);
+            localStorage.removeItem(getGaugeAdjustStorageKey());
             gaugeUserScale = 1;
             gaugeUserOffsetY = 0;
             appContainer.style.removeProperty("--gauge-user-scale");
@@ -3160,6 +3183,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", () => {
         syncPanelMode();
         syncLandscapeSplitMode();
+        syncGaugeAdjustmentMode();
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
         applyGaugeAdjustmentStyles();
         requestAnimationFrame(positionGaugeAdjustHandle);
@@ -3172,6 +3196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("orientationchange", () => {
         syncPanelMode();
         syncLandscapeSplitMode();
+        syncGaugeAdjustmentMode(true);
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
         applyGaugeAdjustmentStyles();
         requestAnimationFrame(positionGaugeAdjustHandle);
@@ -3265,6 +3290,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
     syncLandscapeSplitMode();
+    gaugeAdjustLayoutMode = getGaugeAdjustLayoutMode();
     restoreGaugeAdjustment();
     requestAnimationFrame(positionGaugeAdjustHandle);
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport", {

@@ -4418,7 +4418,7 @@ html {
     }
 }
 
-@media (orientation: landscape) and (pointer: coarse) {
+@media (orientation: landscape) and (pointer: coarse), (orientation: landscape) and (any-pointer: coarse) {
     .app-container {
         grid-template-columns: minmax(136px, var(--landscape-left-width, var(--landscape-left-default, 35vw))) minmax(0, 1fr) !important;
     }
@@ -4434,11 +4434,14 @@ html {
     }
 }
 
-@media (orientation: portrait), (pointer: fine) {
+@media (orientation: portrait) {
     .landscape-splitter {
         display: none !important;
     }
+}
 
+@media (pointer: fine) {
+    .landscape-splitter,
     .gauge-adjust-handle {
         display: none !important;
     }
