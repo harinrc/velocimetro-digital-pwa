@@ -3158,9 +3158,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.addEventListener("resize", () => {
-        if (orientationMode === "auto" && appContainer.classList.contains("force-landscape")) {
-            applySimulatedLandscape(false);
-        }
         syncPanelMode();
         syncLandscapeSplitMode();
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
@@ -3173,10 +3170,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener("orientationchange", () => {
-        if (orientationMode === "auto") {
-            applySimulatedLandscape(false);
-        }
+        syncPanelMode();
+        syncLandscapeSplitMode();
+        setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
         applyGaugeAdjustmentStyles();
+        requestAnimationFrame(positionGaugeAdjustHandle);
     });
 
     window.addEventListener("beforeinstallprompt", (event) => {
