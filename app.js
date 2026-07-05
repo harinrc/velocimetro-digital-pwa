@@ -1162,6 +1162,27 @@ document.addEventListener("DOMContentLoaded", () => {
         landscapeSplitter.style.transform = "none";
     }
 
+    function positionGaugeAdjustHandle() {
+        if (!gaugeAdjustHandle || !appContainer || !gaugeContainer) return;
+
+        const appRect = appContainer.getBoundingClientRect();
+        const gaugeRect = gaugeContainer.getBoundingClientRect();
+        const statusRect = statusBar?.getBoundingClientRect();
+        const handleSize = gaugeAdjustHandle.offsetWidth || 34;
+        const topStart = statusRect
+            ? Math.max(8, Math.round(statusRect.bottom - appRect.top + 6))
+            : 12;
+
+        const rawLeft = Math.round(gaugeRect.left - appRect.left + (gaugeRect.width / 2) - (handleSize / 2));
+        const minLeft = Math.round(gaugeRect.left - appRect.left + 8);
+        const maxLeft = Math.round(gaugeRect.right - appRect.left - handleSize - 8);
+        const safeLeft = Math.max(minLeft, Math.min(maxLeft, rawLeft));
+
+        gaugeAdjustHandle.style.left = `${safeLeft}px`;
+        gaugeAdjustHandle.style.top = `${topStart}px`;
+        gaugeAdjustHandle.style.transform = "none";
+    }
+
     function setLandscapeSplitWidth(width, persist = true) {
         if (!appContainer) return;
         const bounds = getLandscapeSplitBounds();
@@ -1173,7 +1194,10 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem(LANDSCAPE_SPLIT_KEY, ratio.toFixed(4));
         }
 
-        requestAnimationFrame(positionLandscapeSplitter);
+        requestAnimationFrame(() => {
+            positionLandscapeSplitter();
+            positionGaugeAdjustHandle();
+        });
     }
 
     function restoreLandscapeSplitWidth() {
@@ -1182,7 +1206,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const savedRatio = Number.parseFloat(localStorage.getItem(LANDSCAPE_SPLIT_KEY) || "");
         if (!Number.isFinite(savedRatio)) {
             appContainer.style.removeProperty("--landscape-left-width");
-            requestAnimationFrame(positionLandscapeSplitter);
+            requestAnimationFrame(() => {
+                positionLandscapeSplitter();
+                positionGaugeAdjustHandle();
+            });
             return;
         }
 
@@ -1202,7 +1229,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         landscapeSplitter.style.display = "inline-flex";
         restoreLandscapeSplitWidth();
-        requestAnimationFrame(positionLandscapeSplitter);
+        requestAnimationFrame(() => {
+            positionLandscapeSplitter();
+            positionGaugeAdjustHandle();
+        });
     }
 
     function getGaugeAdjustBounds() {
@@ -3050,13 +3080,19 @@ document.addEventListener("DOMContentLoaded", () => {
         landscapeSplitter.addEventListener("pointercancel", (event) => {
             if (splitterPointerId !== event.pointerId) return;
             splitterPointerId = null;
-            requestAnimationFrame(positionLandscapeSplitter);
+            requestAnimationFrame(() => {
+                positionLandscapeSplitter();
+                positionGaugeAdjustHandle();
+            });
         });
 
         landscapeSplitter.addEventListener("dblclick", () => {
             localStorage.removeItem(LANDSCAPE_SPLIT_KEY);
             appContainer.style.removeProperty("--landscape-left-width");
-            requestAnimationFrame(positionLandscapeSplitter);
+            requestAnimationFrame(() => {
+                positionLandscapeSplitter();
+                positionGaugeAdjustHandle();
+            });
         });
     }
 
@@ -3110,6 +3146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         syncPanelMode();
         syncLandscapeSplitMode();
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
+        requestAnimationFrame(positionGaugeAdjustHandle);
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
         }
@@ -3202,6 +3239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     syncPanelMode();
     syncLandscapeSplitMode();
     restoreGaugeAdjustment();
+    requestAnimationFrame(positionGaugeAdjustHandle);
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport", {
         persist: false,
         rememberPreference: true,
