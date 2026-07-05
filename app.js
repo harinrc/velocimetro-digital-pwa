@@ -130,7 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let followMap = true;
     let mapThemeVariant = "dark";
     const isCompactPanelModeNow = () => {
-        if (window.matchMedia("(pointer: coarse) and (hover: none)").matches) {
+        const isTouchDevice = window.matchMedia("(pointer: coarse) and (hover: none)").matches;
+        const isPhonePortraitLike = window.matchMedia("(max-width: 600px)").matches;
+        const isPhoneLandscapeLike = window.matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
+
+        if (isTouchDevice && (isPhonePortraitLike || isPhoneLandscapeLike)) {
             return true;
         }
 
