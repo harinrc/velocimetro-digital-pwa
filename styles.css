@@ -4173,3 +4173,157 @@ html {
         display: flex !important;
     }
 }
+
+@media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) and (max-height: 430px) {
+    .app-container {
+        grid-template-columns: minmax(148px, 36vw) minmax(0, 1fr);
+        gap: 3px 5px;
+        padding: calc(3px + env(safe-area-inset-top)) 5px calc(3px + env(safe-area-inset-bottom));
+    }
+
+    .status-bar {
+        padding-bottom: 1px;
+        font-size: 10px;
+    }
+
+    .status-right {
+        gap: 2px;
+    }
+
+    .time {
+        font-size: clamp(11px, 2.9vw, 15px);
+        padding: 2px 4px;
+    }
+
+    .reload-btn,
+    .install-btn,
+    .orientation-btn {
+        font-size: 7px;
+        padding: 2px 4px;
+    }
+
+    .gauge {
+        width: min(34vw, 35dvh, 168px);
+    }
+
+    .digital-display {
+        top: 52.8%;
+        gap: 2px;
+    }
+
+    .current-speed {
+        font-size: clamp(26px, 6.1vw, 40px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(20px, 4.8vw, 30px);
+    }
+
+    .unit {
+        font-size: 7px;
+        letter-spacing: 0.8px;
+    }
+
+    .limit-indicator {
+        min-width: 36px;
+        padding: 2px 4px;
+    }
+
+    .limit-label {
+        font-size: 6px;
+    }
+
+    .limit-value {
+        font-size: 16px;
+    }
+
+    .controls-panel {
+        padding: 4px;
+        gap: 3px;
+        border-radius: 9px;
+        max-height: calc(100dvh - 38px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .weather-location-strip {
+        min-height: 20px;
+        padding: 2px 3px;
+        gap: 3px;
+    }
+
+    .weather-icon {
+        font-size: 9px;
+    }
+
+    .weather-temp,
+    .location-text,
+    .refresh-age {
+        font-size: 7px;
+    }
+
+    .stats-grid {
+        gap: 2px;
+        padding-bottom: 2px;
+    }
+
+    .stat-item {
+        min-width: 46px;
+        padding: 2px 3px;
+    }
+
+    .stat-label,
+    .stat-value {
+        font-size: 7px;
+    }
+
+    .map-card {
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .map-title {
+        font-size: 7px;
+    }
+
+    .map-location-tag {
+        font-size: 6px;
+        max-width: 72px;
+    }
+
+    .map-center-btn {
+        font-size: 7px;
+        padding: 2px 4px;
+    }
+
+    .mini-map {
+        height: 32px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(48px, 1fr) minmax(0, 1fr);
+        gap: 2px;
+        font-size: 7px;
+    }
+
+    .max-speed-actions {
+        gap: 2px;
+    }
+
+    .mode-btn,
+    .max-speed-btn,
+    .floating-btn,
+    .btn-start {
+        font-size: 7px;
+        padding: 3px 4px;
+    }
+
+    .max-scale-value {
+        min-width: 36px;
+        font-size: 7px;
+        padding: 2px 3px;
+    }
+
+    .action-row {
+        gap: 3px;
+    }
+}
