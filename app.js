@@ -163,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let gaugeUserScale = 1;
     let gaugeUserOffsetY = 0;
     const THEME_PREF_KEY = "speedometer_theme_preference";
+    const ORIENTATION_MODE_KEY = "speedometer_orientation_mode";
     const LANDSCAPE_SPLIT_KEY = "speedometer_landscape_split_ratio";
     const GAUGE_ADJUST_KEY = "speedometer_gauge_adjust";
     const systemThemeQuery = typeof window.matchMedia === "function"
@@ -198,11 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (maxSpeed < minAllowedMax || maxSpeed > maxAllowedMax) {
         maxSpeed = defaultMaxSpeed;
-    }
-
-    if (orientationBtn) {
-        orientationBtn.hidden = true;
-        orientationBtn.setAttribute("aria-hidden", "true");
     }
 
     // Mantener en sincronía CSS (arco/aguja/animaciones) y JS (cálculo de ángulos).
@@ -616,10 +612,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }, tickMs);
     }
 
+    function updateOrientationButtonState() {
+        if (!orientationBtn) return;
+        orientationBtn.classList.toggle("active", simulatedLandscape);
+        orientationBtn.title = simulatedLandscape ? "Volver a vista automática" : "Cambiar a horizontal";
+        orientationBtn.setAttribute("aria-pressed", String(simulatedLandscape));
+        orientationBtn.textContent = simulatedLandscape ? "Auto" : "Horizontal";
+    }
+
     function applySimulatedLandscape(enabled) {
-        simulatedLandscape = false;
-        appContainer.classList.remove("force-landscape");
+        simulatedLandscape = Boolean(enabled);
+        appContainer.classList.toggle("force-landscape", simulatedLandscape);
+        updateOrientationButtonState();
         syncPanelMode();
+        syncLandscapeSplitMode();
+        requestAnimationFrame(positionGaugeAdjustHandle);
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
             keepMusicPlayerInBounds();
@@ -1349,7 +1356,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function toggleOrientationMode() {
-        applySimulatedLandscape(false);
+        const nextEnabled = !simulatedLandscape;
+
+        if (!nextEnabled) {
+            try {
+                if (screen.orientation && typeof screen.orientation.unlock === "function") {
+                    screen.orientation.unlock();
+                }
+            } catch (_) {
+                /* ignore unlock failures */
+            }
+
+            applySimulatedLandscape(false);
+            localStorage.setItem(ORIENTATION_MODE_KEY, "auto");
+            return;
+        }
+
+        let locked = false;
+        try {
+            if (screen.orientation && typeof screen.orientation.lock === "function") {
+                await screen.orientation.lock("landscape-primary");
+                locked = true;
+            }
+        } catch (_) {
+            locked = false;
+        }
+
+        // Fallback local (offline/PWA-safe): simulate landscape layout even if lock is unavailable.
+        applySimulatedLandscape(true);
+        localStorage.setItem(ORIENTATION_MODE_KEY, locked ? "locked-landscape" : "simulated-landscape");
     }
 
     function updateFloatingHud(currentSpeed, isOverLimit) {
@@ -2963,7 +2998,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (orientationBtn) {
-        orientationBtn.style.display = "none";
+        orientationBtn.addEventListener("click", () => {
+            void toggleOrientationMode();
+        });
     }
 
     if (themeBtn) {
@@ -3232,6 +3269,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isCompactPanelModeNow()) {
         panelCollapsed = true;
     }
+
+    const savedOrientationMode = localStorage.getItem(ORIENTATION_MODE_KEY);
+    if (savedOrientationMode === "locked-landscape" || savedOrientationMode === "simulated-landscape") {
+        applySimulatedLandscape(true);
+    } else {
+        applySimulatedLandscape(false);
+    }
+
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
     syncLandscapeSplitMode();
