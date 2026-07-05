@@ -68,27 +68,32 @@
         </header>
 
         <main class="gauge-container">
-            
-            <svg class="gauge" viewBox="0 0 200 200">
-                <path class="gauge-bg" id="gauge-bg" d="" pathLength="500" />
-                <path class="gauge-progress" id="gauge-progress" d="" pathLength="500" />
-                <g class="gauge-labels" id="gauge-labels"></g>
-                
-                <line class="needle" x1="100" y1="100" x2="100" y2="35" id="needle" />
-                <circle class="needle-center" cx="100" cy="100" r="6" />
-            </svg>
+            <div class="gauge-stage" id="gauge-stage">
+                <svg class="gauge" viewBox="0 0 200 200">
+                    <path class="gauge-bg" id="gauge-bg" d="" pathLength="500" />
+                    <path class="gauge-progress" id="gauge-progress" d="" pathLength="500" />
+                    <g class="gauge-labels" id="gauge-labels"></g>
 
-            <div class="digital-display">
-                <div class="speed-box">
-                    <span class="current-speed" id="speed-text">0</span>
-                    <span class="unit">km/h</span>
-                </div>
-                
-                <div class="limit-indicator" id="limit-box">
-                    <span class="limit-label">LÍMITE</span>
-                    <span class="limit-value" id="limit-value">40</span>
+                    <line class="needle" x1="100" y1="100" x2="100" y2="35" id="needle" />
+                    <circle class="needle-center" cx="100" cy="100" r="6" />
+                </svg>
+
+                <div class="digital-display">
+                    <div class="speed-box">
+                        <span class="current-speed" id="speed-text">0</span>
+                        <span class="unit">km/h</span>
+                    </div>
+
+                    <div class="limit-indicator" id="limit-box">
+                        <span class="limit-label">LÍMITE</span>
+                        <span class="limit-value" id="limit-value">40</span>
+                    </div>
                 </div>
             </div>
+
+            <button type="button" class="gauge-adjust-handle" id="gauge-adjust-handle" aria-label="Mover y redimensionar velocímetro" title="Arrastra: arriba/abajo para mover, izquierda/derecha para escalar">
+                <span class="gauge-adjust-handle-dot"></span>
+            </button>
         </main>
 
         <button type="button" class="landscape-splitter" id="landscape-splitter" aria-label="Ajustar tamaño entre velocímetro y panel de acciones" title="Desliza para redimensionar paneles">

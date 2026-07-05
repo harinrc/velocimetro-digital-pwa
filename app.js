@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const navMeta = document.getElementById("meta-nav-color");
     const appContainer = document.querySelector(".app-container");
     const gaugeContainer = document.querySelector(".gauge-container");
+    const gaugeStage = document.getElementById("gauge-stage");
+    const gaugeAdjustHandle = document.getElementById("gauge-adjust-handle");
     const controlsPanel = document.querySelector(".controls-panel");
     const landscapeSplitter = document.getElementById("landscape-splitter");
     const btnAction = document.getElementById("btn-action");
@@ -153,8 +155,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let splitterPointerId = null;
     let splitterStartX = 0;
     let splitterStartWidth = 0;
+    let gaugeAdjustPointerId = null;
+    let gaugeAdjustStartX = 0;
+    let gaugeAdjustStartY = 0;
+    let gaugeAdjustStartScale = 1;
+    let gaugeAdjustStartOffsetY = 0;
+    let gaugeUserScale = 1;
+    let gaugeUserOffsetY = 0;
     const THEME_PREF_KEY = "speedometer_theme_preference";
     const LANDSCAPE_SPLIT_KEY = "speedometer_landscape_split_ratio";
+    const GAUGE_ADJUST_KEY = "speedometer_gauge_adjust";
     const systemThemeQuery = typeof window.matchMedia === "function"
         ? window.matchMedia("(prefers-color-scheme: dark)")
         : null;
@@ -1193,6 +1203,56 @@ document.addEventListener("DOMContentLoaded", () => {
         landscapeSplitter.style.display = "inline-flex";
         restoreLandscapeSplitWidth();
         requestAnimationFrame(positionLandscapeSplitter);
+    }
+
+    function getGaugeAdjustBounds() {
+        const containerHeight = gaugeContainer?.getBoundingClientRect().height || 0;
+        const maxOffset = Math.max(56, containerHeight * 0.34);
+        return {
+            minScale: 0.72,
+            maxScale: 1.34,
+            minOffsetY: -maxOffset,
+            maxOffsetY: maxOffset,
+        };
+    }
+
+    function setGaugeAdjustment(scale, offsetY, persist = true) {
+        if (!appContainer) return;
+
+        const bounds = getGaugeAdjustBounds();
+        gaugeUserScale = Math.min(bounds.maxScale, Math.max(bounds.minScale, scale));
+        gaugeUserOffsetY = Math.min(bounds.maxOffsetY, Math.max(bounds.minOffsetY, offsetY));
+
+        appContainer.style.setProperty("--gauge-user-scale", gaugeUserScale.toFixed(3));
+        appContainer.style.setProperty("--gauge-user-offset-y", `${Math.round(gaugeUserOffsetY)}px`);
+
+        if (persist) {
+            localStorage.setItem(GAUGE_ADJUST_KEY, JSON.stringify({
+                scale: Number(gaugeUserScale.toFixed(3)),
+                offsetY: Math.round(gaugeUserOffsetY),
+            }));
+        }
+    }
+
+    function restoreGaugeAdjustment() {
+        if (!appContainer) return;
+
+        let parsed = null;
+        try {
+            parsed = JSON.parse(localStorage.getItem(GAUGE_ADJUST_KEY) || "null");
+        } catch (_) {
+            parsed = null;
+        }
+
+        if (!parsed || !Number.isFinite(parsed.scale) || !Number.isFinite(parsed.offsetY)) {
+            gaugeUserScale = 1;
+            gaugeUserOffsetY = 0;
+            appContainer.style.removeProperty("--gauge-user-scale");
+            appContainer.style.removeProperty("--gauge-user-offset-y");
+            return;
+        }
+
+        setGaugeAdjustment(parsed.scale, parsed.offsetY, false);
     }
 
     function applyPanelState(collapsed, persist = true) {
@@ -3000,9 +3060,56 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    if (gaugeAdjustHandle && gaugeStage && appContainer) {
+        gaugeAdjustHandle.addEventListener("pointerdown", (event) => {
+            gaugeAdjustPointerId = event.pointerId;
+            gaugeAdjustStartX = event.clientX;
+            gaugeAdjustStartY = event.clientY;
+            gaugeAdjustStartScale = gaugeUserScale;
+            gaugeAdjustStartOffsetY = gaugeUserOffsetY;
+            try { gaugeAdjustHandle.setPointerCapture(event.pointerId); } catch (_) { /* no-op */ }
+            event.preventDefault();
+        });
+
+        gaugeAdjustHandle.addEventListener("pointermove", (event) => {
+            if (gaugeAdjustPointerId !== event.pointerId) return;
+            const deltaX = event.clientX - gaugeAdjustStartX;
+            const deltaY = event.clientY - gaugeAdjustStartY;
+            const scaleFromX = gaugeAdjustStartScale + (deltaX / 220);
+            const offsetFromY = gaugeAdjustStartOffsetY + deltaY;
+            setGaugeAdjustment(scaleFromX, offsetFromY, false);
+        });
+
+        const finishGaugeAdjust = (event) => {
+            if (gaugeAdjustPointerId === null || gaugeAdjustPointerId !== event.pointerId) return;
+            const deltaX = event.clientX - gaugeAdjustStartX;
+            const deltaY = event.clientY - gaugeAdjustStartY;
+            const scaleFromX = gaugeAdjustStartScale + (deltaX / 220);
+            const offsetFromY = gaugeAdjustStartOffsetY + deltaY;
+            setGaugeAdjustment(scaleFromX, offsetFromY, true);
+            gaugeAdjustPointerId = null;
+        };
+
+        gaugeAdjustHandle.addEventListener("pointerup", finishGaugeAdjust);
+        gaugeAdjustHandle.addEventListener("pointercancel", (event) => {
+            if (gaugeAdjustPointerId !== event.pointerId) return;
+            gaugeAdjustPointerId = null;
+            setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
+        });
+
+        gaugeAdjustHandle.addEventListener("dblclick", () => {
+            localStorage.removeItem(GAUGE_ADJUST_KEY);
+            gaugeUserScale = 1;
+            gaugeUserOffsetY = 0;
+            appContainer.style.removeProperty("--gauge-user-scale");
+            appContainer.style.removeProperty("--gauge-user-offset-y");
+        });
+    }
+
     window.addEventListener("resize", () => {
         syncPanelMode();
         syncLandscapeSplitMode();
+        setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
         }
@@ -3094,6 +3201,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
     syncLandscapeSplitMode();
+    restoreGaugeAdjustment();
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport", {
         persist: false,
         rememberPreference: true,
