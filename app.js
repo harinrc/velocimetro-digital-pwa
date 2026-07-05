@@ -169,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const systemThemeQuery = typeof window.matchMedia === "function"
         ? window.matchMedia("(prefers-color-scheme: dark)")
         : null;
+    let orientationMode = "auto";
     let activeTheme = "dark";
     let themePreference = localStorage.getItem(THEME_PREF_KEY) || "auto";
     let lastSystemWarningState = false;
@@ -614,10 +615,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateOrientationButtonState() {
         if (!orientationBtn) return;
-        orientationBtn.classList.toggle("active", simulatedLandscape);
-        orientationBtn.title = simulatedLandscape ? "Volver a vista automática" : "Cambiar a horizontal";
-        orientationBtn.setAttribute("aria-pressed", String(simulatedLandscape));
-        orientationBtn.textContent = simulatedLandscape ? "Auto" : "Horizontal";
+        const isLandscapeMode = orientationMode === "landscape";
+        orientationBtn.classList.toggle("active", isLandscapeMode);
+        orientationBtn.title = isLandscapeMode ? "Volver a vista automática" : "Cambiar a horizontal";
+        orientationBtn.setAttribute("aria-pressed", String(isLandscapeMode));
+        orientationBtn.textContent = isLandscapeMode ? "Auto" : "Horizontal";
     }
 
     function applySimulatedLandscape(enabled) {
@@ -630,6 +632,43 @@ document.addEventListener("DOMContentLoaded", () => {
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
             keepMusicPlayerInBounds();
+        }
+    }
+
+    async function setOrientationMode(mode, persist = true) {
+        const nextMode = mode === "landscape" ? "landscape" : "auto";
+
+        if (nextMode === "auto") {
+            try {
+                if (screen.orientation && typeof screen.orientation.unlock === "function") {
+                    screen.orientation.unlock();
+                }
+            } catch (_) {
+                /* ignore unlock failures */
+            }
+
+            orientationMode = "auto";
+            applySimulatedLandscape(false);
+
+            if (persist) {
+                localStorage.setItem(ORIENTATION_MODE_KEY, "auto");
+            }
+            return;
+        }
+
+        try {
+            if (screen.orientation && typeof screen.orientation.lock === "function") {
+                await screen.orientation.lock("landscape-primary");
+            }
+        } catch (_) {
+            /* keep simulated fallback when lock is unavailable */
+        }
+
+        orientationMode = "landscape";
+        applySimulatedLandscape(true);
+
+        if (persist) {
+            localStorage.setItem(ORIENTATION_MODE_KEY, "landscape");
         }
     }
 
@@ -1356,35 +1395,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function toggleOrientationMode() {
-        const nextEnabled = !simulatedLandscape;
-
-        if (!nextEnabled) {
-            try {
-                if (screen.orientation && typeof screen.orientation.unlock === "function") {
-                    screen.orientation.unlock();
-                }
-            } catch (_) {
-                /* ignore unlock failures */
-            }
-
-            applySimulatedLandscape(false);
-            localStorage.setItem(ORIENTATION_MODE_KEY, "auto");
-            return;
-        }
-
-        let locked = false;
-        try {
-            if (screen.orientation && typeof screen.orientation.lock === "function") {
-                await screen.orientation.lock("landscape-primary");
-                locked = true;
-            }
-        } catch (_) {
-            locked = false;
-        }
-
-        // Fallback local (offline/PWA-safe): simulate landscape layout even if lock is unavailable.
-        applySimulatedLandscape(true);
-        localStorage.setItem(ORIENTATION_MODE_KEY, locked ? "locked-landscape" : "simulated-landscape");
+        const nextMode = orientationMode === "landscape" ? "auto" : "landscape";
+        await setOrientationMode(nextMode, true);
     }
 
     function updateFloatingHud(currentSpeed, isOverLimit) {
@@ -3177,6 +3189,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.addEventListener("resize", () => {
+        if (orientationMode === "auto" && appContainer.classList.contains("force-landscape")) {
+            applySimulatedLandscape(false);
+        }
         syncPanelMode();
         syncLandscapeSplitMode();
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
@@ -3185,6 +3200,12 @@ document.addEventListener("DOMContentLoaded", () => {
             resetMusicPlayerPosition();
         }
         keepMusicPlayerInBounds();
+    });
+
+    window.addEventListener("orientationchange", () => {
+        if (orientationMode === "auto") {
+            applySimulatedLandscape(false);
+        }
     });
 
     window.addEventListener("beforeinstallprompt", (event) => {
@@ -3271,11 +3292,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const savedOrientationMode = localStorage.getItem(ORIENTATION_MODE_KEY);
-    if (savedOrientationMode === "locked-landscape" || savedOrientationMode === "simulated-landscape") {
-        applySimulatedLandscape(true);
-    } else {
-        applySimulatedLandscape(false);
-    }
+    orientationMode = savedOrientationMode === "landscape"
+        || savedOrientationMode === "locked-landscape"
+        || savedOrientationMode === "simulated-landscape"
+        ? "landscape"
+        : "auto";
+    applySimulatedLandscape(orientationMode === "landscape");
 
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
