@@ -3975,3 +3975,201 @@ html {
         display: none !important;
     }
 }
+
+@media (orientation: landscape) and (pointer: coarse) and (max-width: 915px) {
+    body {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .app-container {
+        width: 100vw;
+        max-width: 100vw;
+        min-height: 100dvh;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        grid-template-columns: minmax(172px, 40vw) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        gap: 4px 7px;
+        padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
+        overflow: hidden;
+        align-content: start;
+    }
+
+    .status-bar {
+        grid-column: 1 / 3;
+        margin-bottom: 0;
+        padding-bottom: 2px;
+        font-size: 11px;
+    }
+
+    .status-right {
+        gap: 3px;
+    }
+
+    .time {
+        font-size: clamp(12px, 3vw, 16px);
+        padding: 2px 4px;
+        letter-spacing: 0.7px;
+    }
+
+    .reload-btn,
+    .install-btn,
+    .orientation-btn {
+        font-size: 8px;
+        padding: 3px 5px;
+    }
+
+    .gauge-container {
+        margin: 0;
+        align-self: center;
+        min-height: 0;
+    }
+
+    .gauge {
+        width: min(36vw, 39dvh, 186px);
+    }
+
+    .digital-display {
+        top: 53%;
+        gap: 3px;
+    }
+
+    .current-speed {
+        font-size: clamp(30px, 6.8vw, 46px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(23px, 5.4vw, 34px);
+    }
+
+    .limit-indicator {
+        min-width: 40px;
+        padding: 3px 5px;
+    }
+
+    .limit-label {
+        font-size: 7px;
+    }
+
+    .limit-value {
+        font-size: 18px;
+    }
+
+    .controls-panel {
+        margin-top: 0;
+        align-self: stretch;
+        min-height: 0;
+        max-height: calc(100dvh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 5px;
+        gap: 4px;
+        border-radius: 11px;
+    }
+
+    .weather-location-strip {
+        min-height: 24px;
+        padding: 3px 4px;
+        gap: 4px;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .weather-info {
+        flex: 0 0 auto;
+    }
+
+    .location-info {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .refresh-age {
+        flex: 0 1 42%;
+        min-width: 0;
+        padding-right: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: right;
+    }
+
+    .stats-grid {
+        gap: 3px;
+        padding-bottom: 3px;
+    }
+
+    .stat-item {
+        min-width: 50px;
+        padding: 3px 4px;
+    }
+
+    .stat-label,
+    .stat-value {
+        font-size: 8px;
+    }
+
+    .map-card {
+        padding: 4px;
+        gap: 3px;
+    }
+
+    .map-head {
+        gap: 3px;
+    }
+
+    .map-title {
+        font-size: 8px;
+    }
+
+    .map-location-tag {
+        font-size: 7px;
+        max-width: 86px;
+    }
+
+    .map-center-btn {
+        font-size: 8px;
+        padding: 3px 5px;
+    }
+
+    .mini-map {
+        height: 38px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(54px, 1fr) minmax(0, 1fr);
+        gap: 3px;
+        font-size: 8px;
+    }
+
+    .max-speed-actions {
+        gap: 3px;
+    }
+
+    .mode-btn,
+    .max-speed-btn,
+    .floating-btn,
+    .btn-start {
+        font-size: 8px;
+        padding: 4px 5px;
+    }
+
+    .max-scale-value {
+        min-width: 40px;
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+
+    .action-row {
+        gap: 4px;
+    }
+
+    .panel-handle,
+    .app-container.panel-collapsed .panel-handle {
+        display: flex !important;
+    }
+}
