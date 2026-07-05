@@ -1163,20 +1163,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function positionGaugeAdjustHandle() {
-        if (!gaugeAdjustHandle || !appContainer || !gaugeContainer) return;
+        if (!gaugeAdjustHandle || !appContainer) return;
 
         const appRect = appContainer.getBoundingClientRect();
-        const gaugeRect = gaugeContainer.getBoundingClientRect();
         const statusRect = statusBar?.getBoundingClientRect();
         const handleSize = gaugeAdjustHandle.offsetWidth || 34;
         const topStart = statusRect
             ? Math.max(8, Math.round(statusRect.bottom - appRect.top + 6))
             : 12;
 
-        const rawLeft = Math.round(gaugeRect.left - appRect.left + (gaugeRect.width / 2) - (handleSize / 2));
-        const minLeft = Math.round(gaugeRect.left - appRect.left + 8);
-        const maxLeft = Math.round(gaugeRect.right - appRect.left - handleSize - 8);
-        const safeLeft = Math.max(minLeft, Math.min(maxLeft, rawLeft));
+        // Fixed strategic anchor: centered in the app, independent of gauge resizing/moving.
+        const safeLeft = Math.max(8, Math.round((appRect.width - handleSize) / 2));
 
         gaugeAdjustHandle.style.left = `${safeLeft}px`;
         gaugeAdjustHandle.style.top = `${topStart}px`;

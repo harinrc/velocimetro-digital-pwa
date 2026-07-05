@@ -946,7 +946,7 @@ html {
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--mode-button-active-border) 40%, transparent), 0 0 12px color-mix(in srgb, var(--mode-button-active-glow) 68%, transparent);
     touch-action: none;
     cursor: move;
-    z-index: 3;
+    z-index: 8;
     -webkit-tap-highlight-color: transparent;
 }
 
