@@ -933,8 +933,9 @@ html {
 
 .gauge-adjust-handle {
     position: absolute;
-    right: 10px;
-    top: 10px;
+    left: 50%;
+    top: max(8px, env(safe-area-inset-top));
+    transform: translateX(-50%);
     width: 34px;
     height: 34px;
     border: 0;
@@ -959,7 +960,7 @@ html {
 }
 
 .gauge-adjust-handle:active {
-    transform: scale(0.95);
+    transform: translateX(-50%) scale(0.95);
 }
 
 .gauge {
