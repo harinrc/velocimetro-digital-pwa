@@ -933,8 +933,8 @@ html {
 
 .gauge-adjust-handle {
     position: absolute;
-    right: 8px;
-    bottom: 12px;
+    right: 10px;
+    top: 10px;
     width: 34px;
     height: 34px;
     border: 0;

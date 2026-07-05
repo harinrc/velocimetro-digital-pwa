@@ -1207,10 +1207,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getGaugeAdjustBounds() {
         const containerHeight = gaugeContainer?.getBoundingClientRect().height || 0;
-        const maxOffset = Math.max(56, containerHeight * 0.34);
+        const maxOffset = Math.max(84, containerHeight * 0.48);
         return {
-            minScale: 0.72,
-            maxScale: 1.34,
+            minScale: 0.62,
+            maxScale: 1.9,
             minOffsetY: -maxOffset,
             maxOffsetY: maxOffset,
         };
