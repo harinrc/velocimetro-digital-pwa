@@ -129,7 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastMapCenterAt = 0;
     let followMap = true;
     let mapThemeVariant = "dark";
-    const isCompactPanelModeNow = () => window.matchMedia("(max-width: 430px)").matches;
+    const isCompactPanelModeNow = () => {
+        if (window.matchMedia("(pointer: coarse) and (hover: none)").matches) {
+            return true;
+        }
+
+        return window.matchMedia("(max-width: 430px)").matches;
+    };
 
     let panelCollapsed = isCompactPanelModeNow()
         ? true
@@ -2959,6 +2965,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---
     applyMaxSpeed(maxSpeed, false);
     // Aplicar estado del panel ANTES de la animación para evitar salto visual al recargar
+    if (isCompactPanelModeNow()) {
+        panelCollapsed = true;
+    }
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport", {
