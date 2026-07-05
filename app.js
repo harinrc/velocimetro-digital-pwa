@@ -26,9 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxSpeedScale = document.getElementById("max-speed-scale");
     const miniMapContainer = document.getElementById("mini-map");
     const mapCenterBtn = document.getElementById("map-center-btn");
+    const statusBar = document.querySelector(".status-bar");
     const themeMeta = document.getElementById("meta-theme-color");
     const navMeta = document.getElementById("meta-nav-color");
     const appContainer = document.querySelector(".app-container");
+    const gaugeContainer = document.querySelector(".gauge-container");
+    const controlsPanel = document.querySelector(".controls-panel");
+    const landscapeSplitter = document.getElementById("landscape-splitter");
     const btnAction = document.getElementById("btn-action");
     const floatingBtn = document.getElementById("floating-btn");
     const themeBtn = document.getElementById("theme-btn");
@@ -146,7 +150,11 @@ document.addEventListener("DOMContentLoaded", () => {
         : localStorage.getItem("speedometer_panel_collapsed") === "1";
     let panelSwipeStartY = null;
     let panelSwipePointerId = null;
+    let splitterPointerId = null;
+    let splitterStartX = 0;
+    let splitterStartWidth = 0;
     const THEME_PREF_KEY = "speedometer_theme_preference";
+    const LANDSCAPE_SPLIT_KEY = "speedometer_landscape_split_ratio";
     const systemThemeQuery = typeof window.matchMedia === "function"
         ? window.matchMedia("(prefers-color-scheme: dark)")
         : null;
@@ -1112,6 +1120,79 @@ document.addEventListener("DOMContentLoaded", () => {
             if (locationTextEl) locationTextEl.textContent = fallbackLocation;
             if (mapLocationTag) mapLocationTag.textContent = fallbackLocation;
         }
+    }
+
+    function isLandscapeSplitModeNow() {
+        return window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+    }
+
+    function getLandscapeSplitBounds() {
+        const containerWidth = appContainer?.getBoundingClientRect().width || 0;
+        const minWidth = Math.max(136, containerWidth * 0.24);
+        const maxWidth = Math.min(containerWidth * 0.68, containerWidth - 180);
+        return {
+            min: minWidth,
+            max: Math.max(minWidth + 8, maxWidth),
+            containerWidth,
+        };
+    }
+
+    function positionLandscapeSplitter() {
+        if (!landscapeSplitter || !appContainer || !gaugeContainer || !isLandscapeSplitModeNow()) return;
+
+        const appRect = appContainer.getBoundingClientRect();
+        const gaugeRect = gaugeContainer.getBoundingClientRect();
+        const statusRect = statusBar?.getBoundingClientRect();
+        const splitterHalf = (landscapeSplitter.offsetWidth || 18) / 2;
+        const topStart = statusRect ? Math.max(6, statusRect.bottom - appRect.top + 4) : 8;
+
+        landscapeSplitter.style.left = `${Math.round(gaugeRect.right - appRect.left - splitterHalf)}px`;
+        landscapeSplitter.style.top = `${Math.round(topStart)}px`;
+        landscapeSplitter.style.height = `${Math.max(40, Math.round(appRect.height - topStart - 8))}px`;
+        landscapeSplitter.style.transform = "none";
+    }
+
+    function setLandscapeSplitWidth(width, persist = true) {
+        if (!appContainer) return;
+        const bounds = getLandscapeSplitBounds();
+        const safeWidth = Math.min(bounds.max, Math.max(bounds.min, width));
+        appContainer.style.setProperty("--landscape-left-width", `${Math.round(safeWidth)}px`);
+
+        if (persist && bounds.containerWidth > 0) {
+            const ratio = Math.max(0.2, Math.min(0.75, safeWidth / bounds.containerWidth));
+            localStorage.setItem(LANDSCAPE_SPLIT_KEY, ratio.toFixed(4));
+        }
+
+        requestAnimationFrame(positionLandscapeSplitter);
+    }
+
+    function restoreLandscapeSplitWidth() {
+        if (!appContainer || !isLandscapeSplitModeNow()) return;
+
+        const savedRatio = Number.parseFloat(localStorage.getItem(LANDSCAPE_SPLIT_KEY) || "");
+        if (!Number.isFinite(savedRatio)) {
+            appContainer.style.removeProperty("--landscape-left-width");
+            requestAnimationFrame(positionLandscapeSplitter);
+            return;
+        }
+
+        const bounds = getLandscapeSplitBounds();
+        if (bounds.containerWidth <= 0) return;
+        setLandscapeSplitWidth(bounds.containerWidth * savedRatio, false);
+    }
+
+    function syncLandscapeSplitMode() {
+        if (!landscapeSplitter || !appContainer) return;
+
+        if (!isLandscapeSplitModeNow()) {
+            landscapeSplitter.style.display = "none";
+            appContainer.style.removeProperty("--landscape-left-width");
+            return;
+        }
+
+        landscapeSplitter.style.display = "inline-flex";
+        restoreLandscapeSplitWidth();
+        requestAnimationFrame(positionLandscapeSplitter);
     }
 
     function applyPanelState(collapsed, persist = true) {
@@ -2882,8 +2963,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }, { passive: true });
     }
 
+    if (landscapeSplitter && appContainer && gaugeContainer && controlsPanel) {
+        landscapeSplitter.addEventListener("pointerdown", (event) => {
+            if (!isLandscapeSplitModeNow()) return;
+            splitterPointerId = event.pointerId;
+            splitterStartX = event.clientX;
+            splitterStartWidth = gaugeContainer.getBoundingClientRect().width;
+            try { landscapeSplitter.setPointerCapture(event.pointerId); } catch (_) { /* no-op */ }
+            event.preventDefault();
+        });
+
+        landscapeSplitter.addEventListener("pointermove", (event) => {
+            if (splitterPointerId !== event.pointerId) return;
+            const deltaX = event.clientX - splitterStartX;
+            setLandscapeSplitWidth(splitterStartWidth + deltaX, false);
+        });
+
+        const finishSplitterDrag = (event) => {
+            if (splitterPointerId === null || splitterPointerId !== event.pointerId) return;
+            const deltaX = event.clientX - splitterStartX;
+            setLandscapeSplitWidth(splitterStartWidth + deltaX, true);
+            splitterPointerId = null;
+        };
+
+        landscapeSplitter.addEventListener("pointerup", finishSplitterDrag);
+        landscapeSplitter.addEventListener("pointercancel", (event) => {
+            if (splitterPointerId !== event.pointerId) return;
+            splitterPointerId = null;
+            requestAnimationFrame(positionLandscapeSplitter);
+        });
+
+        landscapeSplitter.addEventListener("dblclick", () => {
+            localStorage.removeItem(LANDSCAPE_SPLIT_KEY);
+            appContainer.style.removeProperty("--landscape-left-width");
+            requestAnimationFrame(positionLandscapeSplitter);
+        });
+    }
+
     window.addEventListener("resize", () => {
         syncPanelMode();
+        syncLandscapeSplitMode();
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
         }
@@ -2974,6 +3093,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     applyPanelState(isCompactPanelModeNow() ? panelCollapsed : false, false);
     syncPanelMode();
+    syncLandscapeSplitMode();
     setVisualMode(localStorage.getItem("speedometer_visual_mode") || "sport", {
         persist: false,
         rememberPreference: true,

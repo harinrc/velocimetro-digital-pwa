@@ -278,6 +278,37 @@ html {
     z-index: 1;
 }
 
+.landscape-splitter {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 46px;
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface-color) 82%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--mode-button-active-border) 42%, transparent), 0 0 12px color-mix(in srgb, var(--mode-button-active-glow) 72%, transparent);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    cursor: ew-resize;
+    z-index: 3;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.landscape-splitter-bar {
+    width: 4px;
+    height: 24px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--mode-button-active-border) 90%, white 10%), color-mix(in srgb, var(--mode-button-active-border) 65%, transparent));
+}
+
+.landscape-splitter:active {
+    transform: translate(-50%, -50%) scale(0.96);
+}
+
 .app-container.app-booting {
     animation: app-boot var(--boot-duration) ease-out;
 }
@@ -4342,6 +4373,22 @@ html {
 
     .action-row {
         gap: 3px;
+    }
+}
+
+@media (orientation: landscape) and (pointer: coarse) {
+    .app-container {
+        grid-template-columns: minmax(136px, var(--landscape-left-width, var(--landscape-left-default, 35vw))) minmax(0, 1fr) !important;
+    }
+
+    .landscape-splitter {
+        display: inline-flex;
+    }
+}
+
+@media (orientation: portrait), (pointer: fine) {
+    .landscape-splitter {
+        display: none !important;
     }
 }
 
