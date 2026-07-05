@@ -1243,6 +1243,24 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    function isGaugeAdjustModeNow() {
+        return window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches;
+    }
+
+    function applyGaugeAdjustmentStyles() {
+        if (!appContainer) return;
+
+        if (!isGaugeAdjustModeNow()) {
+            // In portrait/default mode the gauge must render at its baseline size and position.
+            appContainer.style.removeProperty("--gauge-user-scale");
+            appContainer.style.removeProperty("--gauge-user-offset-y");
+            return;
+        }
+
+        appContainer.style.setProperty("--gauge-user-scale", gaugeUserScale.toFixed(3));
+        appContainer.style.setProperty("--gauge-user-offset-y", `${Math.round(gaugeUserOffsetY)}px`);
+    }
+
     function setGaugeAdjustment(scale, offsetY, persist = true) {
         if (!appContainer) return;
 
@@ -1250,8 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gaugeUserScale = Math.min(bounds.maxScale, Math.max(bounds.minScale, scale));
         gaugeUserOffsetY = Math.min(bounds.maxOffsetY, Math.max(bounds.minOffsetY, offsetY));
 
-        appContainer.style.setProperty("--gauge-user-scale", gaugeUserScale.toFixed(3));
-        appContainer.style.setProperty("--gauge-user-offset-y", `${Math.round(gaugeUserOffsetY)}px`);
+        applyGaugeAdjustmentStyles();
 
         if (persist) {
             localStorage.setItem(GAUGE_ADJUST_KEY, JSON.stringify({
@@ -1274,8 +1291,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!parsed || !Number.isFinite(parsed.scale) || !Number.isFinite(parsed.offsetY)) {
             gaugeUserScale = 1;
             gaugeUserOffsetY = 0;
-            appContainer.style.removeProperty("--gauge-user-scale");
-            appContainer.style.removeProperty("--gauge-user-offset-y");
+            applyGaugeAdjustmentStyles();
             return;
         }
 
@@ -3148,6 +3164,7 @@ document.addEventListener("DOMContentLoaded", () => {
         syncPanelMode();
         syncLandscapeSplitMode();
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
+        applyGaugeAdjustmentStyles();
         requestAnimationFrame(positionGaugeAdjustHandle);
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
@@ -3159,6 +3176,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (orientationMode === "auto") {
             applySimulatedLandscape(false);
         }
+        applyGaugeAdjustmentStyles();
     });
 
     window.addEventListener("beforeinstallprompt", (event) => {
