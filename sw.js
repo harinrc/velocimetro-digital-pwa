@@ -1,5 +1,5 @@
-const APP_CACHE = 'velocimetro-app-v48';
-const RUNTIME_CACHE = 'velocimetro-runtime-v48';
+const APP_CACHE = 'velocimetro-app-v49';
+const RUNTIME_CACHE = 'velocimetro-runtime-v49';
 const ASSETS = [
   './',
   './index.html',
@@ -68,9 +68,25 @@ self.addEventListener('fetch', (e) => {
   if (e.request.mode === 'navigate') {
     e.respondWith(
       (async () => {
+        const appShellCandidates = [
+          './index.html',
+          './',
+          new URL('./index.html', self.location.href).toString(),
+          new URL('./', self.location.href).toString(),
+        ];
+
+        for (const candidate of appShellCandidates) {
+          const cachedShell = await caches.match(candidate);
+          if (cachedShell) {
+            return cachedShell;
+          }
+        }
+
         try {
           const preloadResponse = await e.preloadResponse;
           if (preloadResponse) {
+            const cache = await caches.open(APP_CACHE);
+            cache.put('./index.html', preloadResponse.clone());
             return preloadResponse;
           }
 
@@ -80,7 +96,12 @@ self.addEventListener('fetch', (e) => {
           return networkResponse;
         } catch {
           const cachedPage = await caches.match('./index.html');
-          return cachedPage || Response.error();
+          if (cachedPage) return cachedPage;
+
+          return new Response(
+            '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sin conexión</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050608;color:#f5f7ff;font-family:Segoe UI,sans-serif}main{padding:20px;text-align:center;max-width:420px}h1{font-size:1.2rem;margin:0 0 .6rem}p{opacity:.88;line-height:1.45}</style></head><body><main><h1>Sin conexión</h1><p>Abre la app al menos una vez con internet para guardar la interfaz offline.</p></main></body></html>',
+            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+          );
         }
       })()
     );
@@ -91,7 +112,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       (async () => {
         const cachedResponse = await caches.match(e.request);
-        const networkPromise = fetch(e.request)
+        const networkResponse = await fetch(e.request)
           .then(async (networkResponse) => {
             const cache = await caches.open(APP_CACHE);
             cache.put(e.request, networkResponse.clone());
@@ -99,7 +120,7 @@ self.addEventListener('fetch', (e) => {
           })
           .catch(() => null);
 
-        return cachedResponse || networkPromise || Response.error();
+        return cachedResponse || networkResponse || Response.error();
       })()
     );
     return;
