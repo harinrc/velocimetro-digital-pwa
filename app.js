@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxSpeedScale = document.getElementById("max-speed-scale");
     const miniMapContainer = document.getElementById("mini-map");
     const mapCenterBtn = document.getElementById("map-center-btn");
+    const mapDataNote = document.getElementById("map-data-note");
     const statusBar = document.querySelector(".status-bar");
     const themeMeta = document.getElementById("meta-theme-color");
     const navMeta = document.getElementById("meta-nav-color");
@@ -74,6 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxSpeedText = document.getElementById("max-speed");
     const avgSpeedText = document.getElementById("avg-speed");
     const clockText = document.getElementById("clock");
+
+    try {
+        localStorage.removeItem("speedometer_tomtom_api_key");
+    } catch (error) {
+        console.warn("No se pudo borrar la clave antigua de TomTom de este dispositivo.", error);
+    }
 
     // --- CONFIGURACIÓN DEL VELOCÍMETRO ---
     const minSpeed = 0;
@@ -128,13 +135,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let gpsRefreshTimer = null;
     let mapInstance = null;
     let mapBaseLayer = null;
+    let mapResizeObserver = null;
     let mapMarker = null;
     let mapAccuracyCircle = null;
     let latestLatLng = null;
     let smoothedMapPoint = null;
     let lastMapCenterAt = 0;
     let followMap = true;
-    let mapThemeVariant = "dark";
     const isCompactPanelModeNow = () => {
         const isTouchDevice = window.matchMedia("(pointer: coarse) and (hover: none)").matches;
         const isPhonePortraitLike = window.matchMedia("(max-width: 600px)").matches;
@@ -681,38 +688,29 @@ document.addEventListener("DOMContentLoaded", () => {
         syncMapTheme();
     }
 
-    function getMapTileConfig(theme) {
-        if (theme === "light") {
-            return {
-                variant: "light",
-                url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-            };
-        }
-
+    function getMapTileConfig() {
         return {
-            variant: "dark",
-            url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+            url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         };
     }
 
     function syncMapTheme() {
         if (!mapInstance || typeof L === "undefined") return;
+        if (mapBaseLayer) return;
 
-        const nextTheme = activeTheme === "light" ? "light" : "dark";
-        if (mapThemeVariant === nextTheme && mapBaseLayer) return;
-
-        const tileConfig = getMapTileConfig(nextTheme);
-
-        if (mapBaseLayer) {
-            mapInstance.removeLayer(mapBaseLayer);
-        }
+        const tileConfig = getMapTileConfig();
 
         mapBaseLayer = L.tileLayer(tileConfig.url, {
-            maxZoom: 20,
-            attribution: "&copy; OpenStreetMap &copy; CARTO"
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
         }).addTo(mapInstance);
+    }
 
-        mapThemeVariant = tileConfig.variant;
+    function syncMapDataNote() {
+        if (!mapDataNote) return;
+        mapDataNote.textContent = navigator.onLine
+            ? "OpenStreetMap · las zonas visitadas se guardan para uso sin conexión."
+            : "Sin conexión: solo están disponibles las zonas visitadas.";
     }
 
     function applyThemePreference(preference, persist = true) {
@@ -1407,14 +1405,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mapInstance || !miniMapContainer) return;
 
         if (typeof L === "undefined") {
-            miniMapContainer.innerHTML = '<div class="mini-map-fallback">Mapa no disponible sin internet.</div>';
-            const controlsPanel = document.querySelector(".controls-panel");
-            if (controlsPanel) {
-                controlsPanel.classList.add("map-offline");
-            }
+            miniMapContainer.innerHTML = '<div class="mini-map-fallback">No se pudo cargar el mapa. Conéctate y vuelve a intentarlo.</div>';
             return;
         }
 
+        miniMapContainer.querySelector(".mini-map-fallback")?.remove();
         mapInstance = L.map(miniMapContainer, {
             zoomControl: false,
             attributionControl: true,
@@ -1423,6 +1418,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }).setView([13.7, -89.2], 14);
 
         syncMapTheme();
+        if ("ResizeObserver" in window) {
+            mapResizeObserver = new window.ResizeObserver(() => {
+                mapInstance?.invalidateSize({ pan: false });
+            });
+            mapResizeObserver.observe(miniMapContainer);
+        }
     }
 
     function updateMapPosition(lat, lon, accuracy = 0) {
@@ -3040,6 +3041,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            mapBaseLayer?.redraw();
+        });
+    }
+
     if (panelHandle) {
         if (!isCompactPanelModeNow()) {
             panelHandle.style.display = "none";
@@ -3189,6 +3196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         syncGaugeAdjustmentMode();
         setGaugeAdjustment(gaugeUserScale, gaugeUserOffsetY, false);
         applyGaugeAdjustmentStyles();
+        mapInstance?.invalidateSize({ pan: false });
         requestAnimationFrame(positionGaugeAdjustHandle);
         if (musicPlayer && !musicPlayer.hidden) {
             resetMusicPlayerPosition();
@@ -3279,6 +3287,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (controlsPanel) {
             controlsPanel.classList.toggle("map-offline", !navigator.onLine);
         }
+        if (navigator.onLine) {
+            ensureMap();
+        }
+        syncMapDataNote();
     }
 
     // --- EJECUCIÓN INICIAL AUTOMÁTICA ---

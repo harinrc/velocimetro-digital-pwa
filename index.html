@@ -20,7 +20,7 @@
     <title>Velocímetro PWA</title>
 
     <!-- SEO -->
-    <meta name="description" content="Velocímetro digital deportivo con GPS, alertas de velocidad, mapa en tiempo real y clima. Funciona sin internet.">
+    <meta name="description" content="Velocímetro digital con GPS, alertas, clima y mapa de calles y lugares. La interfaz y las zonas de mapa visitadas pueden conservarse sin conexión.">
     <meta name="author" content="harinrc">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://harinrc.github.io/velocimetro-digital-pwa/">
@@ -29,7 +29,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Velocímetro Deportivo PWA">
     <meta property="og:title" content="Velocímetro Deportivo PWA">
-    <meta property="og:description" content="Velocímetro digital con GPS, alertas, mapa en tiempo real y clima. Instalable y 100% offline.">
+    <meta property="og:description" content="Velocímetro digital con GPS, alertas, clima y mapa de calles y lugares. La interfaz y las zonas visitadas pueden conservarse sin conexión.">
     <meta property="og:url" content="https://harinrc.github.io/velocimetro-digital-pwa/">
     <meta property="og:image" content="https://harinrc.github.io/velocimetro-digital-pwa/velocimetro.jpeg">
     <meta property="og:image:secure_url" content="https://harinrc.github.io/velocimetro-digital-pwa/velocimetro.jpeg">
@@ -40,7 +40,7 @@
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Velocímetro Deportivo PWA">
-    <meta name="twitter:description" content="Velocímetro digital con GPS, alertas, mapa en tiempo real y clima. Instalable y 100% offline.">
+    <meta name="twitter:description" content="Velocímetro digital con GPS, alertas, clima y mapa de calles y lugares. La interfaz y las zonas visitadas pueden conservarse sin conexión.">
     <meta name="twitter:image" content="https://harinrc.github.io/velocimetro-digital-pwa/twitter-image.png">
     <meta name="twitter:image:alt" content="Icono de Velocímetro Deportivo PWA">
 
@@ -139,9 +139,14 @@
                         <span class="map-title">Mapa en tiempo real</span>
                         <span class="map-location-tag" id="map-location-tag"></span>
                     </div>
-                    <button type="button" id="map-center-btn" class="map-center-btn">Centrar</button>
+                    <div class="map-actions">
+                        <button type="button" id="map-center-btn" class="map-center-btn">Centrar</button>
+                    </div>
                 </div>
-                <div id="mini-map" class="mini-map" role="img" aria-label="Mapa de ubicación actual"></div>
+                <div id="mini-map" class="mini-map" role="region" aria-label="Mapa de calles y ubicación actual"></div>
+                <div class="map-footer">
+                    <p class="map-data-note" id="map-data-note">OpenStreetMap · las zonas visitadas se guardan para uso sin conexión.</p>
+                </div>
             </section>
 
             <div class="setup-row">

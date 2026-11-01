@@ -1778,6 +1778,14 @@ html {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 6px;
+}
+
+.map-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
 }
 
 .map-title {
@@ -1800,6 +1808,20 @@ html {
     font-weight: 700;
     padding: 5px 8px;
     cursor: pointer;
+}
+
+.map-footer {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.map-data-note {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--text-muted);
+    font-size: 10px;
+    line-height: 1.35;
 }
 
 .mini-map {
@@ -4452,4 +4474,391 @@ html {
     .app-container.panel-collapsed .panel-handle {
         display: none !important;
     }
+}
+
+/* Ajustes finales para que los controles y el mapa conserven espacio util */
+.app-container,
+.app-container > *,
+.controls-panel,
+.map-card,
+.mini-map {
+    min-width: 0;
+}
+
+.map-data-note {
+    color: var(--text-muted);
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+@media (max-width: 759px) {
+    body {
+        align-items: stretch;
+        overflow: hidden;
+    }
+
+    .app-container {
+        width: 100%;
+        max-width: none;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        padding: calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));
+        gap: 4px;
+    }
+
+    .status-bar {
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        padding-bottom: 5px;
+        margin-bottom: 0;
+    }
+
+    .status-right {
+        flex: 1 1 100%;
+        min-width: 0;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .time {
+        font-size: clamp(13px, 4vw, 18px);
+        padding: 3px 6px;
+    }
+
+    .install-btn,
+    .theme-btn,
+    .orientation-btn,
+    .reload-btn {
+        min-height: 30px;
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+
+    .gauge-container {
+        flex: 1 1 0;
+        width: 100%;
+        margin: 0;
+        min-height: 0;
+    }
+
+    .gauge-stage {
+        max-height: 100%;
+    }
+
+    .gauge {
+        width: min(84vw, 42dvh, 320px);
+    }
+
+    .digital-display {
+        gap: clamp(4px, 2vw, 10px);
+    }
+
+    .current-speed {
+        font-size: clamp(42px, 16vw, 82px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(32px, 12vw, 64px);
+    }
+
+    .controls-panel {
+        flex: 0 1 auto;
+        width: 100%;
+        max-height: 48dvh;
+        min-height: 0;
+        margin-top: 0;
+        padding: clamp(6px, 2vw, 12px);
+        gap: clamp(5px, 1.5vw, 9px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .weather-location-strip {
+        min-width: 0;
+    }
+
+    .location-info,
+    .location-text {
+        min-width: 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .stat-item {
+        min-width: 0;
+    }
+
+    .map-head {
+        min-width: 0;
+    }
+
+    .map-title-group {
+        flex: 1 1 auto;
+    }
+
+    .map-location-tag {
+        max-width: 100%;
+    }
+
+    .mini-map {
+        width: 100%;
+        height: clamp(112px, 22dvh, 210px);
+    }
+
+    .map-data-note {
+        font-size: 9px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+}
+
+@media (max-width: 380px) {
+    .app-container {
+        padding-right: 6px;
+        padding-left: 6px;
+    }
+
+    .status-bar {
+        font-size: 11px;
+    }
+
+    .status-right {
+        gap: 3px;
+    }
+
+    .install-btn,
+    .theme-btn,
+    .orientation-btn,
+    .reload-btn {
+        padding-right: 5px;
+        padding-left: 5px;
+        font-size: 9px;
+    }
+
+    .controls-panel {
+        border-radius: 14px;
+    }
+
+    .stats-grid {
+        gap: 3px;
+    }
+
+    .stat-item {
+        padding: 6px 4px;
+    }
+
+    .setup-row,
+    .mode-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 4px;
+    }
+}
+
+@media (min-width: 760px) {
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 12px;
+        overflow: auto;
+    }
+
+    .app-container {
+        width: min(1600px, 96vw);
+        max-width: 1600px;
+        height: min(1100px, calc(100dvh - 24px));
+        min-height: min(500px, calc(100dvh - 24px));
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(min(320px, 40vw), 0.9fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: clamp(10px, 1.5vw, 24px);
+        padding: clamp(12px, 2vw, 26px);
+        overflow: hidden;
+    }
+
+    .status-bar {
+        grid-column: 1 / -1;
+    }
+
+    .gauge-container {
+        min-height: 0;
+        margin: 0;
+    }
+
+    .gauge {
+        width: min(100%, 74dvh, 700px);
+    }
+
+    .controls-panel {
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
+        margin: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .mini-map {
+        height: clamp(170px, 28dvh, 360px);
+    }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+    body {
+        padding: 0;
+    }
+
+    .app-container {
+        width: 100%;
+        max-width: none;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(112px, 36vw) minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 4px 6px;
+        padding: calc(4px + env(safe-area-inset-top)) 6px calc(4px + env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 0;
+    }
+
+    .status-bar {
+        grid-column: 1 / -1;
+        flex-wrap: nowrap;
+        padding-bottom: 3px;
+    }
+
+    .status-right {
+        flex: 0 1 auto;
+        width: auto;
+        flex-wrap: nowrap;
+    }
+
+    .time {
+        font-size: clamp(11px, 2.8vw, 16px);
+    }
+
+    .install-btn,
+    .theme-btn,
+    .orientation-btn,
+    .reload-btn {
+        min-height: 26px;
+        font-size: 9px;
+    }
+
+    .gauge-container {
+        grid-column: 1;
+        grid-row: 2;
+        min-height: 0;
+    }
+
+    .gauge {
+        width: min(34vw, 48dvh, 280px);
+    }
+
+    .digital-display {
+        gap: 3px;
+    }
+
+    .current-speed {
+        font-size: clamp(28px, 6vw, 48px);
+    }
+
+    .current-speed.triple-digits {
+        font-size: clamp(22px, 4.8vw, 36px);
+    }
+
+    .controls-panel {
+        grid-column: 2;
+        grid-row: 2;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
+        padding: 5px;
+        gap: 4px;
+        border-radius: 10px;
+    }
+
+    .mini-map {
+        height: clamp(76px, 23dvh, 150px);
+    }
+
+    .map-data-note {
+        font-size: 8px;
+    }
+}
+
+@media (min-width: 760px) {
+    .status-bar {
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .status-right {
+        min-width: 0;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 280px) and (max-width: 759px) {
+    .weather-location-strip {
+        display: none;
+    }
+
+    .controls-panel {
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .panel-handle,
+    .app-container.panel-collapsed .panel-handle {
+        padding: 4px 0 2px;
+    }
+
+    .map-card {
+        gap: 2px;
+        padding: 3px;
+    }
+
+    .mini-map {
+        height: 64px;
+    }
+
+    .map-data-note {
+        display: none;
+    }
+}
+
+@media (max-width: 380px) {
+    .map-head {
+        gap: 3px;
+    }
+
+    .map-title {
+        font-size: 8px;
+    }
+
+    .map-actions {
+        gap: 2px;
+    }
+
+    .map-actions .map-center-btn {
+        padding: 3px 4px;
+        font-size: 8px;
+    }
+
 }

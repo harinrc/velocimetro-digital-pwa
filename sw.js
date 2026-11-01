@@ -1,5 +1,7 @@
-const APP_CACHE = 'velocimetro-app-v49';
-const RUNTIME_CACHE = 'velocimetro-runtime-v49';
+const APP_CACHE = 'velocimetro-app-v53';
+const RUNTIME_CACHE = 'velocimetro-runtime-v53';
+const MAP_TILE_CACHE = 'velocimetro-map-tiles-v1';
+const MAX_CACHED_MAP_TILES = 1200;
 const ASSETS = [
   './',
   './index.html',
@@ -20,11 +22,12 @@ function isStaticAsset(pathname) {
 }
 
 function isThirdPartyAsset(url) {
-  return (
-    url.hostname.includes('unpkg.com') ||
-    url.hostname.includes('cartocdn.com') ||
-    url.hostname.includes('openstreetmap.org')
-  );
+  return url.hostname === 'unpkg.com';
+}
+
+function isMapTile(url) {
+  return url.hostname === 'tile.openstreetmap.org' &&
+    /^\/\d+\/\d+\/\d+\.png$/.test(url.pathname);
 }
 
 // 1. Instalar el Service Worker y almacenar archivos en caché
@@ -43,7 +46,7 @@ self.addEventListener('activate', (e) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== APP_CACHE && key !== RUNTIME_CACHE) {
+          if (key !== APP_CACHE && key !== RUNTIME_CACHE && key !== MAP_TILE_CACHE) {
             console.log('Eliminando caché antigua:', key);
             return caches.delete(key);
           }
@@ -121,6 +124,40 @@ self.addEventListener('fetch', (e) => {
           .catch(() => null);
 
         return cachedResponse || networkResponse || Response.error();
+      })()
+    );
+    return;
+  }
+
+  if (isMapTile(requestUrl)) {
+    e.respondWith(
+      (async () => {
+        const cache = await caches.open(MAP_TILE_CACHE);
+        const cached = await cache.match(e.request);
+
+        try {
+          const networkResponse = await fetch(e.request);
+          if (!networkResponse.ok && networkResponse.type !== 'opaque') {
+            return cached || networkResponse;
+          }
+
+          try {
+            await cache.put(e.request, networkResponse.clone());
+            const keys = await cache.keys();
+            if (keys.length > MAX_CACHED_MAP_TILES) {
+              await Promise.all(
+                keys.slice(0, keys.length - MAX_CACHED_MAP_TILES).map((key) => cache.delete(key))
+              );
+            }
+          } catch (error) {
+            console.warn('No se pudo guardar el mosaico del mapa en caché:', error);
+          }
+
+          return networkResponse;
+        } catch (error) {
+          if (cached) return cached;
+          throw error;
+        }
       })()
     );
     return;
