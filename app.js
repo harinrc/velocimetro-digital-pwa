@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultMaxSpeed = 120;
     const minAllowedMax = 60;
     const maxAllowedMax = 240;
+    const maxPlausibleSpeedKmh = 400;
     const startAngle = -128; // Arco más abierto para liberar espacio en la zona inferior del display
     const endAngle = 98;
     const totalAngle = endAngle - startAngle; // Arco total de 226 grados
@@ -2521,8 +2522,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         lastCoords = { latitude, longitude, timestamp };
 
-        if (rawKmh === null || Number.isNaN(rawKmh)) {
-            return 0;
+        if (rawKmh === null || !Number.isFinite(rawKmh) || rawKmh > maxPlausibleSpeedKmh) {
+            return Math.max(0, Math.round(smoothedSpeed));
         }
 
         if (rawKmh < 0.9) {
@@ -2536,7 +2537,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- FUNCIÓN PARA ACTUALIZAR LA AGUJA Y EL DISPLAY ---
     function updateInterface(currentSpeed) {
-        const displaySpeed = Math.max(0, Math.round(Number(currentSpeed) || 0));
+        const numericSpeed = Number(currentSpeed);
+        const displaySpeed = Number.isFinite(numericSpeed)
+            ? Math.min(maxPlausibleSpeedKmh, Math.max(0, Math.round(numericSpeed)))
+            : 0;
         // Evitar que la aguja se salga físicamente de los límites visuales (0 - 120)
         const boundedSpeed = Math.max(minSpeed, Math.min(maxSpeed, displaySpeed));
         
@@ -2615,6 +2619,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         isTracking = true;
+        maxSpeedRecorded = 0;
+        speedHistory = [];
+        maxSpeedText.textContent = "--";
+        avgSpeedText.textContent = "--";
         lastWeatherStatus = "buscando";
         updateRefreshAgeLabel();
         lastPositionAt = 0;

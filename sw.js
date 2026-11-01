@@ -1,5 +1,5 @@
-const APP_CACHE = 'velocimetro-app-v53';
-const RUNTIME_CACHE = 'velocimetro-runtime-v53';
+const APP_CACHE = 'velocimetro-app-v54';
+const RUNTIME_CACHE = 'velocimetro-runtime-v54';
 const MAP_TILE_CACHE = 'velocimetro-map-tiles-v1';
 const MAX_CACHED_MAP_TILES = 1200;
 const ASSETS = [
